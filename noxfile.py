@@ -21,7 +21,7 @@ def lint(session):
     session.run("pylint", f"{_python_app_dir}", "--extension-pkg-allow-list=")
 
 
-@nox.session(python=["3.12", "3.14"])
+@nox.session(python=["3.12", "3.10"])
 def test(session):
     session.install("-r", _requirements_tests)
     session.install("-r", _requirements_app)
