@@ -13,7 +13,7 @@ def format(session):
     session.run("black", ".")
 
 
-@nox.session
+@nox.session(python=["3.12"])
 def lint(session):
     session.install("-r", _requirements_tests)
     session.install("-r", _requirements_app)
