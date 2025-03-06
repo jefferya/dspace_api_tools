@@ -56,32 +56,72 @@ def string_compare(str1, str2):
 
 
 # Define the columns to compare and how to compare them
+# "index_columns" is the key to use to align the two dataframes
+# "comparison_types" is a dictionary of the columns to compare
 # The key at the top level is the column name in the output file
 # The columns key is a dictionary with the keys jupiter and dspace
 # and value is the column name in the respective dataframes.
 # The "comparison_function" is the function to use to compare the two columns
 community_columns_to_compare = {
-    "name": {
-        "columns": {"jupiter": "title", "dspace": "name"},
-        "comparison_function": string_compare,
-    },
-    "description": {
-        "columns": {
-            "jupiter": "description",
-            "dspace": "metadata.dc.description.0.value",
+    "index_columns": {"jupiter": "title", "dspace": "name"},
+    "comparison_types": {
+        "name": {
+            "columns": {"jupiter": "title", "dspace": "name"},
+            "comparison_function": string_compare,
         },
-        "comparison_function": string_compare,
-    },
-    "abstract": {
-        "columns": {
-            "jupiter": "description",
-            "dspace": "metadata.dc.description.abstract.0.value",
+        "description": {
+            "columns": {
+                "jupiter": "description",
+                "dspace": "metadata.dc.description.0.value",
+            },
+            "comparison_function": string_compare,
         },
-        "comparison_function": string_compare,
+        "abstract": {
+            "columns": {
+                "jupiter": "description",
+                "dspace": "metadata.dc.description.abstract.0.value",
+            },
+            "comparison_function": string_compare,
+        },
+        "dc.title": {
+            "columns": {"jupiter": "title", "dspace": "metadata.dc.title.0.value"},
+            "comparison_function": string_compare,
+        },
     },
-    "dc.title": {
-        "columns": {"jupiter": "title", "dspace": "metadata.dc.title.0.value"},
-        "comparison_function": string_compare,
+}
+
+# Define the columns to compare and how to compare them
+# "index_columns" is the key to use to align the two dataframes
+# "comparison_types" is a dictionary of the columns to compare
+# The key at the top level is the column name in the output file
+# The columns key is a dictionary with the keys jupiter and dspace
+# and value is the column name in the respective dataframes.
+# The "comparison_function" is the function to use to compare the two columns
+collection_columns_to_compare = {
+    "index_columns": {"jupiter": "title", "dspace": "name"},
+    "comparison_types": {
+        "name": {
+            "columns": {"jupiter": "title", "dspace": "name"},
+            "comparison_function": string_compare,
+        },
+        "description": {
+            "columns": {
+                "jupiter": "description",
+                "dspace": "metadata.dc.description.0.value",
+            },
+            "comparison_function": string_compare,
+        },
+        "abstract": {
+            "columns": {
+                "jupiter": "description",
+                "dspace": "metadata.dc.description.abstract.0.value",
+            },
+            "comparison_function": string_compare,
+        },
+        "dc.title": {
+            "columns": {"jupiter": "title", "dspace": "metadata.dc.title.0.value"},
+            "comparison_function": string_compare,
+        },
     },
 }
 
@@ -105,7 +145,12 @@ def process_row(row, columns_to_compare):
 
 
 #
-def process_input(jupiter_input, dspace_input, output_file, columns_to_compare):
+def process_input(
+    jupiter_input,
+    dspace_input,
+    output_file,
+    comparison_config,
+):
     """
     Process communities.
     """
@@ -114,8 +159,12 @@ def process_input(jupiter_input, dspace_input, output_file, columns_to_compare):
 
     # Merge the two dataframes and align on the column values in the title/name
     # drop=False to keep the column in the dataframe
-    jupiter_df.set_index("title", inplace=True, drop=False)
-    dspace_df.set_index("name", inplace=True, drop=False)
+    jupiter_df.set_index(
+        comparison_config["index_columns"]["jupiter"], inplace=True, drop=False
+    )
+    dspace_df.set_index(
+        comparison_config["index_columns"]["dspace"], inplace=True, drop=False
+    )
 
     # Outer join to keep all rows from both dataframesif missing from one or the other.
     # NAN if missing
@@ -125,44 +174,43 @@ def process_input(jupiter_input, dspace_input, output_file, columns_to_compare):
     )
 
     writer = csv.DictWriter(
-        output_file, fieldnames=["index"] + list(columns_to_compare.keys())
+        output_file,
+        fieldnames=["index"] + list(comparison_config["comparison_types"].keys()),
     )
     writer.writeheader()
 
     # Iterate over the rows in the aligned dataframe and compare the columns
     for index, row in aligned_df.iterrows():
         comparison_output = {"index": index}
-        comparison_output.update(process_row(row, columns_to_compare))
-
-        # for key, value in columns_to_compare.items():
-        #    jupiter_column = f"{value['columns']['jupiter']}"
-        #    dspace_column = f"{value["columns"]["dspace"]}"
-        #    comparison_function = value["comparison_function"]
-        #
-        #            if comparison_function(row[jupiter_column], row[dspace_column]):
-        #                comparison_output[key] = "PASS"
-        #            else:
-        #                comparison_output[key] = "FAIL"
+        comparison_output.update(
+            process_row(row, comparison_config["comparison_types"])
+        )
         writer.writerow(comparison_output)
 
 
 #
-def process(jupiter_input, dspace_input, output_file, type):
+def process(jupiter_input, dspace_input, output_file, data_type):
     """
     Main processing function
     """
 
-    match type:
+    match data_type:
         case "communities":
             process_input(
-                jupiter_input, dspace_input, output_file, community_columns_to_compare
+                jupiter_input,
+                dspace_input,
+                output_file,
+                community_columns_to_compare,
             )
-        # case "collections":
-        #    process_collections(jupiter_input, dspace_input, output_file)
+        case "collections":
+            process_input(
+                jupiter_input,
+                dspace_input,
+                output_file,
+                collection_columns_to_compare,
+            )
         # case "items":
         #    process_items(jupiter_input, dspace_input, output_file)
-        # case "users":
-        #    process_users(jupiter_input, dspace_input, output_file)
         case _:
             logging.error("Unsupported DSO Type: %s", type)
             sys.exit()

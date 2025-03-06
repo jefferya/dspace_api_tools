@@ -34,7 +34,7 @@ def parse_args():
     parser.add_argument(
         "--dso_type",
         required=False,
-        help="DSpace Object Type ['communities', 'collections', 'item'].",
+        help="DSpace Object Type ['communities', 'collections', 'items', 'users'].",
         default="communities",
     )
     parser.add_argument(
