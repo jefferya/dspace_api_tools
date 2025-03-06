@@ -11,6 +11,7 @@ References for using the DSpace API
 * <https://github.com/DSpace/RestContract/blob/dspace-7_x/endpoints.md>
 * <https://github.com/the-library-code/dspace-rest-python>
 * <https://wiki.lyrasis.org/display/DSDOC7x/Functional+Overview#FunctionalOverview-DataModel>
+* <https://docs.google.com/document/d/11meAwAI-RPipoYs9uuJYTvvi5mkiFQp7HPAnERD03rA/edit?tab=t.0>
 * <https://stateless.co/hal_specification.html>
 
 ## Requirements

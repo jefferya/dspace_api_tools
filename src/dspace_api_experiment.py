@@ -105,18 +105,32 @@ def process_items(dspace_client, output_file):
             dspace_client.refresh_token()
         logging.debug("%s", item.to_json_pretty())
         bundles = dspace_client.get_bundles(parent=item)
-        logging.debug("%s A --------------------------------------------", item.uuid)
+        logging.debug(
+            "BEGIN bundles of item %s --------------------------------------------",
+            item.uuid,
+        )
         for bundle in bundles:
-            logging.debug(
-                "%s B --------------------------------------------", bundle.uuid
-            )
             logging.debug("%s", bundle.to_json_pretty())
+            logging.debug(
+                "BEGIN bitstreams of bundle %s / item %s -----------------------------------------",
+                bundle.uuid,
+                item.uuid,
+            )
             bundle_expanded = {**bundle.as_dict(), "bitstreams": []}
             bitstreams = dspace_client.get_bitstreams(bundle=bundle)
             for bitstream in bitstreams:
                 bundle_expanded["bitstreams"].append(bitstream.as_dict())
                 logging.debug("%s", bitstream.to_json_pretty())
             item_expanded["bundles"].append(bundle_expanded)
+            logging.debug(
+                "END bitstreams of bundle %s / item %s -------------------------------------------",
+                bundle.uuid,
+                item.uuid,
+            )
+        logging.debug(
+            "END bundles of item %s --------------------------------------------",
+            item.uuid,
+        )
         utils.output_writer(item_expanded, writer)
     logging.info("Count: [%d]", count)
 
