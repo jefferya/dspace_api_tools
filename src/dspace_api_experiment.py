@@ -38,7 +38,7 @@ def parse_args():
         default="communities",
     )
     parser.add_argument(
-        "--logging_level", required=False, help="Logging level.", default=logging.INFO
+        "--logging_level", required=False, help="Logging level.", default="INFO"
     )
 
     return parser.parse_args()

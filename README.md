@@ -13,6 +13,7 @@ References for using the DSpace API
 * <https://wiki.lyrasis.org/display/DSDOC7x/Functional+Overview#FunctionalOverview-DataModel>
 * <https://docs.google.com/document/d/11meAwAI-RPipoYs9uuJYTvvi5mkiFQp7HPAnERD03rA/edit?tab=t.0>
 * <https://stateless.co/hal_specification.html>
+* HAL Browser Demo: <https://demo.dspace.org/server/#/server/api>
 
 ## Requirements
 
@@ -52,7 +53,7 @@ Run Python from the virtual environment (see Python Virtual Environment document
 
 Where `--dso_type` is `[communities|collections|items|people]`
 
-## How to Test & Lint :white_check_mark:
+## How to Test & Lint
 
 To have the code ready for production, simply run:
 
