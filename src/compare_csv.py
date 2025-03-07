@@ -7,6 +7,10 @@ venv/bin/python src/compare_csv.py \
     --output /tmp/z.csv
     --type communities
 
+    Where
+    * input_jupiter is the CSV file from the Jupiter export in the
+        jupiter_output_scripts/juptiter_collection_metadata_to_CSV.rb
+    * input_dspace is the CSV file from the dsapce_api_experiment.py
 """
 
 import argparse
