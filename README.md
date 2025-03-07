@@ -6,14 +6,14 @@ A set of tools to interact with the DSpace API in use cases such as aiding migra
 
 References for using the DSpace API
 
-* <https://wiki.lyrasis.org/display/DSDOC6x/REST+API#RESTAPI-WhatisDSpaceRESTAPI>
-* <https://github.com/DSpace/RestContract/blob/dspace-7_x/README.md#rest-design-principles>
-* <https://github.com/DSpace/RestContract/blob/dspace-7_x/endpoints.md>
-* <https://github.com/the-library-code/dspace-rest-python>
-* <https://wiki.lyrasis.org/display/DSDOC7x/Functional+Overview#FunctionalOverview-DataModel>
-* <https://docs.google.com/document/d/11meAwAI-RPipoYs9uuJYTvvi5mkiFQp7HPAnERD03rA/edit?tab=t.0>
-* <https://stateless.co/hal_specification.html>
+* REST API intro: <https://wiki.lyrasis.org/display/DSDOC6x/REST+API#RESTAPI-WhatisDSpaceRESTAPI>
+* REST API design: <https://github.com/DSpace/RestContract/blob/dspace-7_x/README.md#rest-design-principles>
+* REST API endpoints: <https://github.com/DSpace/RestContract/blob/dspace-7_x/endpoints.md>
+* Data Model: <https://wiki.lyrasis.org/display/DSDOC7x/Functional+Overview#FunctionalOverview-DataModel>
+* Acronym and definitions: <https://docs.google.com/document/d/11meAwAI-RPipoYs9uuJYTvvi5mkiFQp7HPAnERD03rA/edit?tab=t.0>
+* HAL spec: <https://stateless.co/hal_specification.html>
 * HAL Browser Demo: <https://demo.dspace.org/server/#/server/api>
+* Python client: <https://github.com/the-library-code/dspace-rest-python>
 
 ## Requirements
 
@@ -44,14 +44,14 @@ The steps to set up a validation run.
     venv/bin/python src/compare_csv.py \
         --input_jupiter ~/Downloads/era_export/jupiter_community_2025-03-06_12-05-19.csv \
         --input_dspace ~/Downloads/scholaris_communities.csv \
-        --output /tmp/communities_validation_$(date +%Y-%m-%d_%H:%M:%S).csv
+        --output /tmp/communities_validation_$(date +%Y-%m-%d_%H:%M:%S).csv \
         --type communities
 
     # Collections validation results
     venv/bin/python src/compare_csv.py \
-        --input_jupiter ~/Downloads/era_export/jupiter_collections_2025-03-06_12-05-19.csv \
+        --input_jupiter ~/Downloads/era_export/jupiter_collection_2025-03-06_12-08-01.csv \
         --input_dspace ~/Downloads/scholaris_collections.csv \
-        --output /tmp/collections_validation_$(date +%Y-%m-%d_%H:%M:%S).csv
+        --output /tmp/collections_validation_$(date +%Y-%m-%d_%H:%M:%S).csv \
         --type collections
     ```
 
