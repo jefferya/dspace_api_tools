@@ -1,5 +1,5 @@
 """
-Test integration module
+Test util module
 """
 
 from utils import utilities as utils

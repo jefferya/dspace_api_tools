@@ -66,6 +66,8 @@ def string_compare_ignore_whitespace(str1, str2):
     """
     Compare two strings
     """
+    # Remove all whitespace
+    # Reconsider this approach?
     regex = re.compile(r"\s+")
     logging.debug("string_compare_ignore_whitespace: %s", regex.sub("", str(str1)))
     return (
