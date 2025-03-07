@@ -22,6 +22,41 @@ References for using the DSpace API
   * pytest
   * nox
 
+## Validation
+
+Setup
+
+```bash
+    python3 -m venv ./venv/ \
+    && \
+    ./venv/bin/python3 -m pip install -r src/requirements/requirements.txt
+```
+
+The steps to set up a validation run.
+
+1. Use `./jupiter_output_scripts/juptiter_collection_metadata_to_CSV.rb` to export (CSV) Jupiter metadata
+2. Use `./dspace_api_experiment.py` to export (CSV) DSpace metadata
+3. Use `compare_csv.py` supplying the output from steps 1 & 2 to output a CSV file with the validation results (tweak comparison configuration as required).
+
+    ```bash
+
+    # Communities validation results
+    venv/bin/python src/compare_csv.py \
+        --input_jupiter ~/Downloads/era_export/jupiter_community_2025-03-06_12-05-19.csv \
+        --input_dspace ~/Downloads/scholaris_communities.csv \
+        --output /tmp/communities_validation_$(date +%Y-%m-%d_%H:%M:%S).csv
+        --type communities
+
+    # Collections validation results
+    venv/bin/python src/compare_csv.py \
+        --input_jupiter ~/Downloads/era_export/jupiter_collections_2025-03-06_12-05-19.csv \
+        --input_dspace ~/Downloads/scholaris_collections.csv \
+        --output /tmp/collections_validation_$(date +%Y-%m-%d_%H:%M:%S).csv
+        --type collections
+    ```
+
+4. Review the results for PASS/FAIL notices on the validated columns.
+
 ## dspace_api_experiment.py
 
 Test exporting content from the DSpace API using <https://pypi.org/project/dspace-rest-client>.
@@ -29,7 +64,7 @@ Test exporting content from the DSpace API using <https://pypi.org/project/dspac
 Setup
 
 ```bash
-    python3 -m venv ./venv/ \                                                   
+    python3 -m venv ./venv/ \
     && \
     ./venv/bin/python3 -m pip install -r src/requirements/requirements.txt
 ```
