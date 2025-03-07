@@ -1,10 +1,11 @@
 """
 Given two CSV files, compare the two files and return the differences between the two files.
 
-venv/bin/python src/compare_CSV.py \
+venv/bin/python src/compare_csv.py \
     --input_jupiter ~/Downloads/era_export/jupiter_community_2025-03-06_12-05-19.csv \
     --input_dspace ~/Downloads/scholaris_communities.csv
     --output /tmp/z.csv
+    --type communities
 
 """
 
@@ -13,6 +14,7 @@ import csv
 import logging
 import os
 import pathlib
+import re
 import sys
 
 import pandas
@@ -55,6 +57,20 @@ def string_compare(str1, str2):
     return str1 == str2
 
 
+# Scholaris removes trailing linebreaks
+def string_compare_ignore_whitespace(str1, str2):
+    """
+    Compare two strings
+    """
+    regex = re.compile(r"\s+")
+    logging.debug("string_compare_ignore_whitespace: %s", regex.sub("", str(str1)))
+    return (
+        False
+        if isinstance(str1, float) or isinstance(str2, float)
+        else regex.sub("", str(str1)) == regex.sub("", str(str2))
+    )
+
+
 # Define the columns to compare and how to compare them
 # "index_columns" is the key to use to align the two dataframes
 # "comparison_types" is a dictionary of the columns to compare
@@ -74,14 +90,14 @@ community_columns_to_compare = {
                 "jupiter": "description",
                 "dspace": "metadata.dc.description.0.value",
             },
-            "comparison_function": string_compare,
+            "comparison_function": string_compare_ignore_whitespace,
         },
         "abstract": {
             "columns": {
                 "jupiter": "description",
                 "dspace": "metadata.dc.description.abstract.0.value",
             },
-            "comparison_function": string_compare,
+            "comparison_function": string_compare_ignore_whitespace,
         },
         "dc.title": {
             "columns": {"jupiter": "title", "dspace": "metadata.dc.title.0.value"},
@@ -109,14 +125,14 @@ collection_columns_to_compare = {
                 "jupiter": "description",
                 "dspace": "metadata.dc.description.0.value",
             },
-            "comparison_function": string_compare,
+            "comparison_function": string_compare_ignore_whitespace,
         },
         "abstract": {
             "columns": {
                 "jupiter": "description",
                 "dspace": "metadata.dc.description.abstract.0.value",
             },
-            "comparison_function": string_compare,
+            "comparison_function": string_compare_ignore_whitespace,
         },
         "dc.title": {
             "columns": {"jupiter": "title", "dspace": "metadata.dc.title.0.value"},
