@@ -58,6 +58,7 @@ def string_compare(str1, str2):
     """
     Compare two strings
     """
+    logging.debug("string_compare: %s ---- %s", str1, str2)
     return str1 == str2
 
 
@@ -69,12 +70,13 @@ def string_compare_ignore_whitespace(str1, str2):
     # Remove all whitespace
     # Reconsider this approach?
     regex = re.compile(r"\s+")
-    logging.debug("string_compare_ignore_whitespace: %s", regex.sub("", str(str1)))
-    return (
-        False
-        if isinstance(str1, float) or isinstance(str2, float)
-        else regex.sub("", str(str1)) == regex.sub("", str(str2))
-    )
+    ret = False
+    if str(str1) == str(str2):
+        ret = True
+    else:
+        ret = regex.sub("", str(str1)) == regex.sub("", str(str2))
+    logging.debug("string_compare_ignore_whitespace: %s ---- %s %s", str(str1), str(str2), str(ret))
+    return ret
 
 
 # Define the columns to compare and how to compare them

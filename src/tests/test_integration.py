@@ -19,6 +19,7 @@ def test_string_compare():
     assert compare.string_compare("a", " a") is False
     assert compare.string_compare("a", " a ") is False
     assert compare.string_compare("a", " a\n") is False
+    assert compare.string_compare("", "") is True
 
 
 def test_string_compare_ignore_whitespace():
@@ -33,6 +34,8 @@ def test_string_compare_ignore_whitespace():
     assert compare.string_compare_ignore_whitespace("a", " a") is True
     assert compare.string_compare_ignore_whitespace("a", " a ") is True
     assert compare.string_compare_ignore_whitespace("a", " a\n") is True
+    assert compare.string_compare_ignore_whitespace("", "") is True
+    assert compare.string_compare_ignore_whitespace(float(), float()) is True
 
 
 def test_input_process_community_valid(tmp_path):
