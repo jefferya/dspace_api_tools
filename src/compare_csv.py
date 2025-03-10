@@ -75,7 +75,12 @@ def string_compare_ignore_whitespace(str1, str2):
         ret = True
     else:
         ret = regex.sub("", str(str1)) == regex.sub("", str(str2))
-    logging.debug("string_compare_ignore_whitespace: %s ---- %s %s", str(str1), str(str2), str(ret))
+    logging.debug(
+        "string_compare_ignore_whitespace: %s ---- %s %s",
+        str(str1),
+        str(str2),
+        str(ret),
+    )
     return ret
 
 
@@ -178,8 +183,8 @@ def process_input(
     """
     Process communities.
     """
-    jupiter_df = pandas.read_csv(jupiter_input)
-    dspace_df = pandas.read_csv(dspace_input)
+    jupiter_df = pandas.read_csv(jupiter_input, keep_default_na=False)
+    dspace_df = pandas.read_csv(dspace_input, keep_default_na=False)
 
     # Merge the two dataframes and align on the column values in the title/name
     # drop=False to keep the column in the dataframe
