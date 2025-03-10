@@ -732,7 +732,8 @@ def output_writer(dso, writer, output_type="csv", embbed=None):
     """
     if output_type == "csv":
         dso_dict = dso.as_dict() if hasattr(dso, "as_dict") else dso
-        writer.writerow(flatten_json(dso_dict | embbed))
+        dso_dict = dso_dict | embbed if embbed else dso_dict
+        writer.writerow(flatten_json(dso_dict))
     elif output_type == "json":
         # fails: not valid json when combined print(dso.to_json_pretty())
         sys.exit()
