@@ -93,7 +93,7 @@ def string_compare_ignore_whitespace(str1, str2):
 # The "comparison_function" is the function to use to compare the two columns
 community_columns_to_compare = {
     "index_columns": {"jupiter": "title", "dspace": "name"},
-    "label_dspace_column": "name",
+    "label_column": "name",
     "comparison_types": {
         "name": {
             "columns": {"jupiter": "title", "dspace": "name"},
@@ -209,13 +209,17 @@ def process_input(
 
     writer = csv.DictWriter(
         output_file,
-        fieldnames=["index (empty if no ERA obj), label"] + list(comparison_config["comparison_types"].keys()),
+        fieldnames=["index (empty if no ERA obj)", "label"]
+        + list(comparison_config["comparison_types"].keys()),
     )
     writer.writeheader()
 
     # Iterate over the rows in the aligned dataframe and compare the columns
     for index, row in aligned_df.iterrows():
-        comparison_output = {"index": index, "label": row[comparison_config['label_column']]}
+        comparison_output = {
+            "index (empty if no ERA obj)": index,
+            "label": row[comparison_config["label_column"]],
+        }
         comparison_output.update(
             process_row(row, comparison_config["comparison_types"])
         )
