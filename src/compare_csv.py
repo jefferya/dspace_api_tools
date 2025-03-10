@@ -93,6 +93,7 @@ def string_compare_ignore_whitespace(str1, str2):
 # The "comparison_function" is the function to use to compare the two columns
 community_columns_to_compare = {
     "index_columns": {"jupiter": "title", "dspace": "name"},
+    "label_dspace_column": "name",
     "comparison_types": {
         "name": {
             "columns": {"jupiter": "title", "dspace": "name"},
@@ -121,13 +122,17 @@ community_columns_to_compare = {
 
 # Define the columns to compare and how to compare them
 # "index_columns" is the key to use to align the two dataframes
+#    Examples:
+#    "index_columns": {"jupiter": "title", "dspace": "name"},
+#    "index_columns": {"jupiter": "id", "dspace": "provenance.ual.jupiterId.collection"},
 # "comparison_types" is a dictionary of the columns to compare
 # The key at the top level is the column name in the output file
 # The columns key is a dictionary with the keys jupiter and dspace
 # and value is the column name in the respective dataframes.
 # The "comparison_function" is the function to use to compare the two columns
 collection_columns_to_compare = {
-    "index_columns": {"jupiter": "title", "dspace": "name"},
+    "index_columns": {"jupiter": "id", "dspace": "provenance.ual.jupiterId.collection"},
+    "label_column": "name",
     "comparison_types": {
         "name": {
             "columns": {"jupiter": "title", "dspace": "name"},
@@ -204,13 +209,13 @@ def process_input(
 
     writer = csv.DictWriter(
         output_file,
-        fieldnames=["index"] + list(comparison_config["comparison_types"].keys()),
+        fieldnames=["index (empty if no ERA obj), label"] + list(comparison_config["comparison_types"].keys()),
     )
     writer.writeheader()
 
     # Iterate over the rows in the aligned dataframe and compare the columns
     for index, row in aligned_df.iterrows():
-        comparison_output = {"index": index}
+        comparison_output = {"index": index, "label": row[comparison_config['label_column']]}
         comparison_output.update(
             process_row(row, comparison_config["comparison_types"])
         )

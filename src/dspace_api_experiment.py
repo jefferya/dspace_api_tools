@@ -82,7 +82,12 @@ def process_collections(dspace_client, output_file):
     writer = utils.output_init(output_file, utils.CSV_FLATTENED_HEADERS["collections"])
     count = 0
     for count, collection in enumerate(collections, start=1):
-        utils.output_writer(collection, writer)
+        ual_jupiterid_collection = {
+            "provenance.ual.jupiterId.collection": utils.get_provenance_ual_jupiter_id(
+                collection, "ual.jupiterId.collection"
+            )
+        }
+        utils.output_writer(collection, writer, embbed=ual_jupiterid_collection)
         logging.info("%s (%s)", collection.name, collection.uuid)
         logging.debug("%s", collection.to_json_pretty())
     logging.info("Count: [%d]", count)
@@ -135,6 +140,78 @@ def process_items(dspace_client, output_file):
     logging.info("Count: [%d]", count)
 
 
+def process_bitstreams(dspace_client, output_file):
+    """
+    Process bitstreams: mainly for existence checks and bitstream checksums
+    """
+    writer = utils.output_init(output_file, utils.CSV_FLATTENED_HEADERS["bitstreams"])
+    items = dspace_client.search_objects_iter(query="*:*", dso_type="item")
+    count = 0
+    for count, item in enumerate(items, start=1):
+        # refresh auth token
+        if count % 5000 == 0:
+            dspace_client.refresh_token()
+
+        if "dc.provenance" in item.metadata:
+            ual_jupiterid_item = utils.get_provenance_ual_jupiter_id(
+                item, "ual.jupiterId.item"
+            )
+        else:
+            ual_jupiterid_item = None
+        bundles = dspace_client.get_bundles(parent=item)
+        for bundle in bundles:
+            bitstreams = dspace_client.get_bitstreams(bundle=bundle)
+            for bitstream in bitstreams:
+                tmp_dict = {
+                    "item.handle": item.handle,
+                    "item.id": item.id,
+                    "item.name": item.name,
+                    "provenance.ual.jupiterId.item": ual_jupiterid_item,
+                    "bundle.name": bundle.name,
+                    "bitstream.name": bitstream.name,
+                    "bitstream.bundleName": bitstream.bundleName,
+                    "bitstream.checksum.value": bitstream.checkSum["value"],
+                    "bitstream.checksum_algorithm": bitstream.checkSum[
+                        "checkSumAlgorithm"
+                    ],
+                    "bitstream.sizeBytes": bitstream.sizeBytes,
+                    "bitstream.sequenceId": bitstream.sequenceId,
+                    "bitstream.id": bitstream.id,
+                    "bitstream.uuid": bitstream.uuid,
+                }
+                if "dc.title" in bitstream.metadata:
+                    tmp_dict.update(
+                        {
+                            "bitstream.metadata.dc.title.0.value": bitstream.metadata[
+                                "dc.title"
+                            ][0]["value"]
+                        }
+                    )
+                if "dc.source" in bitstream.metadata:
+                    tmp_dict.update(
+                        {
+                            "bitstream.metadata.dc.source.0.value": bitstream.metadata[
+                                "dc.source"
+                            ][0]["value"]
+                        }
+                    )
+                if "dc.description" in bitstream.metadata:
+                    tmp_dict.update(
+                        {
+                            "bitstream.metadata.dc.description.0.value": bitstream.metadata[
+                                "dc.description"
+                            ][
+                                0
+                            ][
+                                "value"
+                            ],
+                        }
+                    )
+
+                utils.output_writer(tmp_dict, writer)
+    logging.info("Count: [%d]", count)
+
+
 def process_users(dspace_client, output_file):
     """
     Process users
@@ -161,6 +238,8 @@ def process(dspace_client, output_file, dso_type):
             process_collections(dspace_client, output_file)
         case "items":
             process_items(dspace_client, output_file)
+        case "bitstreams":
+            process_bitstreams(dspace_client, output_file)
         case "users":
             process_users(dspace_client, output_file)
         case _:

@@ -4,6 +4,7 @@ Script utility functions
 
 import csv
 import logging
+import json
 import sys
 
 
@@ -44,6 +45,7 @@ CSV_FLATTENED_HEADERS = {
         "lastModified",
         "type",
         "uuid",
+        "provenance.ual.jupiterId.collection",
         "metadata.dc.description.abstract.0.authority",
         "metadata.dc.description.abstract.0.confidence",
         "metadata.dc.description.abstract.0.language",
@@ -637,6 +639,23 @@ CSV_FLATTENED_HEADERS = {
         "type",
         "uuid",
     ],
+    "bitstreams": [
+        "bitstream.bundleName",
+        "bitstream.sizeBytes",
+        "bitstream.id",
+        "bitstream.name",
+        "bitstream.sequenceId",
+        "bitstream.checksum.value",
+        "bitstream.checksum_algorithm",
+        "bitstream.uuid",
+        "bitstream.metadata.dc.title.0.value",
+        "bitstream.metadata.dc.source.0.value",
+        "bitstream.metadata.dc.description.0.value",
+        "bundle.name",
+        "item.handle",
+        "item.id",
+        "item.name",
+    ],
     "users": [
         "canLogIn",
         "email",
@@ -707,16 +726,39 @@ def output_init(output_file, csv_header_fieldnames=None, output_type="csv"):
     return writer
 
 
-def output_writer(dso, writer, output_type="csv"):
+def output_writer(dso, writer, output_type="csv", embbed=None):
     """
     Output the specified DSpace object (dso)
     """
     if output_type == "csv":
         dso_dict = dso.as_dict() if hasattr(dso, "as_dict") else dso
-        writer.writerow(flatten_json(dso_dict))
+        writer.writerow(flatten_json(dso_dict | embbed))
     elif output_type == "json":
         # fails: not valid json when combined print(dso.to_json_pretty())
         sys.exit()
     else:
         logging.error("Unsupported output type: %s", output_type)
         sys.exit()
+
+
+def get_provenance_ual_jupiter_id(dso, key):
+    """
+    Get the DC provenance UAL Jupiter ID from the collection
+    """
+    dc_provenance_ual_jupiter_id = None
+    if "dc.provenance" in dso.metadata:
+        for provenance in dso.metadata["dc.provenance"]:
+            provenance_json = convert_string_to_json(provenance["value"])
+            dc_provenance_ual_jupiter_id = provenance_json.get(key)
+    return dc_provenance_ual_jupiter_id
+
+
+def convert_string_to_json(string):
+    """
+    Convert a string to a JSON object
+    """
+    try:
+        return json.loads(string)
+    except json.JSONDecodeError as e:
+        logging.error("Error decoding JSON string: %s", e)
+        return None
