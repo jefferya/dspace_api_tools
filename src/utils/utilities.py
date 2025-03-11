@@ -432,7 +432,8 @@ def flatten_json(json_obj, prefix=""):
             flat_dict.update(flatten_json(value, f"{prefix}{key}."))
         elif isinstance(value, list):
             for i, item in enumerate(value):
-                flat_dict.update(flatten_json(item, f"{prefix}{key}.{i}."))
+                if item is not None:
+                    flat_dict.update(flatten_json(item, f"{prefix}{key}.{i}."))
         else:
             flat_dict[f"{prefix}{key}"] = value
 
@@ -503,12 +504,14 @@ def get_provenance_ual_jupiter_collection_id(dspace_client, item):
     Get the DC provenance UAL Jupiter ID from the Collection
     assocated with the Item
     """
-    parent_community = item.links["mappedCollections"]["href"]
+    # Should mapped collections be included?
+    # parent_community = item.links["mappedCollections"]["href"]
+    parent_community = item.links["owningCollection"]["href"]
     r_json = dspace_client.fetch_resource(url=parent_community)
-    logging.debug("----- parent community %s", r_json)
-    ret = None
-    if "metadata" in r_json and "dc.provenance" in r_json["metadata"]:
-        for provenance in r_json["metadata"]["dc.provenance"]:
-            provenance_json = convert_string_to_json(provenance["value"])
-            ret = provenance_json.get("ual.jupiterId.collection")
+    print(r_json["uuid"])
+    collections = dspace_client.get_collections(uuid=r_json["uuid"])
+    print(collections[0].as_dict())
+    ret = []
+    for c in collections:
+        ret.append(get_provenance_ual_jupiter_id(c, "ual.jupiterId.collection"))
     return ret
