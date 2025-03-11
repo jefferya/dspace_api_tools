@@ -50,7 +50,7 @@ end
 class JupiterActiveStorageBlobMetadataToCSV
   def initialize(output_directory)
     @date_time = Time.now.strftime("%Y-%m-%d_%H-%M-%S")
-    @output_file = output_directory + "jupiter_item_#{@date_time}.csv"
+    @output_file = output_directory + "jupiter_activestorage_#{@date_time}.csv"
   end
   def run
     headers = ["item.id",
