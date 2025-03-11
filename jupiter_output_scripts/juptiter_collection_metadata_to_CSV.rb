@@ -53,9 +53,13 @@ class JupiterActiveStorageBlobMetadataToCSV
     @output_file = output_directory + "jupiter_activestorage_#{@date_time}.csv"
   end
   def run
+    # "provenance.ual.jupiterId.item" & "bitstream.sequenceId" labels need to align
+    # with the DSpace CSV for use with pandas dataframe multi-index join
+    # in the comparison script 
     headers = ["item.id",
                 "item.title",
-                "sequence",
+                "provenance.ual.jupiterId.item",
+                "bitstream.sequenceId",
                 "key",
                 "filename",
                 "content_type",
@@ -70,6 +74,7 @@ class JupiterActiveStorageBlobMetadataToCSV
           sequence_num += 1
           csv << [item.id,
                   item.title,
+                  item.id,
                   sequence_num,
                   f.blob.key,
                   f.blob.filename,

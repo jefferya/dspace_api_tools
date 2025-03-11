@@ -53,6 +53,13 @@ The steps to set up a validation run.
         --input_dspace ~/Downloads/scholaris_collections.csv \
         --output /tmp/collections_validation_$(date +%Y-%m-%d_%H:%M:%S).csv \
         --type collections
+    
+    # Bitstream validation results
+    venv/bin/python src/compare_csv.py \
+        --input_jupiter ~/Downloads/era_export/jupiter_activestorage_2025-03-06_12-08-01.csv \
+        --input_dspace ~/Downloads/scholaris_bitstreams.csv \
+        --output /tmp/bitstreamss_validation_$(date +%Y-%m-%d_%H:%M:%S).csv \
+        --type bitstreams 
     ```
 
 4. Review the results for PASS/FAIL notices on the validated columns.
@@ -86,7 +93,7 @@ Run Python from the virtual environment (see Python Virtual Environment document
     --dso_type communities
 ```
 
-Where `--dso_type` is `[communities|collections|items|people]`
+Where `--dso_type` is `[communities|collections|items|people|bitstreams]`
 
 ## How to Test & Lint
 

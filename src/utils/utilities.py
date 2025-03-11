@@ -640,6 +640,10 @@ CSV_FLATTENED_HEADERS = {
         "uuid",
     ],
     "bitstreams": [
+        "item.handle",
+        "item.id",
+        "item.name",
+        "provenance.ual.jupiterId.item",
         "bitstream.bundleName",
         "bitstream.sizeBytes",
         "bitstream.id",
@@ -652,9 +656,6 @@ CSV_FLATTENED_HEADERS = {
         "bitstream.metadata.dc.source.0.value",
         "bitstream.metadata.dc.description.0.value",
         "bundle.name",
-        "item.handle",
-        "item.id",
-        "item.name",
     ],
     "users": [
         "canLogIn",

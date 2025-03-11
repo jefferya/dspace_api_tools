@@ -180,3 +180,34 @@ def test_input_process_collection_missing(tmp_path):
     assert output_df["description"][0] == "FAIL"
     assert output_df["abstract"][0] == "FAIL"
     assert output_df["dc.title"][0] == "FAIL"
+
+
+def test_input_process_bitstream_valid(tmp_path):
+    """
+    Test process_input for a bitstream with valid data and 2 sequences
+    """
+    comparison_config = compare.bitstream_columns_to_compare
+    jupiter_input = "src/tests/assets/jupiter_activestorage.csv"
+    dspace_input = "src/tests/assets/dspace_bitstream.csv"
+    tmp_file = tmp_path / "output.csv"
+
+    with open(tmp_file, "wt", encoding="utf-8", newline="") as output_file:
+        compare.process_input(
+            jupiter_input,
+            dspace_input,
+            output_file,
+            comparison_config,
+        )
+
+    output_df = pandas.read_csv(tmp_file)
+    print (f"{output_df}")
+    assert output_df["name"][0] == "PASS"
+    assert output_df["checksum"][0] == "PASS"
+    assert output_df["sequence"][0] == "PASS"
+    assert output_df["parent_item_id"][0] == "PASS"
+    assert output_df["parent_item_name"][0] == "PASS"
+    assert output_df["name"][1] == "PASS"
+    assert output_df["checksum"][1] == "PASS"
+    assert output_df["sequence"][1] == "PASS"
+    assert output_df["parent_item_id"][1] == "PASS"
+    assert output_df["parent_item_name"][1] == "PASS"

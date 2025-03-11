@@ -159,6 +159,57 @@ collection_columns_to_compare = {
     },
 }
 
+# Define the columns to compare and how to compare them
+# "index_columns" is the key to use to align the two dataframes
+#    Examples:
+#    "index_columns": {"jupiter": "title", "dspace": "name"},
+#    "index_columns": {"jupiter": "id", "dspace": "provenance.ual.jupiterId.collection"},
+# "comparison_types" is a dictionary of the columns to compare
+#   The key at the top level is the column name in the output file
+#   The columns key is a dictionary with the keys jupiter and dspace
+#   and value is the column name in the respective dataframes.
+#   The "comparison_function" is the function to use to compare the two columns
+#   "_jupiter"/"_dspace" suffixes are added to the column names if the dataframes 
+#       have the same column names, required for multi-index dataframe joins 
+bitstream_columns_to_compare = {
+    "index_columns": {
+        "jupiter": ["provenance.ual.jupiterId.item", "bitstream.sequenceId"],
+        "dspace": ["provenance.ual.jupiterId.item", "bitstream.sequenceId"],
+    },
+    "label_column": "item.name",
+    "comparison_types": {
+        "name": {
+            "columns": {"jupiter": "filename", "dspace": "bitstream.name"},
+            "comparison_function": string_compare,
+        },
+        "checksum": {
+            "columns": {
+                "jupiter": "checksum",
+                "dspace": "bitstream.checksum.value",
+            },
+            "comparison_function": string_compare,
+        },
+        "sequence": {
+            "columns": {
+                "jupiter": "bitstream.sequenceId_jupiter",
+                "dspace": "bitstream.sequenceId_dspace",
+            },
+            "comparison_function": string_compare,
+        },
+        "parent_item_id": {
+            "columns": {
+                "jupiter": "provenance.ual.jupiterId.item_jupiter",
+                "dspace": "provenance.ual.jupiterId.item_jupiter",
+            },
+            "comparison_function": string_compare,
+        },
+        "parent_item_name": {
+            "columns": {"jupiter": "item.title", "dspace": "item.name"},
+            "comparison_function": string_compare,
+        },
+    },
+}
+
 
 #
 def process_row(row, columns_to_compare):
@@ -186,7 +237,7 @@ def process_input(
     comparison_config,
 ):
     """
-    Process communities.
+    Process input from Jupiter and DSpace.
     """
     jupiter_df = pandas.read_csv(jupiter_input, keep_default_na=False)
     dspace_df = pandas.read_csv(dspace_input, keep_default_na=False)
@@ -246,6 +297,13 @@ def process(jupiter_input, dspace_input, output_file, data_type):
                 dspace_input,
                 output_file,
                 collection_columns_to_compare,
+            )
+        case "bitstreams":
+            process_input(
+                jupiter_input,
+                dspace_input,
+                output_file,
+                bitstream_columns_to_compare,
             )
         # case "items":
         #    process_items(jupiter_input, dspace_input, output_file)
