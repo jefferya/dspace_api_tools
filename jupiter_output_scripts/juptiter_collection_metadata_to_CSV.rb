@@ -17,6 +17,7 @@ class JupiterBasicMetadataToCSV
   end
 end
 
+# Jupiter Community Metadata
 class JupiterCommunityMetadataToCSV < JupiterBasicMetadataToCSV
   def initialize(output_directory)
     super()
@@ -26,6 +27,7 @@ class JupiterCommunityMetadataToCSV < JupiterBasicMetadataToCSV
   end
 end
 
+# Jupiter Collection metadata
 class JupiterCollectionMetadataToCSV < JupiterBasicMetadataToCSV
   def initialize(output_directory)
     super()
@@ -35,5 +37,54 @@ class JupiterCollectionMetadataToCSV < JupiterBasicMetadataToCSV
   end
 end
 
+# Jupiter Item metadata 
+class JupiterItemMetadataToCSV < JupiterBasicMetadataToCSV
+  def initialize(output_directory)
+    super()
+    @date_time = Time.now.strftime("%Y-%m-%d_%H-%M-%S")
+    @output_file = output_directory + "jupiter_item_#{@date_time}.csv"
+    @instance = Item 
+end
+
+# Juptier Active Storage Blob and Item metadata
+class JupiterActiveStorageBlobMetadataToCSV
+  def initialize(output_directory)
+    @date_time = Time.now.strftime("%Y-%m-%d_%H-%M-%S")
+    @output_file = output_directory + "jupiter_item_#{@date_time}.csv"
+  end
+  def run
+    headers = ["item.id",
+                "item.title",
+                "sequence",
+                "key",
+                "filename",
+                "content_type",
+                "metadata",
+                "byte_size",
+                "checksum",
+                "created_at"] 
+    CSV.open(@output_file, 'wb', write_headers: true, headers: headers) do |csv|
+      Item.find_each do |item|
+        sequence_num = 0
+        item.ordered_files.each do |f|
+          sequence_num += 1
+          csv << [item.id,
+                  item.title,
+                  sequence_num,
+                  f.blob.key,
+                  f.blob.filename,
+                  f.blob.content_type,
+                  f.blob.metadata,
+                  f.blob.byte_size,
+                  f.blob.checksum,
+                  f.blob.created_at]
+        end
+      end
+    end
+  end
+end
+
 JupiterCommunityMetadataToCSV.new("/era_tmp/delete_me_by_2025-04-15/").run
 JupiterCollectionMetadataToCSV.new("/era_tmp/delete_me_by_2025-04-15/").run
+JupiterItemMetadataToCSV.new("/era_tmp/delete_me_by_2025-04-15/").run
+JupiterActiveStorageBlobMetadataToCSV.new("/era_tmp/delete_me_by_2025-04-15/").run
