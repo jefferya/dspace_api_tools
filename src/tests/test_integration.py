@@ -200,7 +200,7 @@ def test_input_process_bitstream_valid(tmp_path):
         )
 
     output_df = pandas.read_csv(tmp_file)
-    print (f"{output_df}")
+    print(f"{output_df}")
     assert output_df["name"][0] == "PASS"
     assert output_df["checksum"][0] == "PASS"
     assert output_df["sequence"][0] == "PASS"

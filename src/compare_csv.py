@@ -169,8 +169,8 @@ collection_columns_to_compare = {
 #   The columns key is a dictionary with the keys jupiter and dspace
 #   and value is the column name in the respective dataframes.
 #   The "comparison_function" is the function to use to compare the two columns
-#   "_jupiter"/"_dspace" suffixes are added to the column names if the dataframes 
-#       have the same column names, required for multi-index dataframe joins 
+#   "_jupiter"/"_dspace" suffixes are added to the column names if the dataframes
+#       have the same column names, required for multi-index dataframe joins
 bitstream_columns_to_compare = {
     "index_columns": {
         "jupiter": ["provenance.ual.jupiterId.item", "bitstream.sequenceId"],
