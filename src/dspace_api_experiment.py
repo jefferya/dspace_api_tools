@@ -68,9 +68,9 @@ def process_communities(dspace_client, output_file):
     writer = utils.output_init(output_file, utils.CSV_FLATTENED_HEADERS["community"])
     count = 0
     for count, community in enumerate(communities, start=1):
-        utils.output_writer(community, writer)
         logging.info("%s (%s)", community.name, community.uuid)
         logging.debug("%s", community.to_json_pretty())
+        utils.output_writer(community, writer)
     logging.info("Count: [%d]", count)
 
 
@@ -82,14 +82,17 @@ def process_collections(dspace_client, output_file):
     writer = utils.output_init(output_file, utils.CSV_FLATTENED_HEADERS["collections"])
     count = 0
     for count, collection in enumerate(collections, start=1):
-        ual_jupiterid_collection = {
-            "provenance.ual.jupiterId.collection": utils.get_provenance_ual_jupiter_id(
-                collection, "ual.jupiterId.collection"
-            )
-        }
-        utils.output_writer(collection, writer, embbed=ual_jupiterid_collection)
         logging.info("%s (%s)", collection.name, collection.uuid)
         logging.debug("%s", collection.to_json_pretty())
+        provenance = {
+            "provenance.ual.jupiterId.collection": utils.get_provenance_ual_jupiter_id(
+                collection, "ual.jupiterId.collection"
+            ),
+            "provenance.ual.jupiterId.community": utils.get_provenance_ual_jupiter_community_id(
+                dspace_client, collection
+            ),
+        }
+        utils.output_writer(collection, writer, embbed=provenance)
     logging.info("Count: [%d]", count)
 
 
@@ -104,39 +107,21 @@ def process_items(dspace_client, output_file):
     items = dspace_client.search_objects_iter(query="*:*", dso_type="item")
     count = 0
     for count, item in enumerate(items, start=1):
-        item_expanded = {**item.as_dict(), "bundles": []}
         # refresh auth token
         if count % 5000 == 0:
             dspace_client.refresh_token()
+        logging.info("%s (%s)", item.name, item.uuid)
         logging.debug("%s", item.to_json_pretty())
-        bundles = dspace_client.get_bundles(parent=item)
-        logging.debug(
-            "BEGIN bundles of item %s --------------------------------------------",
-            item.uuid,
-        )
-        for bundle in bundles:
-            logging.debug("%s", bundle.to_json_pretty())
-            logging.debug(
-                "BEGIN bitstreams of bundle %s / item %s -----------------------------------------",
-                bundle.uuid,
-                item.uuid,
-            )
-            bundle_expanded = {**bundle.as_dict(), "bitstreams": []}
-            bitstreams = dspace_client.get_bitstreams(bundle=bundle)
-            for bitstream in bitstreams:
-                bundle_expanded["bitstreams"].append(bitstream.as_dict())
-                logging.debug("%s", bitstream.to_json_pretty())
-            item_expanded["bundles"].append(bundle_expanded)
-            logging.debug(
-                "END bitstreams of bundle %s / item %s -------------------------------------------",
-                bundle.uuid,
-                item.uuid,
-            )
-        logging.debug(
-            "END bundles of item %s --------------------------------------------",
-            item.uuid,
-        )
-        utils.output_writer(item_expanded, writer)
+        provenance = {
+            "provenance.ual.jupiterId.item": utils.get_provenance_ual_jupiter_id(
+                item, "ual.jupiterId.item"
+            ),
+            "provenance.ual.jupiterId.collection": utils.get_provenance_ual_jupiter_collection_id(
+                dspace_client, item
+            ),
+        }
+        logging.debug("------ provenance %s", provenance)
+        utils.output_writer(item, writer, embbed=provenance)
     logging.info("Count: [%d]", count)
 
 

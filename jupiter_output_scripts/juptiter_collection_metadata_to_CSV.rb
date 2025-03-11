@@ -7,7 +7,7 @@ class JupiterBasicMetadataToCSV
     @instance
   end
   def run
-    reaise "Instance not set" unless @instance
+    raise "Instance not set" unless @instance
     headers = @instance.new.decorate.attributes.keys
     CSV.open(@output_file, 'wb', write_headers: true, headers: headers) do |csv|
       @instance.find_each do |i|
