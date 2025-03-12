@@ -210,6 +210,39 @@ bitstream_columns_to_compare = {
     },
 }
 
+# Define the columns to compare and how to compare them
+# "index_columns" is the key to use to align the two dataframes
+#    Examples:
+#    "index_columns": {"jupiter": "title", "dspace": "name"},
+#    "index_columns": {"jupiter": "id", "dspace": "provenance.ual.jupiterId.collection"},
+# "comparison_types" is a dictionary of the columns to compare
+# The key at the top level is the column name in the output file
+# The columns key is a dictionary with the keys jupiter and dspace
+# and value is the column name in the respective dataframes.
+# The "comparison_function" is the function to use to compare the two columns
+item_columns_to_compare = {
+    "index_columns": {"jupiter": "id", "dspace": "provenance.ual.jupiterId.item"},
+    "label_column": "name",
+    "comparison_types": {
+        "name": {
+            "columns": {"jupiter": "title", "dspace": "name"},
+            "comparison_function": string_compare,
+        },
+        "description": {
+            "columns": {
+                "jupiter": "description",
+                "dspace": "metadata.dc.description.0.value",
+            },
+            "comparison_function": string_compare_ignore_whitespace,
+        },
+        "dc.title": {
+            "columns": {"jupiter": "title", "dspace": "metadata.dc.title.0.value"},
+            "comparison_function": string_compare,
+        },
+    },
+}
+
+
 
 #
 def process_row(row, columns_to_compare):
@@ -305,8 +338,13 @@ def process(jupiter_input, dspace_input, output_file, data_type):
                 output_file,
                 bitstream_columns_to_compare,
             )
-        # case "items":
-        #    process_items(jupiter_input, dspace_input, output_file)
+        case "items":
+            process_input(
+                jupiter_input,
+                dspace_input,
+                output_file,
+                item_columns_to_compare,
+            )
         case _:
             logging.error("Unsupported DSO Type: %s", type)
             sys.exit()

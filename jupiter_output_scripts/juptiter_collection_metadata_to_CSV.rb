@@ -44,6 +44,7 @@ class JupiterItemMetadataToCSV < JupiterBasicMetadataToCSV
     @date_time = Time.now.strftime("%Y-%m-%d_%H-%M-%S")
     @output_file = output_directory + "jupiter_item_#{@date_time}.csv"
     @instance = Item 
+  end
 end
 
 # Juptier Active Storage Blob and Item metadata
