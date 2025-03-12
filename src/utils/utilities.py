@@ -39,7 +39,7 @@ CSV_FLATTENED_HEADERS = {
         "metadata.dc.title.0.place",
         "metadata.dc.title.0.value",
     ],
-    "collections": [
+    "collection": [
         "handle",
         "name",
         "lastModified",
@@ -73,7 +73,7 @@ CSV_FLATTENED_HEADERS = {
         "metadata.dc.description.0.language",
         "metadata.dc.description.0.place",
     ],
-    "items": [
+    "item": [
         "handle",
         "lastModified",
         "metadata.dc.contributor.author.0.authority",
@@ -362,7 +362,7 @@ CSV_FLATTENED_HEADERS = {
         "type",
         "uuid",
     ],
-    "bitstreams": [
+    "bitstream": [
         "item.handle",
         "item.id",
         "item.name",
@@ -380,7 +380,7 @@ CSV_FLATTENED_HEADERS = {
         "bitstream.metadata.dc.description.0.value",
         "bundle.name",
     ],
-    "users": [
+    "user": [
         "canLogIn",
         "email",
         "handle",
@@ -421,7 +421,7 @@ CSV_FLATTENED_HEADERS = {
 }
 
 
-def flatten_json(json_obj, prefix=""):
+def flatten_json(json_obj, flattened_schema, prefix=""):
     """
     Flatten JSON object in a very naive way for use in a CSV serialization.
     DSpace Items likely require a more complex flattening to generate "useful" output.
@@ -429,36 +429,40 @@ def flatten_json(json_obj, prefix=""):
     flat_dict = {}
     for key, value in json_obj.items():
         if isinstance(value, dict):
-            flat_dict.update(flatten_json(value, f"{prefix}{key}."))
+            flat_dict.update(flatten_json(value, flattened_schema, f"{prefix}{key}."))
         elif isinstance(value, list):
             for i, item in enumerate(value):
                 if item is not None:
-                    flat_dict.update(flatten_json(item, f"{prefix}{key}.{i}."))
+                    flat_dict.update(flatten_json(item, flattened_schema, f"{prefix}{key}.{i}."))
         else:
-            flat_dict[f"{prefix}{key}"] = value
+            flat_key = f"{prefix}{key}"
+            if flat_key in flattened_schema:
+                flat_dict[flat_key] = value
+            else:
+                logging.error("Key not found in schema: %s", flat_key)
 
     return flat_dict
 
 
-def output_init(output_file, csv_header_fieldnames=None, output_type="csv"):
+def output_init(output_file, dso_type=None, output_type="csv"):
     """
     Output initialization and
     """
     if output_type == "csv":
         # writer = csv.DictWriter(output_file, fieldnames= .as_dict[0].keys())
-        writer = csv.DictWriter(output_file, fieldnames=csv_header_fieldnames)
+        writer = csv.DictWriter(output_file, fieldnames=CSV_FLATTENED_HEADERS[dso_type])
         writer.writeheader()
     return writer
 
 
-def output_writer(dso, writer, output_type="csv", embbed=None):
+def output_writer(dso, dso_type, writer, output_type="csv", embbed=None):
     """
     Output the specified DSpace object (dso)
     """
     if output_type == "csv":
         dso_dict = dso.as_dict() if hasattr(dso, "as_dict") else dso
         dso_dict = dso_dict | embbed if embbed else dso_dict
-        writer.writerow(flatten_json(dso_dict))
+        writer.writerow(flatten_json(dso_dict, CSV_FLATTENED_HEADERS[dso_type]))
     elif output_type == "json":
         # fails: not valid json when combined print(dso.to_json_pretty())
         sys.exit()
@@ -508,9 +512,7 @@ def get_provenance_ual_jupiter_collection_id(dspace_client, item):
     # parent_community = item.links["mappedCollections"]["href"]
     parent_community = item.links["owningCollection"]["href"]
     r_json = dspace_client.fetch_resource(url=parent_community)
-    print(r_json["uuid"])
     collections = dspace_client.get_collections(uuid=r_json["uuid"])
-    print(collections[0].as_dict())
     ret = []
     for c in collections:
         ret.append(get_provenance_ual_jupiter_id(c, "ual.jupiterId.collection"))

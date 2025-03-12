@@ -65,12 +65,12 @@ def process_communities(dspace_client, output_file):
     Process communities
     """
     communities = dspace_client.get_communities_iter()
-    writer = utils.output_init(output_file, utils.CSV_FLATTENED_HEADERS["community"])
+    writer = utils.output_init(output_file, "community")
     count = 0
     for count, community in enumerate(communities, start=1):
         logging.info("%s (%s)", community.name, community.uuid)
         logging.debug("%s", community.to_json_pretty())
-        utils.output_writer(community, writer)
+        utils.output_writer(community, "community", writer)
     logging.info("Count: [%d]", count)
 
 
@@ -79,7 +79,7 @@ def process_collections(dspace_client, output_file):
     Process collections
     """
     collections = dspace_client.get_collections_iter()
-    writer = utils.output_init(output_file, utils.CSV_FLATTENED_HEADERS["collections"])
+    writer = utils.output_init(output_file, "collection")
     count = 0
     for count, collection in enumerate(collections, start=1):
         logging.info("%s (%s)", collection.name, collection.uuid)
@@ -92,7 +92,7 @@ def process_collections(dspace_client, output_file):
                 dspace_client, collection
             ),
         }
-        utils.output_writer(collection, writer, embbed=provenance)
+        utils.output_writer(collection, "collection", writer, embbed=provenance)
     logging.info("Count: [%d]", count)
 
 
@@ -103,7 +103,7 @@ def process_items(dspace_client, output_file):
     print("\n\n+++++++++++++++++++")
     print("\n Items will likely fail due to CSV dict header and JSON flattening.\n")
     print("+++++++++++++++++++\n\n")
-    writer = utils.output_init(output_file, utils.CSV_FLATTENED_HEADERS["items"])
+    writer = utils.output_init(output_file, "item")
     items = dspace_client.search_objects_iter(query="*:*", dso_type="item")
     count = 0
     for count, item in enumerate(items, start=1):
@@ -121,7 +121,7 @@ def process_items(dspace_client, output_file):
             ),
         }
         logging.debug("------ provenance %s", provenance)
-        utils.output_writer(item, writer, embbed=provenance)
+        utils.output_writer(item, "item", writer, embbed=provenance)
     logging.info("Count: [%d]", count)
 
 
@@ -129,7 +129,7 @@ def process_bitstreams(dspace_client, output_file):
     """
     Process bitstreams: mainly for existence checks and bitstream checksums
     """
-    writer = utils.output_init(output_file, utils.CSV_FLATTENED_HEADERS["bitstreams"])
+    writer = utils.output_init(output_file, "bitstream")
     items = dspace_client.search_objects_iter(query="*:*", dso_type="item")
     count = 0
     for count, item in enumerate(items, start=1):
@@ -193,7 +193,7 @@ def process_bitstreams(dspace_client, output_file):
                         }
                     )
 
-                utils.output_writer(tmp_dict, writer)
+                utils.output_writer(tmp_dict, "bitstream", writer)
     logging.info("Count: [%d]", count)
 
 
@@ -201,11 +201,11 @@ def process_users(dspace_client, output_file):
     """
     Process users
     """
-    writer = utils.output_init(output_file, utils.CSV_FLATTENED_HEADERS["users"])
+    writer = utils.output_init(output_file, "user")
     users = dspace_client.get_users_iter()
     count = 0
     for count, user in enumerate(users, start=1):
-        utils.output_writer(user, writer)
+        utils.output_writer(user, "user", writer)
         logging.debug("%s", user.to_json_pretty())
     logging.info("Count: [%d]", count)
 
