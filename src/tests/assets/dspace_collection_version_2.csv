@@ -1,2 +1,2 @@
-name,metadata.dc.description.0.value,metadata.dc.description.abstract.0.value,metadata.dc.title.0.value,provenance.ual.jupiterId.collection
-Test,Test description 2,Test description 2,Test 2,123456789.1
+name,metadata.dc.description.0.value,metadata.dc.description.abstract.0.value,metadata.dc.title.0.value,provenance.ual.jupiterId.collection,languages.iso,metadata.dc.identifier.0.value,lastModified
+Test,Test description 2,Test description 2,Test 2,123456789.1,9999-01-02T00:00:00Z

@@ -247,7 +247,6 @@ item_columns_to_compare = {
 }
 
 
-
 #
 def process_row(row, columns_to_compare):
     """
@@ -297,7 +296,12 @@ def process_input(
 
     writer = csv.DictWriter(
         output_file,
-        fieldnames=["index (empty if no ERA obj)", "label", "jupiter_updated_at", "dspace_lastModified"]
+        fieldnames=[
+            "index (empty if no ERA obj)",
+            "label",
+            "jupiter_updated_at",
+            "dspace_lastModified",
+        ]
         + list(comparison_config["comparison_types"].keys()),
     )
     writer.writeheader()
@@ -308,10 +312,10 @@ def process_input(
             "index (empty if no ERA obj)": index,
             "label": row[comparison_config["label_column"]],
         }
-        if (comparison_config["last_modified"]["jupiter"] is not None):
-            comparison_output.update( {"jupiter_updated_at": row["updated_at"]} )
-        if (comparison_config["last_modified"]["dspace"] is not None):
-            comparison_output.update( {"dspace_lastModified": row["lastModified"]} )
+        if comparison_config["last_modified"]["jupiter"] is not None:
+            comparison_output.update({"jupiter_updated_at": row["updated_at"]})
+        if comparison_config["last_modified"]["dspace"] is not None:
+            comparison_output.update({"dspace_lastModified": row["lastModified"]})
         comparison_output.update(
             process_row(row, comparison_config["comparison_types"])
         )

@@ -256,8 +256,10 @@ def main():
 
     try:
         dspace_client.authenticate()
-    except Exception as e:
-        logging.error("Authentication error, check credentials and VPN (if applicable) [%s]", e)
+    except TypeError as e:
+        logging.error(
+            "Authentication error, check credentials and VPN (if applicable) [%s]", e
+        )
         sys.exit(1)
 
     pathlib.Path(os.path.dirname(args.output)).mkdir(parents=True, exist_ok=True)

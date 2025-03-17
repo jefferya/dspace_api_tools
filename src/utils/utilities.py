@@ -433,7 +433,9 @@ def flatten_json(json_obj, flattened_schema, prefix=""):
         elif isinstance(value, list):
             for i, item in enumerate(value):
                 if item is not None:
-                    flat_dict.update(flatten_json(item, flattened_schema, f"{prefix}{key}.{i}."))
+                    flat_dict.update(
+                        flatten_json(item, flattened_schema, f"{prefix}{key}.{i}.")
+                    )
         else:
             flat_key = f"{prefix}{key}"
             if flat_key in flattened_schema:

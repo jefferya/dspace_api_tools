@@ -211,3 +211,26 @@ def test_input_process_bitstream_valid(tmp_path):
     assert output_df["sequence"][1] == "PASS"
     assert output_df["parent_item_id"][1] == "PASS"
     assert output_df["parent_item_name"][1] == "PASS"
+
+
+def test_input_process_item_valid(tmp_path):
+    """
+    Test process_input for a Item with valid data
+    """
+    comparison_config = compare.collection_columns_to_compare
+    jupiter_input = "src/tests/assets/jupiter_item.csv"
+    dspace_input = "src/tests/assets/dspace_item.csv"
+    tmp_file = tmp_path / "output.csv"
+
+    with open(tmp_file, "wt", encoding="utf-8", newline="") as output_file:
+        compare.process_input(
+            jupiter_input,
+            dspace_input,
+            output_file,
+            comparison_config,
+        )
+
+    output_df = pandas.read_csv(tmp_file)
+    assert output_df["name"][0] == "PASS"
+    assert output_df["description"][0] == "PASS"
+    assert output_df["dc.title"][0] == "PASS"
