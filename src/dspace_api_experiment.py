@@ -147,6 +147,9 @@ def process_bitstreams(dspace_client, output_file):
         for bundle in bundles:
             bitstreams = dspace_client.get_bitstreams(bundle=bundle)
             for bitstream in bitstreams:
+                logging.info("%s (%s)", bitstream.name, item.uuid)
+                logging.debug("%s", bitstream.to_json_pretty())
+                logging.debug("%s", bundle.to_json_pretty())
                 tmp_dict = {
                     "item.handle": item.handle,
                     "item.id": item.id,
@@ -251,9 +254,11 @@ def main():
 
     check_required_env_vars()
 
-    if not dspace_client.authenticate():
-        logging.error("Authentication error, exiting")
-        sys.exit()
+    try:
+        dspace_client.authenticate()
+    except Exception as e:
+        logging.error("Authentication error, check credentials and VPN (if applicable) [%s]", e)
+        sys.exit(1)
 
     pathlib.Path(os.path.dirname(args.output)).mkdir(parents=True, exist_ok=True)
     with open(args.output, "wt", encoding="utf-8", newline="") as output_file:

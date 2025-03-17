@@ -94,6 +94,7 @@ def string_compare_ignore_whitespace(str1, str2):
 community_columns_to_compare = {
     "index_columns": {"jupiter": "title", "dspace": "name"},
     "label_column": "name",
+    "last_modified": {"jupiter": "updated_at", "dspace": "lastModified"},
     "comparison_types": {
         "name": {
             "columns": {"jupiter": "title", "dspace": "name"},
@@ -133,6 +134,7 @@ community_columns_to_compare = {
 collection_columns_to_compare = {
     "index_columns": {"jupiter": "id", "dspace": "provenance.ual.jupiterId.collection"},
     "label_column": "name",
+    "last_modified": {"jupiter": "updated_at", "dspace": "lastModified"},
     "comparison_types": {
         "name": {
             "columns": {"jupiter": "title", "dspace": "name"},
@@ -177,6 +179,7 @@ bitstream_columns_to_compare = {
         "dspace": ["provenance.ual.jupiterId.item", "bitstream.sequenceId"],
     },
     "label_column": "item.name",
+    "last_modified": {"jupiter": "created_at", "dspace": None},
     "comparison_types": {
         "name": {
             "columns": {"jupiter": "filename", "dspace": "bitstream.name"},
@@ -223,6 +226,7 @@ bitstream_columns_to_compare = {
 item_columns_to_compare = {
     "index_columns": {"jupiter": "id", "dspace": "provenance.ual.jupiterId.item"},
     "label_column": "name",
+    "last_modified": {"jupiter": "updated_at", "dspace": "lastModified"},
     "comparison_types": {
         "name": {
             "columns": {"jupiter": "title", "dspace": "name"},
@@ -284,7 +288,7 @@ def process_input(
         comparison_config["index_columns"]["dspace"], inplace=True, drop=False
     )
 
-    # Outer join to keep all rows from both dataframesif missing from one or the other.
+    # Outer join to keep all rows from both dataframes if missing from one or the other.
     # NAN if missing
     # If the dataframes have the same column names, the suffixes are added to the column names
     aligned_df = jupiter_df.join(
@@ -293,7 +297,7 @@ def process_input(
 
     writer = csv.DictWriter(
         output_file,
-        fieldnames=["index (empty if no ERA obj)", "label"]
+        fieldnames=["index (empty if no ERA obj)", "label", "jupiter_updated_at", "dspace_lastModified"]
         + list(comparison_config["comparison_types"].keys()),
     )
     writer.writeheader()
@@ -304,6 +308,10 @@ def process_input(
             "index (empty if no ERA obj)": index,
             "label": row[comparison_config["label_column"]],
         }
+        if (comparison_config["last_modified"]["jupiter"] is not None):
+            comparison_output.update( {"jupiter_updated_at": row["updated_at"]} )
+        if (comparison_config["last_modified"]["dspace"] is not None):
+            comparison_output.update( {"dspace_lastModified": row["lastModified"]} )
         comparison_output.update(
             process_row(row, comparison_config["comparison_types"])
         )

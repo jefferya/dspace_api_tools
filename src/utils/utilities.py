@@ -500,6 +500,8 @@ def get_provenance_ual_jupiter_community_id(dspace_client, collection):
     """
     parent_community = collection.links["parentCommunity"]["href"]
     r_json = dspace_client.fetch_resource(url=parent_community)
+    # Currently, the parent community doesn't have provenance metadata
+    #   thus use "name"
     return r_json["name"]
 
 

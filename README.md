@@ -36,7 +36,7 @@ The steps to set up a validation run.
 
 1. Use `./jupiter_output_scripts/juptiter_collection_metadata_to_CSV.rb` to export (CSV) Jupiter metadata
 2. Use `./dspace_api_experiment.py` to export (CSV) DSpace metadata
-3. Use `compare_csv.py` supplying the output from steps 1 & 2 to output a CSV file with the validation results (tweak comparison configuration as required).
+3. Use `compare_csv.py` supplying the output from steps 1 & 2 as input, a join and comparison function outputs a CSV file with the validation results. FYI: the join is an outer join which includes null matches in either input file in the output; tweak comparison configuration as required.
 
     ```bash
 
