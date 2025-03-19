@@ -1,2 +1,2 @@
-title,description,id,updated_at
-Test,Test description,123456789.1,9999-01-02T03:04:05Z
+title,description,id,updated_at,community_id
+Test,Test description,123456789.1,9999-01-02T03:04:05Z,abcdef

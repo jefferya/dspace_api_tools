@@ -420,6 +420,15 @@ CSV_FLATTENED_HEADERS = {
     ],
 }
 
+fields_deconstruct_to_list_of_values = ["dc.contributor.author"]
+
+
+def deconstruct_list_of_dicts_to_list_of_values(list_of_dicts):
+    """
+    Destruct a list of dictionaries to a list of values
+    """
+    return [item["value"] for item in list_of_dicts]
+
 
 def flatten_json(json_obj, flattened_schema, prefix=""):
     """
@@ -428,8 +437,11 @@ def flatten_json(json_obj, flattened_schema, prefix=""):
     """
     flat_dict = {}
     for key, value in json_obj.items():
+        flat_key = f"{prefix}{key}"
         if isinstance(value, dict):
             flat_dict.update(flatten_json(value, flattened_schema, f"{prefix}{key}."))
+        elif isinstance(value, list) and key in fields_deconstruct_to_list_of_values:
+            flat_dict[flat_key] = deconstruct_list_of_dicts_to_list_of_values(value)
         elif isinstance(value, list):
             for i, item in enumerate(value):
                 if item is not None:
@@ -437,7 +449,6 @@ def flatten_json(json_obj, flattened_schema, prefix=""):
                         flatten_json(item, flattened_schema, f"{prefix}{key}.{i}.")
                     )
         else:
-            flat_key = f"{prefix}{key}"
             if flat_key in flattened_schema:
                 flat_dict[flat_key] = value
             else:

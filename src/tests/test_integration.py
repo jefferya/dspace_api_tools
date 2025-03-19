@@ -38,6 +38,17 @@ def test_string_compare_ignore_whitespace():
     assert compare.string_compare_ignore_whitespace(float(), float()) is True
 
 
+def test_member_of_list_compare():
+    """
+    Test member_of_list_compare
+    """
+    assert compare.member_of_list_compare(["a", "b", "c"], ["a", "b", "c"]) is True
+    assert compare.member_of_list_compare([], []) is True
+    assert compare.member_of_list_compare(["a", "b", "c"], ["c", "b", "a"]) is False
+    assert compare.member_of_list_compare(["a", "b", "c"], ["a"]) is False
+    assert compare.member_of_list_compare(["a", "b", "c"], ["1"]) is False
+
+
 def test_input_process_community_valid(tmp_path):
     """
     Test process_input for community with valid data
@@ -217,7 +228,7 @@ def test_input_process_item_valid(tmp_path):
     """
     Test process_input for a Item with valid data
     """
-    comparison_config = compare.collection_columns_to_compare
+    comparison_config = compare.item_columns_to_compare
     jupiter_input = "src/tests/assets/jupiter_item.csv"
     dspace_input = "src/tests/assets/dspace_item.csv"
     tmp_file = tmp_path / "output.csv"

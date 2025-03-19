@@ -84,6 +84,15 @@ def string_compare_ignore_whitespace(str1, str2):
     return ret
 
 
+#
+def member_of_list_compare(list1, list2):
+    """
+    Compare two lists
+    """
+    logging.debug("member_of_list_compare: %s ---- %s", list1, list2)
+    return list1 == list2
+
+
 # Define the columns to compare and how to compare them
 # "index_columns" is the key to use to align the two dataframes
 # "comparison_types" is a dictionary of the columns to compare
@@ -158,6 +167,13 @@ collection_columns_to_compare = {
             "columns": {"jupiter": "title", "dspace": "metadata.dc.title.0.value"},
             "comparison_function": string_compare,
         },
+        "collection_parent_expect_to_fail_due_to_lack_of_community_provenance": {
+            "columns": {
+                "jupiter": "community_id",
+                "dspace": "provenance.ual.jupiterId.community",
+            },
+            "comparison_function": string_compare,
+        },
     },
 }
 
@@ -224,7 +240,7 @@ bitstream_columns_to_compare = {
 # and value is the column name in the respective dataframes.
 # The "comparison_function" is the function to use to compare the two columns
 item_columns_to_compare = {
-    "index_columns": {"jupiter": "id", "dspace": "provenance.ual.jupiterId.item"},
+    "index_columns": {"jupiter": "id", "dspace": "metadata.ual.jupiterId"},
     "label_column": "name",
     "last_modified": {"jupiter": "updated_at", "dspace": "lastModified"},
     "comparison_types": {
@@ -242,6 +258,20 @@ item_columns_to_compare = {
         "dc.title": {
             "columns": {"jupiter": "title", "dspace": "metadata.dc.title.0.value"},
             "comparison_function": string_compare,
+        },
+        "dc.contributors": {
+            "columns": {
+                "jupiter": "creators" "",
+                "dspace": "metadata.dc.contributor.author",
+            },
+            "comparison_function": member_of_list_compare,
+        },
+        "collection_parent": {
+            "columns": {
+                "jupiter": "member_of_paths",
+                "dspace": "metadata.ual.jupiterCollection",
+            },
+            "comparison_function": member_of_list_compare,
         },
     },
 }
