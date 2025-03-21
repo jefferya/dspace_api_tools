@@ -114,3 +114,10 @@ To lint, run:
 ```bash
     nox -s lint
 ```
+
+## Test content
+
+Test file permissions 2025-03-19:
+
+* <http://198.168.187.81:4000/collections/c3c2d7e6-4efa-43f5-8345-0b6aa16d2af9>
+* <https://ualberta-dev.scholaris.ca/collections/f2190650-69ee-4989-a5f9-399251c3314b>

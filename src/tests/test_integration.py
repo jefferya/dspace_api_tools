@@ -244,4 +244,13 @@ def test_input_process_item_valid(tmp_path):
     output_df = pandas.read_csv(tmp_file)
     assert output_df["name"][0] == "PASS"
     assert output_df["description"][0] == "PASS"
+    assert output_df["collection_parent"][0] == "PASS"
     assert output_df["dc.title"][0] == "PASS"
+    assert output_df["dc.contributor.author"][0] == "PASS"
+    assert output_df["dc.contributor.other"][0] == "PASS"
+    assert output_df["dc.language"][0] == "PASS"
+    assert output_df["dc.subject"][0] == "PASS"
+    assert output_df["dc.date.issued"][0] == "PASS"
+    assert output_df["dc.rights"][0] == "PASS"
+    assert output_df["dc.rights.license"][0] == "PASS"
+    assert output_df["dc.type"][0] == "PASS"

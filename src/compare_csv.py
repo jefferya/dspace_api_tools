@@ -16,6 +16,7 @@ venv/bin/python src/compare_csv.py \
 import argparse
 import csv
 import logging
+import json
 import os
 import pathlib
 import re
@@ -91,6 +92,86 @@ def member_of_list_compare(list1, list2):
     """
     logging.debug("member_of_list_compare: %s ---- %s", list1, list2)
     return list1 == list2
+
+
+#
+def collection_parent_compare(list1, list2):
+    """
+    Compare two lists
+    """
+    logging.debug("member_of_list_compare: %s ---- %s", list1, list2)
+    list1_collection_ids = list(
+        path.split("/")[1] for path in json.loads(list1) if path
+    )
+    return list1_collection_ids == json.loads(list2)
+
+
+#
+def language_compare(list1, list2):
+    """
+    Compare two lists of languages with a conversion step
+    Adapted from https://gist.github.com/lagoan/839cf8ce997fa17b529d84776b91cdac
+    """
+
+    easy_language_mapping = {
+        "http://id.loc.gov/vocabulary/iso639-2/eng": "en",
+        "http://id.loc.gov/vocabulary/iso639-2/fre": "fr",
+        "http://id.loc.gov/vocabulary/iso639-2/ger": "de",
+        "http://id.loc.gov/vocabulary/iso639-2/ita": "it",
+        "http://id.loc.gov/vocabulary/iso639-2/jpn": "ja",
+        "http://id.loc.gov/vocabulary/iso639-2/spa": "es",
+        "http://id.loc.gov/vocabulary/iso639-2/zho": "zh",
+        "http://id.loc.gov/vocabulary/iso639-2/ukr": "uk",
+        "http://id.loc.gov/vocabulary/iso639-2/rus": "ru",
+        "http://id.loc.gov/vocabulary/iso639-2/zxx": "No linguistic content",
+        "http://terms.library.ualberta.ca/other": "other",
+    }
+    logging.debug("member_of_list_compare: %s ---- %s", list1, list2)
+    conversion_result = list(
+        easy_language_mapping[language] for language in json.loads(list1) if language
+    )
+    return conversion_result == json.loads(list2)
+
+
+#
+def special_type_compare(row, key, value):
+    """
+    Special type comparision
+    """
+    logging.debug("special_type_compare: [%s] %s ---- %s", key, value, row)
+
+    # Adapted from the original migration
+    # https://gist.github.com/lagoan/839cf8ce997fa17b529d84776b91cdac
+    easy_item_type_mapping = {
+        # Values to check when there are multiple entries
+        "http://purl.org/ontology/bibo/Article": "http://purl.org/coar/resource_type/c_6501",
+        "http://purl.org/ontology/bibo/status#draft": "http://purl.org/coar/version/c_b1a7d7d4d402bcce",
+        "http://vivoweb.org/ontology/core#submitted": "http://purl.org/coar/version/c_71e4c1898caa6e32",
+        # 'http://purl.org/ontology/bibo/Article': 'http://purl.org/coar/resource_type/c_6501',
+        "http://purl.org/ontology/bibo/status#published": "http://purl.org/coar/version/c_970fb48d4fbd8a85",
+        # Values mapped one to one
+        "http://purl.org/ontology/bibo/Book": "http://purl.org/coar/resource_type/c_2f33",
+        "http://purl.org/ontology/bibo/Chapter": "http://purl.org/coar/resource_type/c_3248",
+        "http://purl.org/ontology/bibo/Image": "http://purl.org/coar/resource_type/c_c513",
+        "http://purl.org/ontology/bibo/Report": "http://purl.org/coar/resource_type/c_93fc",
+        "http://terms.library.ualberta.ca/researchMaterial": "http://purl.org/coar/resource_type/c_1843",
+        "http://vivoweb.org/ontology/core#Presentation": "http://purl.org/coar/resource_type/R60J-J5BD",
+        "http://vivoweb.org/ontology/core#ConferencePoster": "http://purl.org/coar/resource_type/c_6670",
+        "http://vivoweb.org/ontology/core#Dataset": "http://purl.org/coar/resource_type/c_ddb1",
+        "http://vivoweb.org/ontology/core#Review": "http://purl.org/coar/resource_type/c_efa0",
+        "http://terms.library.ualberta.ca/learningObject": "http://purl.org/coar/resource_type/c_e059",
+    }
+
+    list1 = [row[value["columns"]["jupiter"][0]]] + json.loads(
+        row[value["columns"]["jupiter"][1]]
+    )
+    # str1 = " ".join(easy_item_type_mapping[type] for type in list1 if type)
+    list1 = list(easy_item_type_mapping[type] for type in list1 if type)
+    list2 = json.loads(row[value["columns"]["dspace"]])
+
+    logging.debug("special_type_compare: %s ---- %s", list1, list2)
+
+    return "PASS" if list1 == list2 else "FAIL"
 
 
 # Define the columns to compare and how to compare them
@@ -239,6 +320,11 @@ bitstream_columns_to_compare = {
 # The columns key is a dictionary with the keys jupiter and dspace
 # and value is the column name in the respective dataframes.
 # The "comparison_function" is the function to use to compare the two columns
+#
+# Item: title, type, languages, author/creator, subjects, created/issued date, license/rights
+# Thesis: title, dissertant, abstract, graduation date, subjects, rights
+# Permissions attached to a bitstream bundle (HAL accessStatus)
+
 item_columns_to_compare = {
     "index_columns": {"jupiter": "id", "dspace": "metadata.ual.jupiterId"},
     "label_column": "name",
@@ -255,24 +341,70 @@ item_columns_to_compare = {
             },
             "comparison_function": string_compare_ignore_whitespace,
         },
+        "collection_parent": {
+            "columns": {
+                "jupiter": "member_of_paths",
+                "dspace": "metadata.ual.jupiterCollection",
+            },
+            "comparison_function": collection_parent_compare,
+        },
         "dc.title": {
             "columns": {"jupiter": "title", "dspace": "metadata.dc.title.0.value"},
             "comparison_function": string_compare,
         },
-        "dc.contributors": {
+        "dc.contributor.author": {
             "columns": {
                 "jupiter": "creators" "",
                 "dspace": "metadata.dc.contributor.author",
             },
             "comparison_function": member_of_list_compare,
         },
-        "collection_parent": {
+        "dc.contributor.other": {
             "columns": {
-                "jupiter": "member_of_paths",
-                "dspace": "metadata.ual.jupiterCollection",
+                "jupiter": "contributors" "",
+                "dspace": "metadata.dc.contributor.other",
             },
             "comparison_function": member_of_list_compare,
         },
+        "dc.type": {
+            "columns": {
+                "jupiter": ["item_type", "publication_status"],
+                "dspace": "metadata.dc.type",
+            },
+            "comparison_function": special_type_compare,
+        },
+        "dc.language": {
+            "columns": {"jupiter": "languages", "dspace": "metadata.dc.language.iso"},
+            "comparison_function": language_compare,
+        },
+        "dc.subject": {
+            "columns": {"jupiter": "subject", "dspace": "metadata.dc.subject"},
+            "comparison_function": member_of_list_compare,
+        },
+        "dc.date.issued": {
+            "columns": {"jupiter": "created", "dspace": "metadata.dc.date.issued"},
+            "comparison_function": string_compare,
+        },
+        "dc.rights": {
+            "columns": {"jupiter": "rights", "dspace": "metadata.dc.rights"},
+            "comparison_function": member_of_list_compare,
+        },
+        "dc.rights.license": {
+            "columns": {"jupiter": "license", "dspace": "metadata.dc.rights.license"},
+            "comparison_function": member_of_list_compare,
+        },
+        # "dissertant": {
+        #    "columns": {"jupiter": "", "dspace": "metadata.dissertant"},
+        #    "comparison_function": string_compare,
+        # },
+        # "abstract": {
+        #     "columns": {"jupiter": "", "dspace": "metadata.dc.abstract"},
+        #     "comparison_function": string_compare,
+        # },
+        # "graduation_date": {
+        #     "columns": {"jupiter": "", "dspace": "metadata.graduation_date"},
+        #     "comparison_function": string_compare,
+        # },
     },
 }
 
@@ -288,7 +420,9 @@ def process_row(row, columns_to_compare):
         dspace_column = f"{value['columns']['dspace']}"
         comparison_function = value["comparison_function"]
 
-        if comparison_function(row[jupiter_column], row[dspace_column]):
+        if key == "dc.type":
+            comparison_output[key] = comparison_function(row, key, value)
+        elif comparison_function(row[jupiter_column], row[dspace_column]):
             comparison_output[key] = "PASS"
         else:
             comparison_output[key] = "FAIL"

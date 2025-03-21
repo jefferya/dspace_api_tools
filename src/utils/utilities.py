@@ -361,6 +361,8 @@ CSV_FLATTENED_HEADERS = {
         "provenance.ual.jupiterId.collection",
         "type",
         "uuid",
+        "metadata.dc.contributor.author",
+        "metadata.dc.contributor.other",
     ],
     "bitstream": [
         "item.handle",
@@ -420,7 +422,11 @@ CSV_FLATTENED_HEADERS = {
     ],
 }
 
-fields_deconstruct_to_list_of_values = ["dc.contributor.author"]
+fields_deconstruct_to_list_of_values = [
+    "dc.contributor.author",
+    "dc.contributor.other",
+    # "provenance.ual.jupiterId.collection",
+]
 
 
 def deconstruct_list_of_dicts_to_list_of_values(list_of_dicts):
@@ -435,6 +441,8 @@ def flatten_json(json_obj, flattened_schema, prefix=""):
     Flatten JSON object in a very naive way for use in a CSV serialization.
     DSpace Items likely require a more complex flattening to generate "useful" output.
     """
+    if isinstance(json_obj, dict) is False:
+        logging.error("Failure to parse [%s] %s", prefix, json_obj)
     flat_dict = {}
     for key, value in json_obj.items():
         flat_key = f"{prefix}{key}"
@@ -444,10 +452,15 @@ def flatten_json(json_obj, flattened_schema, prefix=""):
             flat_dict[flat_key] = deconstruct_list_of_dicts_to_list_of_values(value)
         elif isinstance(value, list):
             for i, item in enumerate(value):
-                if item is not None:
+                if item is not None and isinstance(item, dict):
                     flat_dict.update(
                         flatten_json(item, flattened_schema, f"{prefix}{key}.{i}.")
                     )
+                else:
+                    if flat_key in flattened_schema:
+                        flat_dict.setdefault(flat_key, []).append(item)
+                    else:
+                        logging.error("Key not found in schema: %s", flat_key)
         else:
             if flat_key in flattened_schema:
                 flat_dict[flat_key] = value
@@ -492,7 +505,9 @@ def get_provenance_ual_jupiter_id(dso, key):
     if "dc.provenance" in dso.metadata:
         for provenance in dso.metadata["dc.provenance"]:
             provenance_json = convert_string_to_json(provenance["value"])
-            dc_provenance_ual_jupiter_id = provenance_json.get(key)
+            dc_provenance_ual_jupiter_id = (
+                provenance_json.get(key) if provenance_json else None
+            )
     return dc_provenance_ual_jupiter_id
 
 
