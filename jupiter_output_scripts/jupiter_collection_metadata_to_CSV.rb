@@ -35,6 +35,17 @@ class JupiterCollectionMetadataToCSV < JupiterBasicMetadataToCSV
     @output_file = output_directory + "jupiter_collection_#{@date_time}.csv"
     @instance = Collection 
   end
+  def run
+    raise "Instance not set" unless @instance
+    # Need community label as DSapce doesn't include provanence on Communities
+    headers = @instance.new.decorate.attributes.keys + ["community.title"]
+    CSV.open(@output_file, 'wb', write_headers: true, headers: headers) do |csv|
+      @instance.find_each do |i|
+        community = Community.find(i.community_id)
+        csv << i.decorate.attributes.values + [community.title]
+      end
+    end
+  end
 end
 
 # Jupiter Item metadata 

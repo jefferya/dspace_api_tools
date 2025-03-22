@@ -250,7 +250,7 @@ collection_columns_to_compare = {
         },
         "collection_parent_expect_to_fail_due_to_lack_of_community_provenance": {
             "columns": {
-                "jupiter": "community_id",
+                "jupiter": "community.label",
                 "dspace": "provenance.ual.jupiterId.community",
             },
             "comparison_function": string_compare,
