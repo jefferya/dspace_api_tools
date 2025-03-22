@@ -119,6 +119,7 @@ def process_items(dspace_client, output_file):
             "provenance.ual.jupiterId.collection": utils.get_provenance_ual_jupiter_collection_id(
                 dspace_client, item
             ),
+            "access_rights": utils.get_access_rights(dspace_client, item),
         }
         logging.debug("------ provenance %s", provenance)
         utils.output_writer(item, "item", writer, embbed=provenance)

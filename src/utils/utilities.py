@@ -361,6 +361,7 @@ CSV_FLATTENED_HEADERS = {
         "provenance.ual.jupiterId.collection",
         "type",
         "uuid",
+        "access_rights",
         "metadata.dc.contributor.author",
         "metadata.dc.contributor.other",
     ],
@@ -547,3 +548,12 @@ def get_provenance_ual_jupiter_collection_id(dspace_client, item):
     for c in collections:
         ret.append(get_provenance_ual_jupiter_id(c, "ual.jupiterId.collection"))
     return ret
+
+
+def get_access_rights(dspace_client, item):
+    """
+    Get the access rights assocated with the Item
+    """
+    access_rights_href = item.links["accessStatus"]["href"]
+    r_json = dspace_client.fetch_resource(url=access_rights_href)
+    return r_json["status"]
