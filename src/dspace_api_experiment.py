@@ -44,22 +44,6 @@ def parse_args():
     return parser.parse_args()
 
 
-def check_required_env_vars():
-    """
-    Check if the https://pypi.org/project/dspace-rest-client
-    Environment variables exist
-    """
-    if "DSPACE_API_ENDPOINT" not in os.environ:
-        logging.error("Env Var DSPACE_API_ENDPOINT not set, exiting.")
-        sys.exit()
-    if "DSPACE_API_USERNAME" not in os.environ:
-        logging.error("Env Var DSPACE_API_USERNAME not set, exiting.")
-        sys.exit()
-    if "DSPACE_API_PASSWORD" not in os.environ:
-        logging.error("Env Var DSPACE_API_PASSWORD not set, exiting.")
-        sys.exit()
-
-
 def process_communities(dspace_client, output_file):
     """
     Process communities
@@ -253,7 +237,7 @@ def main():
     # Options: DEBUG, INFO, WARNING, ERROR, CRITICAL
     logging.getLogger().setLevel(log_level)
 
-    check_required_env_vars()
+    utils.check_required_env_vars()
 
     try:
         dspace_client.authenticate()

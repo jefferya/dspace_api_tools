@@ -5,6 +5,7 @@ Script utility functions
 import csv
 import logging
 import json
+import os
 import sys
 
 
@@ -557,3 +558,31 @@ def get_access_rights(dspace_client, item):
     access_rights_href = item.links["accessStatus"]["href"]
     r_json = dspace_client.fetch_resource(url=access_rights_href)
     return r_json["status"]
+
+
+def check_required_env_vars():
+    """
+    Check if the https://pypi.org/project/dspace-rest-client
+    Environment variables exist
+    """
+    if "DSPACE_API_ENDPOINT" not in os.environ:
+        logging.error("Env Var DSPACE_API_ENDPOINT not set, exiting.")
+        sys.exit()
+    if "DSPACE_API_USERNAME" not in os.environ:
+        logging.error("Env Var DSPACE_API_USERNAME not set, exiting.")
+        sys.exit()
+    if "DSPACE_API_PASSWORD" not in os.environ:
+        logging.error("Env Var DSPACE_API_PASSWORD not set, exiting.")
+        sys.exit()
+
+
+# Configure logging
+def configure_logging(logging_level):
+    """
+    Set logging level
+    """
+    log_level = getattr(logging, logging_level.upper(), None)
+    if not isinstance(log_level, int):
+        raise ValueError(f"Invalid log level: {logging_level}")
+    # Options: DEBUG, INFO, WARNING, ERROR, CRITICAL
+    logging.getLogger().setLevel(log_level)
