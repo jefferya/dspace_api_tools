@@ -184,6 +184,7 @@ def special_type_compare(row, key, value):
 community_columns_to_compare = {
     "index_columns": {"jupiter": "title", "dspace": "name"},
     "label_column": "name",
+    "identifier": {"jupiter": "id", "dspace": "uuid"},
     "last_modified": {"jupiter": "updated_at", "dspace": "lastModified"},
     "comparison_types": {
         "name": {
@@ -224,6 +225,7 @@ community_columns_to_compare = {
 collection_columns_to_compare = {
     "index_columns": {"jupiter": "id", "dspace": "provenance.ual.jupiterId.collection"},
     "label_column": "name",
+    "identifier": {"jupiter": "id", "dspace": "uuid"},
     "last_modified": {"jupiter": "updated_at", "dspace": "lastModified"},
     "comparison_types": {
         "name": {
@@ -276,6 +278,7 @@ bitstream_columns_to_compare = {
         "dspace": ["provenance.ual.jupiterId.item", "bitstream.sequenceId"],
     },
     "label_column": "item.name",
+    "identifier": {"jupiter": "provenance.ual.jupiterId.item", "dspace": "item.id"},
     "last_modified": {"jupiter": "created_at", "dspace": None},
     "comparison_types": {
         "name": {
@@ -328,6 +331,7 @@ bitstream_columns_to_compare = {
 item_columns_to_compare = {
     "index_columns": {"jupiter": "id", "dspace": "metadata.ual.jupiterId"},
     "label_column": "name",
+    "identifier": {"jupiter": "id", "dspace": "uuid"},
     "last_modified": {"jupiter": "updated_at", "dspace": "lastModified"},
     "comparison_types": {
         "name": {
@@ -465,6 +469,8 @@ def process_input(
             "label",
             "jupiter_updated_at",
             "dspace_lastModified",
+            "jupiter_id",
+            "dspace_id",
         ]
         + list(comparison_config["comparison_types"].keys()),
     )
@@ -477,9 +483,29 @@ def process_input(
             "label": row[comparison_config["label_column"]],
         }
         if comparison_config["last_modified"]["jupiter"] is not None:
-            comparison_output.update({"jupiter_updated_at": row["updated_at"]})
+            comparison_output.update(
+                {
+                    "jupiter_updated_at": row[
+                        comparison_config["last_modified"]["jupiter"]
+                    ]
+                }
+            )
         if comparison_config["last_modified"]["dspace"] is not None:
-            comparison_output.update({"dspace_lastModified": row["lastModified"]})
+            comparison_output.update(
+                {
+                    "dspace_lastModified": row[
+                        comparison_config["last_modified"]["dspace"]
+                    ]
+                }
+            )
+        if comparison_config["identifier"]["dspace"] is not None:
+            comparison_output.update(
+                {"dspace_id": row[comparison_config["identifier"]["dspace"]]}
+            )
+        if comparison_config["identifier"]["jupiter"] is not None:
+            comparison_output.update(
+                {"jupiter_id": row[comparison_config["identifier"]["dspace"]]}
+            )
         comparison_output.update(
             process_row(row, comparison_config["comparison_types"])
         )
