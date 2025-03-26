@@ -1,9 +1,9 @@
 """
 ##############################################################################################
-# desc: .py:
-#     Experiment with the https://pypi.org/project/dspace-rest-client
-#     to get communities, collections, items from a DSpace instance
-#     and write the output to a file.
+# desc: dspace_api_export.py:
+#     Leverage the https://pypi.org/project/dspace-rest-client
+#     to get communities, collections, items, bitstreams, and use from a DSpace instance
+#     and write the output to a CSV file viat the DSpace API.
 #     https://github.com/the-library-code/dspace-rest-python/blob/main/dspace_rest_client/client.py
 # license: CC0 1.0 Universal (CC0 1.0) Public Domain Dedication
 # date: March 3, 2025
