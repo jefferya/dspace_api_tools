@@ -124,7 +124,7 @@ def process_bitstreams(dspace_client, output_file):
 
         if "ual.jupiterId" in item.metadata:
             ual_jupiterid_item = utils.deconstruct_list_of_dicts_to_a_single_value(
-                item.metadata['ual.jupiterId']
+                item.metadata["ual.jupiterId"]
             )
         else:
             ual_jupiterid_item = None

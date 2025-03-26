@@ -285,11 +285,10 @@ fields_deconstruct_to_list_of_values = [
 
 # Deconstruct the JSON structure from the DSpace API and extract out the values
 # during the JSON flattening into a single value
-# For example 
+# For example
 #
-fields_deconstruct_to_a_single_value = [
-    "ual.jupiterId"
-    ]
+fields_deconstruct_to_a_single_value = ["ual.jupiterId"]
+
 
 def deconstruct_list_of_dicts_to_list_of_values(list_of_dicts):
     """
@@ -302,7 +301,7 @@ def deconstruct_list_of_dicts_to_a_single_value(list_of_dicts):
     """
     Deconstruct a list of dictionaries to a single value
     """
-    return list_of_dicts[0]['value']
+    return list_of_dicts[0]["value"]
 
 
 def deconstruct_list_of_non_dicts_to_list_of_values(
