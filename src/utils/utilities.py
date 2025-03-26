@@ -75,296 +75,82 @@ CSV_FLATTENED_HEADERS = {
         "metadata.dc.description.0.place",
     ],
     "item": [
+        "uuid",
+        "metadata.ual.jupiterId",
         "handle",
         "lastModified",
-        "metadata.dc.contributor.author.0.authority",
-        "metadata.dc.contributor.author.0.confidence",
-        "metadata.dc.contributor.author.0.language",
-        "metadata.dc.contributor.author.0.place",
-        "metadata.dc.contributor.author.0.value",
-        "metadata.dc.contributor.author.1.authority",
-        "metadata.dc.contributor.author.1.confidence",
-        "metadata.dc.contributor.author.1.language",
-        "metadata.dc.contributor.author.1.place",
-        "metadata.dc.contributor.author.1.value",
-        "metadata.dc.contributor.author.2.authority",
-        "metadata.dc.contributor.author.2.confidence",
-        "metadata.dc.contributor.author.2.language",
-        "metadata.dc.contributor.author.2.place",
-        "metadata.dc.contributor.author.2.value",
-        "metadata.dc.contributor.other.0.authority",
-        "metadata.dc.contributor.other.0.confidence",
-        "metadata.dc.contributor.other.0.language",
-        "metadata.dc.contributor.other.0.place",
-        "metadata.dc.contributor.other.0.value",
-        "metadata.dc.contributor.other.1.authority",
-        "metadata.dc.contributor.other.1.confidence",
-        "metadata.dc.contributor.other.1.language",
-        "metadata.dc.contributor.other.1.place",
-        "metadata.dc.contributor.other.1.value",
-        "metadata.dc.contributor.other.2.authority",
-        "metadata.dc.contributor.other.2.confidence",
-        "metadata.dc.contributor.other.2.language",
-        "metadata.dc.contributor.other.2.place",
-        "metadata.dc.contributor.other.2.value",
-        "metadata.dc.coverage.spatial.0.authority",
-        "metadata.dc.coverage.spatial.0.confidence",
-        "metadata.dc.coverage.spatial.0.language",
-        "metadata.dc.coverage.spatial.0.place",
-        "metadata.dc.coverage.spatial.0.value",
-        "metadata.dc.coverage.spatial.1.authority",
-        "metadata.dc.coverage.spatial.1.confidence",
-        "metadata.dc.coverage.spatial.1.language",
-        "metadata.dc.coverage.spatial.1.place",
-        "metadata.dc.coverage.spatial.1.value",
-        "metadata.dc.coverage.spatial.2.authority",
-        "metadata.dc.coverage.spatial.2.confidence",
-        "metadata.dc.coverage.spatial.2.language",
-        "metadata.dc.coverage.spatial.2.place",
-        "metadata.dc.coverage.spatial.2.value",
-        "metadata.dc.coverage.temporal.0.authority",
-        "metadata.dc.coverage.temporal.0.confidence",
-        "metadata.dc.coverage.temporal.0.language",
-        "metadata.dc.coverage.temporal.0.place",
-        "metadata.dc.coverage.temporal.0.value",
-        "metadata.dc.coverage.temporal.1.authority",
-        "metadata.dc.coverage.temporal.1.confidence",
-        "metadata.dc.coverage.temporal.1.language",
-        "metadata.dc.coverage.temporal.1.place",
-        "metadata.dc.coverage.temporal.1.value",
-        "metadata.dc.coverage.temporal.2.authority",
-        "metadata.dc.coverage.temporal.2.confidence",
-        "metadata.dc.coverage.temporal.2.language",
-        "metadata.dc.coverage.temporal.2.place",
-        "metadata.dc.coverage.temporal.2.value",
-        "metadata.dc.date.accessioned.0.authority",
-        "metadata.dc.date.accessioned.0.confidence",
-        "metadata.dc.date.accessioned.0.language",
-        "metadata.dc.date.accessioned.0.place",
-        "metadata.dc.date.accessioned.0.value",
-        "metadata.dc.date.accessioned.1.authority",
-        "metadata.dc.date.accessioned.1.confidence",
-        "metadata.dc.date.accessioned.1.language",
-        "metadata.dc.date.accessioned.1.place",
-        "metadata.dc.date.accessioned.1.value",
-        "metadata.dc.date.available.0.authority",
-        "metadata.dc.date.available.0.confidence",
-        "metadata.dc.date.available.0.language",
-        "metadata.dc.date.available.0.place",
-        "metadata.dc.date.available.0.value",
-        "metadata.dc.date.available.1.authority",
-        "metadata.dc.date.available.1.confidence",
-        "metadata.dc.date.available.1.language",
-        "metadata.dc.date.available.1.place",
-        "metadata.dc.date.available.1.value",
-        "metadata.dc.date.issued.0.authority",
-        "metadata.dc.date.issued.0.confidence",
-        "metadata.dc.date.issued.0.language",
-        "metadata.dc.date.issued.0.place",
-        "metadata.dc.date.issued.0.value",
-        "metadata.dc.description.0.authority",
-        "metadata.dc.description.0.confidence",
-        "metadata.dc.description.0.language",
-        "metadata.dc.description.0.place",
-        "metadata.dc.description.0.value",
-        "metadata.dc.description.provenance.0.authority",
-        "metadata.dc.description.provenance.0.confidence",
-        "metadata.dc.description.provenance.0.language",
-        "metadata.dc.description.provenance.0.place",
-        "metadata.dc.description.provenance.0.value",
-        "metadata.dc.description.provenance.1.authority",
-        "metadata.dc.description.provenance.1.confidence",
-        "metadata.dc.description.provenance.1.language",
-        "metadata.dc.description.provenance.1.place",
-        "metadata.dc.description.provenance.1.value",
-        "metadata.dc.description.provenance.2.authority",
-        "metadata.dc.description.provenance.2.confidence",
-        "metadata.dc.description.provenance.2.language",
-        "metadata.dc.description.provenance.2.place",
-        "metadata.dc.description.provenance.2.value",
-        "metadata.dc.description.provenance.3.authority",
-        "metadata.dc.description.provenance.3.confidence",
-        "metadata.dc.description.provenance.3.language",
-        "metadata.dc.description.provenance.3.place",
-        "metadata.dc.description.provenance.3.value",
-        "metadata.dc.identifier.doi.0.authority",
-        "metadata.dc.identifier.doi.0.confidence",
-        "metadata.dc.identifier.doi.0.language",
-        "metadata.dc.identifier.doi.0.place",
-        "metadata.dc.identifier.doi.0.value",
-        "metadata.dc.identifier.uri.0.authority",
-        "metadata.dc.identifier.uri.0.confidence",
-        "metadata.dc.identifier.uri.0.language",
-        "metadata.dc.identifier.uri.0.place",
-        "metadata.dc.identifier.uri.0.value",
-        "metadata.dc.language.iso.0.authority",
-        "metadata.dc.language.iso.0.confidence",
-        "metadata.dc.language.iso.0.language",
-        "metadata.dc.language.iso.0.place",
-        "metadata.dc.language.iso.0.value",
-        "metadata.dc.language.iso.1.authority",
-        "metadata.dc.language.iso.1.confidence",
-        "metadata.dc.language.iso.1.language",
-        "metadata.dc.language.iso.1.place",
-        "metadata.dc.language.iso.1.value",
-        "metadata.dc.language.iso.2.authority",
-        "metadata.dc.language.iso.2.confidence",
-        "metadata.dc.language.iso.2.language",
-        "metadata.dc.language.iso.2.place",
-        "metadata.dc.language.iso.2.value",
-        "metadata.dc.language.iso.3.authority",
-        "metadata.dc.language.iso.3.confidence",
-        "metadata.dc.language.iso.3.language",
-        "metadata.dc.language.iso.3.place",
-        "metadata.dc.language.iso.3.value",
-        "metadata.dc.relation.0.authority",
-        "metadata.dc.relation.0.confidence",
-        "metadata.dc.relation.0.language",
-        "metadata.dc.relation.0.place",
-        "metadata.dc.relation.0.value",
-        "metadata.dc.relation.isversionof.0.authority",
-        "metadata.dc.relation.isversionof.0.confidence",
-        "metadata.dc.relation.isversionof.0.language",
-        "metadata.dc.relation.isversionof.0.place",
-        "metadata.dc.relation.isversionof.0.value",
-        "metadata.dc.relation.isversionof.1.authority",
-        "metadata.dc.relation.isversionof.1.confidence",
-        "metadata.dc.relation.isversionof.1.language",
-        "metadata.dc.relation.isversionof.1.place",
-        "metadata.dc.relation.isversionof.1.value",
-        "metadata.dc.relation.isversionof.2.authority",
-        "metadata.dc.relation.isversionof.2.confidence",
-        "metadata.dc.relation.isversionof.2.language",
-        "metadata.dc.relation.isversionof.2.place",
-        "metadata.dc.relation.isversionof.2.value",
-        "metadata.dc.rights.0.authority",
-        "metadata.dc.rights.0.confidence",
-        "metadata.dc.rights.0.language",
-        "metadata.dc.rights.0.place",
-        "metadata.dc.rights.0.value",
-        "metadata.dc.rights.license.0.authority",
-        "metadata.dc.rights.license.0.confidence",
-        "metadata.dc.rights.license.0.language",
-        "metadata.dc.rights.license.0.place",
-        "metadata.dc.rights.license.0.value",
-        "metadata.dc.subject.0.authority",
-        "metadata.dc.subject.0.confidence",
-        "metadata.dc.subject.0.language",
-        "metadata.dc.subject.0.place",
-        "metadata.dc.subject.0.value",
-        "metadata.dc.subject.1.authority",
-        "metadata.dc.subject.1.confidence",
-        "metadata.dc.subject.1.language",
-        "metadata.dc.subject.1.place",
-        "metadata.dc.subject.1.value",
-        "metadata.dc.subject.2.authority",
-        "metadata.dc.subject.2.confidence",
-        "metadata.dc.subject.2.language",
-        "metadata.dc.subject.2.place",
-        "metadata.dc.subject.2.value",
-        "metadata.dcterms.accessRights.0.authority",
-        "metadata.dcterms.accessRights.0.confidence",
-        "metadata.dcterms.accessRights.0.language",
-        "metadata.dcterms.accessRights.0.place",
-        "metadata.dcterms.accessRights.0.value",
-        "metadata.dcterms.source.0.authority",
-        "metadata.dcterms.source.0.confidence",
-        "metadata.dcterms.source.0.language",
-        "metadata.dcterms.source.0.place",
-        "metadata.dcterms.source.0.value",
-        "metadata.dc.title.0.authority",
-        "metadata.dc.title.0.confidence",
-        "metadata.dc.title.0.language",
-        "metadata.dc.title.0.place",
-        "metadata.dc.title.0.value",
-        "metadata.dc.title.alternative.0.authority",
-        "metadata.dc.title.alternative.0.confidence",
-        "metadata.dc.title.alternative.0.language",
-        "metadata.dc.title.alternative.0.place",
-        "metadata.dc.title.alternative.0.value",
-        "metadata.dc.type.0.authority",
-        "metadata.dc.type.0.confidence",
-        "metadata.dc.type.0.language",
-        "metadata.dc.type.0.place",
-        "metadata.dc.type.0.value",
-        "metadata.local.embargo.lift.0.authority",
-        "metadata.local.embargo.lift.0.confidence",
-        "metadata.local.embargo.lift.0.language",
-        "metadata.local.embargo.lift.0.place",
-        "metadata.local.embargo.lift.0.value",
-        "metadata.local.embargo.terms.0.authority",
-        "metadata.local.embargo.terms.0.confidence",
-        "metadata.local.embargo.terms.0.language",
-        "metadata.local.embargo.terms.0.place",
-        "metadata.local.embargo.terms.0.value",
-        "metadata.ual.date.createdInERA.0.authority",
-        "metadata.ual.date.createdInERA.0.confidence",
-        "metadata.ual.date.createdInERA.0.language",
-        "metadata.ual.date.createdInERA.0.place",
-        "metadata.ual.date.createdInERA.0.value",
-        "metadata.ual.date.createdInJupiter.0.authority",
-        "metadata.ual.date.createdInJupiter.0.confidence",
-        "metadata.ual.date.createdInJupiter.0.language",
-        "metadata.ual.date.createdInJupiter.0.place",
-        "metadata.ual.date.createdInJupiter.0.value",
-        "metadata.ual.date.updatedInJupiter.0.authority",
-        "metadata.ual.date.updatedInJupiter.0.confidence",
-        "metadata.ual.date.updatedInJupiter.0.language",
-        "metadata.ual.date.updatedInJupiter.0.place",
-        "metadata.ual.date.updatedInJupiter.0.value",
-        "metadata.ual.jupiterCollection.0.authority",
-        "metadata.ual.jupiterCollection.0.confidence",
-        "metadata.ual.jupiterCollection.0.language",
-        "metadata.ual.jupiterCollection.0.place",
-        "metadata.ual.jupiterCollection.0.value",
-        "metadata.ual.jupiterFilename.0.authority",
-        "metadata.ual.jupiterFilename.0.confidence",
-        "metadata.ual.jupiterFilename.0.language",
-        "metadata.ual.jupiterFilename.0.place",
-        "metadata.ual.jupiterFilename.0.value",
-        "metadata.ual.jupiterFilename.1.authority",
-        "metadata.ual.jupiterFilename.1.confidence",
-        "metadata.ual.jupiterFilename.1.language",
-        "metadata.ual.jupiterFilename.1.place",
-        "metadata.ual.jupiterFilename.1.value",
-        "metadata.ual.jupiterFilename.2.authority",
-        "metadata.ual.jupiterFilename.2.confidence",
-        "metadata.ual.jupiterFilename.2.language",
-        "metadata.ual.jupiterFilename.2.place",
-        "metadata.ual.jupiterFilename.2.value",
-        "metadata.ual.jupiterId.0.authority",
-        "metadata.ual.jupiterId.0.confidence",
-        "metadata.ual.jupiterId.0.language",
-        "metadata.ual.jupiterId.0.place",
-        "metadata.ual.jupiterId.0.value",
-        "metadata.ual.jupiterThumbnail.0.authority",
-        "metadata.ual.jupiterThumbnail.0.confidence",
-        "metadata.ual.jupiterThumbnail.0.language",
-        "metadata.ual.jupiterThumbnail.0.place",
-        "metadata.ual.jupiterThumbnail.0.value",
-        "metadata.ual.owner.0.authority",
-        "metadata.ual.owner.0.confidence",
-        "metadata.ual.owner.0.language",
-        "metadata.ual.owner.0.place",
-        "metadata.ual.owner.0.value",
-        "metadata.ual.stats.jupiterDownloads.0.authority",
-        "metadata.ual.stats.jupiterDownloads.0.confidence",
-        "metadata.ual.stats.jupiterDownloads.0.language",
-        "metadata.ual.stats.jupiterDownloads.0.place",
-        "metadata.ual.stats.jupiterDownloads.0.value",
-        "metadata.ual.stats.jupiterViews.0.authority",
-        "metadata.ual.stats.jupiterViews.0.confidence",
-        "metadata.ual.stats.jupiterViews.0.language",
-        "metadata.ual.stats.jupiterViews.0.place",
-        "metadata.ual.stats.jupiterViews.0.value",
         "name",
         "provenance.ual.jupiterId.item",
         "provenance.ual.jupiterId.collection",
         "type",
-        "uuid",
         "access_rights",
+        "metadata.dc.contributor",
         "metadata.dc.contributor.author",
+        "metadata.dc.contributor.advisor",
         "metadata.dc.contributor.other",
+        "metadata.dc.coverage.spatial",
+        "metadata.dc.coverage.temporal",
+        "metadata.dc.creator",
+        "metadata.dc.date.accessioned",
+        "metadata.dc.date.available",
+        "metadata.dc.date.created",
+        "metadata.dc.date.issued",
+        "metadata.dc.description",
+        "metadata.dc.description.abstract",
+        "metadata.dc.description.provenance",
+        "metadata.dc.description.sponsorship",
+        "metadata.dc.identifier.citation",
+        "metadata.dc.identifier.govdoc",
+        "metadata.dc.identifier.isbn",
+        "metadata.dc.identifier.ismn",
+        "metadata.dc.identifier.issn",
+        "metadata.dc.identifier.other",
+        "metadata.dc.identifier.doi",
+        "metadata.dc.identifier.uri",
+        "metadata.dc.language",
+        "metadata.dc.language.iso",
+        "metadata.dc.publisher",
+        "metadata.dc.relation",
+        "metadata.dc.relation.isversionof",
+        "metadata.dc.relation.ispartof",
+        "metadata.dc.relation.ispartofseries",
+        "metadata.dc.rights",
+        "metadata.dc.rights.license",
+        "metadata.dc.source",
+        "metadata.dc.subject",
+        "metadata.dc.title",
+        "metadata.dc.title.alternative",
+        "metadata.dc.type",
+        "metadata.dcterms.accessRights",
+        "metadata.dcterms.available",
+        "metadata.dcterms.source",
+        "metadata.dspace.entity.type",
+        "metadata.local.embargo.lift",
+        "metadata.local.embargo.terms",
+        "metadata.person.email",
+        "metadata.person.familyName",
+        "metadata.person.givenName",
+        "metadata.relation.isAuthorOfPublication",
+        "metadata.relation.isAuthorOfPublication.latestForDiscovery",
+        "metadata.relation.isPublicationOfAuthor",
+        "metadata.relation.isPublicationOfAuthor.latestForDiscovery",
+        "metadata.ual.date.createdInERA",
+        "metadata.ual.date.createdInJupiter",
+        "metadata.ual.date.updatedInJupiter",
+        "metadata.ual.depositor",
+        "metadata.ual.fedora3Handle",
+        "metadata.ual.fedora3UUID",
+        "metadata.ual.jupiterCollection",
+        "metadata.ual.jupiterFilename",
+        "metadata.ual.jupiterId",
+        "metadata.ual.jupiterThumbnail",
+        "metadata.ual.hydraNoid",
+        "metadata.ual.ingestBatch",
+        "metadata.ual.owner",
+        "metadata.ual.recordCreatedInJupiter",
+        "metadata.ual.sortYear",
+        "metadata.ual.stats.jupiterDownloads",
+        "metadata.ual.stats.jupiterViews",
     ],
     "bitstream": [
         "item.handle",
@@ -424,18 +210,118 @@ CSV_FLATTENED_HEADERS = {
     ],
 }
 
+# Deconstruct the JSON structure from the DSpace API and extract out the values
+# during the JSON flattening into a list of values
+#
 fields_deconstruct_to_list_of_values = [
+    "dc.contributor",
+    "dc.contributor.advisor",
     "dc.contributor.author",
     "dc.contributor.other",
+    "dc.coverage.spatial",
+    "dc.coverage.temporal",
+    "dc.creator",
+    "dc.date.accessioned",
+    "dc.date.available",
+    "dc.date.created",
+    "dc.date.issued",
+    "dc.description",
+    "dc.description.abstract",
+    "dc.description.provenance",
+    "dc.description.sponsorship",
+    "dc.identifier.citation",
+    "dc.identifier.govdoc",
+    "dc.identifier.isbn",
+    "dc.identifier.ismn",
+    "dc.identifier.issn",
+    "dc.identifier.other",
+    "dc.identifier.doi",
+    "dc.identifier.uri",
+    "dc.language",
+    "dc.language.iso",
+    "dc.publisher",
+    "dc.relation",
+    "dc.relation.isversionof",
+    "dc.relation.ispartof",
+    "dc.relation.ispartofseries",
+    "dc.rights",
+    "dc.rights.license",
+    "dc.source",
+    "dc.subject",
+    "dc.title",
+    "dc.title.alternative",
+    "dc.type",
+    "dcterms.accessRights",
+    "dcterms.available",
+    "dcterms.source",
+    "dspace.entity.type",
+    "local.embargo.lift",
+    "local.embargo.terms",
+    "person.email",
+    "person.familyName",
+    "person.givenName",
+    "relation.isAuthorOfPublication",
+    "relation.isAuthorOfPublication.latestForDiscovery",
+    "relation.isPublicationOfAuthor",
+    "relation.isPublicationOfAuthor.latestForDiscovery",
+    "ual.date.createdInERA",
+    "ual.date.createdInJupiter",
+    "ual.date.updatedInJupiter",
+    "ual.depositor",
+    "ual.fedora3Handle",
+    "ual.fedora3UUID",
+    "ual.jupiterCollection",
+    "ual.jupiterFilename",
+    "ual.jupiterThumbnail",
+    "ual.hydraNoid",
+    "ual.ingestBatch",
+    "ual.owner",
+    "ual.recordCreatedInJupiter",
+    "ual.sortYear",
+    "ual.stats.jupiterDownloads",
+    "ual.stats.jupiterViews",
     # "provenance.ual.jupiterId.collection",
 ]
 
+# Deconstruct the JSON structure from the DSpace API and extract out the values
+# during the JSON flattening into a single value
+# For example 
+#
+fields_deconstruct_to_a_single_value = [
+    "ual.jupiterId"
+    ]
 
 def deconstruct_list_of_dicts_to_list_of_values(list_of_dicts):
     """
-    Destruct a list of dictionaries to a list of values
+    Deconstruct a list of dictionaries to a list of values
     """
     return [item["value"] for item in list_of_dicts]
+
+
+def deconstruct_list_of_dicts_to_a_single_value(list_of_dicts):
+    """
+    Deconstruct a list of dictionaries to a single value
+    """
+    return list_of_dicts[0]['value']
+
+
+def deconstruct_list_of_non_dicts_to_list_of_values(
+    value, flat_dict, flat_key, flattened_schema
+):
+    """
+    Deconstruct a list of non-dict structures into a list of values
+    """
+    for i, item in enumerate(value):
+        if item is not None and isinstance(item, dict):
+            flat_dict.update(flatten_json(item, flattened_schema, f"{flat_key}.{i}."))
+        else:
+            if flat_key in flattened_schema:
+                flat_dict.setdefault(flat_key, []).append(item)
+            else:
+                if (
+                    flat_key.startswith(tuple(fields_deconstruct_to_list_of_values))
+                ) is False:
+                    logging.info("Key not found in schema [list]: %s", flat_key)
 
 
 def flatten_json(json_obj, flattened_schema, prefix=""):
@@ -450,24 +336,25 @@ def flatten_json(json_obj, flattened_schema, prefix=""):
         flat_key = f"{prefix}{key}"
         if isinstance(value, dict):
             flat_dict.update(flatten_json(value, flattened_schema, f"{prefix}{key}."))
+        elif isinstance(value, list) and key in fields_deconstruct_to_a_single_value:
+            flat_dict[flat_key] = deconstruct_list_of_dicts_to_a_single_value(value)
+            logging.debug(
+                "Deconstructed list of dict: %s - %s", flat_key, flat_dict[flat_key]
+            )
         elif isinstance(value, list) and key in fields_deconstruct_to_list_of_values:
             flat_dict[flat_key] = deconstruct_list_of_dicts_to_list_of_values(value)
+            logging.debug(
+                "Deconstructed list of dict: %s - %s", flat_key, flat_dict[flat_key]
+            )
         elif isinstance(value, list):
-            for i, item in enumerate(value):
-                if item is not None and isinstance(item, dict):
-                    flat_dict.update(
-                        flatten_json(item, flattened_schema, f"{prefix}{key}.{i}.")
-                    )
-                else:
-                    if flat_key in flattened_schema:
-                        flat_dict.setdefault(flat_key, []).append(item)
-                    else:
-                        logging.error("Key not found in schema: %s", flat_key)
+            deconstruct_list_of_non_dicts_to_list_of_values(
+                value, flat_dict, flat_key, flattened_schema
+            )
         else:
             if flat_key in flattened_schema:
                 flat_dict[flat_key] = value
             else:
-                logging.error("Key not found in schema: %s", flat_key)
+                logging.info("Key not found in schema [not list member]: %s", flat_key)
 
     return flat_dict
 
@@ -506,10 +393,11 @@ def get_provenance_ual_jupiter_id(dso, key):
     dc_provenance_ual_jupiter_id = None
     if "dc.provenance" in dso.metadata:
         for provenance in dso.metadata["dc.provenance"]:
-            provenance_json = convert_string_to_json(provenance["value"])
-            dc_provenance_ual_jupiter_id = (
-                provenance_json.get(key) if provenance_json else None
-            )
+            if provenance["value"] != "":
+                provenance_json = convert_string_to_json(provenance["value"])
+                dc_provenance_ual_jupiter_id = (
+                    provenance_json.get(key) if provenance_json else None
+                )
     return dc_provenance_ual_jupiter_id
 
 
@@ -520,7 +408,7 @@ def convert_string_to_json(string):
     try:
         return json.loads(string)
     except json.JSONDecodeError as e:
-        logging.error("Error decoding JSON string: %s", e)
+        logging.error("Error decoding JSON string: [%s] error %s", string, e)
         return None
 
 

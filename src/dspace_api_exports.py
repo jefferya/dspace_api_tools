@@ -122,9 +122,9 @@ def process_bitstreams(dspace_client, output_file):
         if count % 5000 == 0:
             dspace_client.refresh_token()
 
-        if "dc.provenance" in item.metadata:
-            ual_jupiterid_item = utils.get_provenance_ual_jupiter_id(
-                item, "ual.jupiterId.item"
+        if "ual.jupiterId" in item.metadata:
+            ual_jupiterid_item = utils.deconstruct_list_of_dicts_to_a_single_value(
+                item.metadata['ual.jupiterId']
             )
         else:
             ual_jupiterid_item = None
