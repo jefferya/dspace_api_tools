@@ -1,12 +1,12 @@
 """
 ##############################################################################################
-# desc: .py:
-#     Experiment with the https://pypi.org/project/dspace-rest-client
+# desc: delete_via_api.py:
+#     Test https://pypi.org/project/dspace-rest-client
 #     to delete communities, collections, items from a DSpace instance
 #     and write the output to a file.
 #     https://github.com/the-library-code/dspace-rest-python/blob/main/dspace_rest_client/client.py
 # license: CC0 1.0 Universal (CC0 1.0) Public Domain Dedication
-# date: March 3, 2025
+# date: March 24, 2025
 ##############################################################################################
 """
 
