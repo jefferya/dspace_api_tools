@@ -35,7 +35,7 @@ Setup
 The steps to set up a validation run.
 
 1. Use `./jupiter_output_scripts/juptiter_collection_metadata_to_CSV.rb` to export (CSV) Jupiter metadata
-2. Use `./dspace_api_experiment.py` to export (CSV) DSpace metadata
+2. Use `./dspace_api_export.py` to export (CSV) DSpace metadata
 3. Use `compare_csv.py` supplying the output from steps 1 & 2 as input, a join and comparison function outputs a CSV file with the validation results. FYI: the join is an outer join which includes null matches in either input file in the output; tweak comparison configuration as required.
 
     ```bash
@@ -64,7 +64,7 @@ The steps to set up a validation run.
 
 4. Review the results for PASS/FAIL notices on the validated columns.
 
-## dspace_api_experiment.py
+## dspace_api_export.py
 
 Test exporting content from the DSpace API using <https://pypi.org/project/dspace-rest-client>.
 
@@ -87,7 +87,7 @@ export DSPACE_API_PASSWORD=''
 Run Python from the virtual environment (see Python Virtual Environment documentation for details). One method:
 
 ```bash
-./venv/bin/python3 src/dspace_api_experiment.py \
+./venv/bin/python3 src/dspace_api_export.py \
     --output /tmp/z.log \
     --logging_level ERROR \
     --dso_type communities
