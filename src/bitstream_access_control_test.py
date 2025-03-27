@@ -98,8 +98,7 @@ def process(csv_reader, csv_writer, web_driver, id_field, root_url):
 
         try:
             # Wait until dynamic page rendering completed
-            # wait = WebDriverWait(web_driver, 30)
-            wait = WebDriverWait(web_driver, 1)
+            wait = WebDriverWait(web_driver, 30)
             # Check that the Download links are present
             # element = wait.until(EC.presence_of_element_located((By.XPATH, "//ds-file-download-link")))
             elements = wait.until(
