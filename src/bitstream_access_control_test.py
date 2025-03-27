@@ -93,7 +93,7 @@ def process(csv_reader, csv_writer, web_driver, id_field, root_url):
     """
 
     for row in csv_reader:
-        logging.info(row[id_field])
+        logging.info("Item id: %s", row[id_field])
 
         url = get_url(root_url, row[id_field])
         web_driver.get(url)
@@ -102,7 +102,7 @@ def process(csv_reader, csv_writer, web_driver, id_field, root_url):
 
         try:
             # Wait until dynamic page rendering completed
-            wait = WebDriverWait(web_driver, 30)
+            wait = WebDriverWait(web_driver, 60)
             # Check that the Download links are present
             # element = wait.until(EC.presence_of_element_located((By.XPATH, "//ds-file-download-link")))
             elements = wait.until(
@@ -114,7 +114,7 @@ def process(csv_reader, csv_writer, web_driver, id_field, root_url):
             for element in elements:
                 # logging.info("Download element rendered [%s]", element.text)
                 # logging.info("Download element rendered [%s]", dir(element))
-                logging.info(
+                logging.debug(
                     "Download element rendered [%s]", element.get_attribute("outerHTML")
                 )
                 span_list = element.find_elements(By.XPATH, "a/span[@aria-label]")
@@ -123,7 +123,8 @@ def process(csv_reader, csv_writer, web_driver, id_field, root_url):
                 bitstream_url = a_list[0].get_attribute("href") if a_list else ""
 
                 logging.info(
-                    "Bitstream id[%s] access restrictions[%s] url[%s]",
+                    "    %s: [%s] access restrictions[%s] url[%s]",
+                    id_field,
                     row[id_field],
                     access,
                     bitstream_url,
@@ -136,16 +137,18 @@ def process(csv_reader, csv_writer, web_driver, id_field, root_url):
             logging.debug(web_driver.page_source)
         except NoSuchElementException as e:
             logging.info(
-                "Element not exist: id[%s] [%s]", row[id_field], e.__class__.__name__
+                " Element does not exist: id[%s] [%s]", row[id_field], e.__class__.__name__
             )
             csv_writer.writerow(
                 populate_result(row[id_field], note=f"{e.__class__.__name__}")
             )
         except TimeoutException as e:
-            logging.info("Timeout: id[%s] [%s]", row[id_field], e.__class__.__name__)
-            csv_writer.writerow(
-                populate_result(row[id_field], note=f"{e.__class__.__name__}")
-            )
+            # Two causes: page unavailable or no files to download on the page (e.g., a password protected item)
+            # add logic to handle the two cases (note: complicated by dynamically generated HTML)
+            check_login = web_driver.find_elements(By.XPATH, "//input[@data-test='password']")
+            note = "Password required to view item" if check_login else e.__class__.__name__
+            logging.info("  Timeout: id[%s] [%s]", row[id_field], note)
+            csv_writer.writerow(populate_result(row[id_field], note=note))
 
 
 #

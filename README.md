@@ -118,6 +118,7 @@ The steps to set up a validation run.
       * access_restriction column: if blank, no access restriction
       * bitstream_url: if contains "request-a-copy" in the URL then there is an access restriction
       * note: if not empty then there was a failure to load the page or the URL contains no bitstreams
+        * TimeoutException can mean that a login prompt was detected or that the site couldn't load
 
 ## dspace_api_export.py
 
