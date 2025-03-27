@@ -85,7 +85,8 @@ def populate_result(identifier="", bitstream_url="", access="", note=""):
         "note": f"{note}",
     }
 
-def check_for_bitstreams(wait, web_driver):
+
+def check_for_bitstreams(wait):
     """
     After trying to access the DSpace Item as an anonymous user the expected result is
     a dynamically generated HTML page with a list of bitstreams
@@ -98,6 +99,7 @@ def check_for_bitstreams(wait, web_driver):
         )
     )
 
+
 def process_bitstreams(bitstreams, csv_writer, id_field, row):
     """
     Process each bitstream and add details to the CSV output
@@ -107,7 +109,8 @@ def process_bitstreams(bitstreams, csv_writer, id_field, row):
         # logging.info("Download element rendered [%s]", bitstream_element.text)
         # logging.info("Download element rendered [%s]", dir(bitstream_element))
         logging.debug(
-            "Download element rendered [%s]", bitstream_element.get_attribute("outerHTML")
+            "Download element rendered [%s]",
+            bitstream_element.get_attribute("outerHTML"),
         )
         span_list = bitstream_element.find_elements(By.XPATH, "a/span[@aria-label]")
         access = span_list[0].get_attribute("aria-label") if span_list else ""
@@ -122,9 +125,7 @@ def process_bitstreams(bitstreams, csv_writer, id_field, row):
             bitstream_url,
         )
 
-        csv_writer.writerow(
-            populate_result(row[id_field], bitstream_url, access)
-        )
+        csv_writer.writerow(populate_result(row[id_field], bitstream_url, access))
 
 
 def check_for_login_prompt(web_driver):
@@ -133,6 +134,7 @@ def check_for_login_prompt(web_driver):
     the dynamic HTML redirects to a login screen
     """
     return web_driver.find_elements(By.XPATH, "//input[@data-test='password']")
+
 
 #
 def process(csv_reader, csv_writer, web_driver, id_field, root_url):
@@ -153,7 +155,7 @@ def process(csv_reader, csv_writer, web_driver, id_field, root_url):
             wait = WebDriverWait(web_driver, 60)
 
             # Test if there are bitsreams on the page
-            bitstreams = check_for_bitstreams(wait, web_driver)
+            bitstreams = check_for_bitstreams(wait)
 
             # Process bitstreams and add check results to the CSV
             process_bitstreams(bitstreams, csv_writer, id_field, row)
@@ -161,7 +163,9 @@ def process(csv_reader, csv_writer, web_driver, id_field, root_url):
             logging.debug(web_driver.page_source)
         except NoSuchElementException as e:
             logging.info(
-                " Element does not exist: id[%s] [%s]", row[id_field], e.__class__.__name__
+                " Element does not exist: id[%s] [%s]",
+                row[id_field],
+                e.__class__.__name__,
             )
             csv_writer.writerow(
                 populate_result(row[id_field], note=f"{e.__class__.__name__}")
@@ -169,8 +173,12 @@ def process(csv_reader, csv_writer, web_driver, id_field, root_url):
         except TimeoutException as e:
             # Two causes: page unavailable or no files to download on the page (e.g., a password protected item)
             # add logic to handle the two cases (note: complicated by dynamically generated HTML)
-            check_login = check_for_login_prompt(web_driver) 
-            note = "Password required to view item" if check_login else e.__class__.__name__
+            check_login = check_for_login_prompt(web_driver)
+            note = (
+                "Password required to view item"
+                if check_login
+                else e.__class__.__name__
+            )
             logging.info("  Timeout: id[%s] [%s]", row[id_field], note)
             csv_writer.writerow(populate_result(row[id_field], note=note))
 
@@ -187,9 +195,13 @@ def main():
 
     web_options = Options()
     web_options.add_argument("--headless")
-    # web_options.add_argument("--disable-gpu")
+    web_options.add_argument("--disable-gpu")
     web_options.add_argument("--window-size=1920,1080")
     web_options.add_argument("--no-sandbox")
+    web_options.add_argument("--disable-extensions")
+    web_options.add_experimental_option(
+        "prefs", {"profile.managed_default_content_settings.images": 2}
+    )
     web_options.timeout = {"script": 30000}
     web_driver = webdriver.Chrome(options=web_options)
 
