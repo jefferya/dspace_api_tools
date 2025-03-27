@@ -56,6 +56,12 @@ def parse_args():
         default="http://localhost:4000",
     )
     parser.add_argument(
+        "--timeout",
+        required=False,
+        help="The timeout to test for bitstreams (sec).",
+        default="5",
+    )
+    parser.add_argument(
         "--logging_level", required=False, help="Logging level.", default="INFO"
     )
 
@@ -137,38 +143,38 @@ def check_for_login_prompt(web_driver):
 
 
 #
-def process(csv_reader, csv_writer, web_driver, id_field, root_url):
+def process(csv_reader, csv_writer, web_driver, args):
     """
     Process CSV rows and call DSpace delete
     """
 
     for row in csv_reader:
-        logging.info("Item id: %s", row[id_field])
+        logging.info("Item id: %s", row[args.id_field])
 
-        url = get_url(root_url, row[id_field])
+        url = get_url(args.root_url, row[args.id_field])
         web_driver.get(url)
 
         logging.debug(web_driver.page_source)
 
         try:
             # Wait until dynamic page rendering completed
-            wait = WebDriverWait(web_driver, 60)
+            wait = WebDriverWait(web_driver, args.timeout)
 
             # Test if there are bitsreams on the page
             bitstreams = check_for_bitstreams(wait)
 
             # Process bitstreams and add check results to the CSV
-            process_bitstreams(bitstreams, csv_writer, id_field, row)
+            process_bitstreams(bitstreams, csv_writer, args.id_field, row)
 
             logging.debug(web_driver.page_source)
         except NoSuchElementException as e:
             logging.info(
                 " Element does not exist: id[%s] [%s]",
-                row[id_field],
+                row[args.id_field],
                 e.__class__.__name__,
             )
             csv_writer.writerow(
-                populate_result(row[id_field], note=f"{e.__class__.__name__}")
+                populate_result(row[args.id_field], note=f"{e.__class__.__name__}")
             )
         except TimeoutException as e:
             # Two causes: page unavailable or no files to download on the page (e.g., a password protected item)
@@ -179,8 +185,8 @@ def process(csv_reader, csv_writer, web_driver, id_field, root_url):
                 if check_login
                 else e.__class__.__name__
             )
-            logging.info("  Timeout: id[%s] [%s]", row[id_field], note)
-            csv_writer.writerow(populate_result(row[id_field], note=note))
+            logging.info("  Timeout: id[%s] [%s]", row[args.id_field], note)
+            csv_writer.writerow(populate_result(row[args.id_field], note=note))
 
 
 #
@@ -212,7 +218,7 @@ def main():
         with open(args.output, "w", encoding="utf-8", newline="") as output_file:
             csv_writer = csv.DictWriter(output_file, fieldnames=output_header)
             csv_writer.writeheader()
-            process(csv_reader, csv_writer, web_driver, args.id_field, args.root_url)
+            process(csv_reader, csv_writer, web_driver, args)
 
     web_driver.quit()
 
