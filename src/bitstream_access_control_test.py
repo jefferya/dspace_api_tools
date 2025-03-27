@@ -85,6 +85,54 @@ def populate_result(identifier="", bitstream_url="", access="", note=""):
         "note": f"{note}",
     }
 
+def check_for_bitstreams(wait, web_driver):
+    """
+    After trying to access the DSpace Item as an anonymous user the expected result is
+    a dynamically generated HTML page with a list of bitstreams
+    """
+    # Check that the Download links are present
+    # element = wait.until(EC.presence_of_element_located((By.XPATH, "//ds-file-download-link")))
+    return wait.until(
+        lambda web_driver: web_driver.find_elements(
+            By.XPATH, "//ds-file-download-link[descendant::a/@href]"
+        )
+    )
+
+def process_bitstreams(bitstreams, csv_writer, id_field, row):
+    """
+    Process each bitstream and add details to the CSV output
+    """
+
+    for bitstream_element in bitstreams:
+        # logging.info("Download element rendered [%s]", bitstream_element.text)
+        # logging.info("Download element rendered [%s]", dir(bitstream_element))
+        logging.debug(
+            "Download element rendered [%s]", bitstream_element.get_attribute("outerHTML")
+        )
+        span_list = bitstream_element.find_elements(By.XPATH, "a/span[@aria-label]")
+        access = span_list[0].get_attribute("aria-label") if span_list else ""
+        a_list = bitstream_element.find_elements(By.XPATH, "a[@href]")
+        bitstream_url = a_list[0].get_attribute("href") if a_list else ""
+
+        logging.info(
+            "     %s: [%s] access restrictions[%s] url[%s]",
+            id_field,
+            row[id_field],
+            access,
+            bitstream_url,
+        )
+
+        csv_writer.writerow(
+            populate_result(row[id_field], bitstream_url, access)
+        )
+
+
+def check_for_login_prompt(web_driver):
+    """
+    When trying to access a DSpace Item with password protection at the metadata/bitstream level
+    the dynamic HTML redirects to a login screen
+    """
+    return web_driver.find_elements(By.XPATH, "//input[@data-test='password']")
 
 #
 def process(csv_reader, csv_writer, web_driver, id_field, root_url):
@@ -103,36 +151,12 @@ def process(csv_reader, csv_writer, web_driver, id_field, root_url):
         try:
             # Wait until dynamic page rendering completed
             wait = WebDriverWait(web_driver, 60)
-            # Check that the Download links are present
-            # element = wait.until(EC.presence_of_element_located((By.XPATH, "//ds-file-download-link")))
-            elements = wait.until(
-                lambda web_driver: web_driver.find_elements(
-                    By.XPATH, "//ds-file-download-link[descendant::a/@href]"
-                )
-            )
 
-            for element in elements:
-                # logging.info("Download element rendered [%s]", element.text)
-                # logging.info("Download element rendered [%s]", dir(element))
-                logging.debug(
-                    "Download element rendered [%s]", element.get_attribute("outerHTML")
-                )
-                span_list = element.find_elements(By.XPATH, "a/span[@aria-label]")
-                access = span_list[0].get_attribute("aria-label") if span_list else ""
-                a_list = element.find_elements(By.XPATH, "a[@href]")
-                bitstream_url = a_list[0].get_attribute("href") if a_list else ""
+            # Test if there are bitsreams on the page
+            bitstreams = check_for_bitstreams(wait, web_driver)
 
-                logging.info(
-                    "    %s: [%s] access restrictions[%s] url[%s]",
-                    id_field,
-                    row[id_field],
-                    access,
-                    bitstream_url,
-                )
-
-                csv_writer.writerow(
-                    populate_result(row[id_field], bitstream_url, access)
-                )
+            # Process bitstreams and add check results to the CSV
+            process_bitstreams(bitstreams, csv_writer, id_field, row)
 
             logging.debug(web_driver.page_source)
         except NoSuchElementException as e:
@@ -145,7 +169,7 @@ def process(csv_reader, csv_writer, web_driver, id_field, root_url):
         except TimeoutException as e:
             # Two causes: page unavailable or no files to download on the page (e.g., a password protected item)
             # add logic to handle the two cases (note: complicated by dynamically generated HTML)
-            check_login = web_driver.find_elements(By.XPATH, "//input[@data-test='password']")
+            check_login = check_for_login_prompt(web_driver) 
             note = "Password required to view item" if check_login else e.__class__.__name__
             logging.info("  Timeout: id[%s] [%s]", row[id_field], note)
             csv_writer.writerow(populate_result(row[id_field], note=note))
