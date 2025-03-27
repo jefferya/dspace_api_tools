@@ -22,7 +22,7 @@ References for using the DSpace API
   * pytest
   * nox
 
-## Validation
+## Audit steps 
 
 Setup
 
@@ -36,33 +36,88 @@ The steps to set up a validation run.
 
 1. Use `./jupiter_output_scripts/juptiter_collection_metadata_to_CSV.rb` to export (CSV) Jupiter metadata
 2. Use `./dspace_api_export.py` to export (CSV) DSpace metadata
+
+    ```bash
+    # DSpace export: communities
+    ./venv/bin/python3 src/dspace_api_export.py \
+        --output ~/Downloads/scholaris_communities.csv \
+        --logging_level ERROR \
+        --dso_type communities
+
+    # Dspace export: collections 
+    ./venv/bin/python3 src/dspace_api_export.py \
+        --output ~/Downloads/scholaris_collections.csv \
+        --logging_level ERROR \
+        --dso_type collections 
+
+    # DSpace export: items 
+    ./venv/bin/python3 src/dspace_api_export.py \
+        --output ~/Downloads/scholaris_items.csv \
+        --logging_level ERROR \
+        --dso_type items 
+        
+    # DSpace export: bibstreams 
+    ./venv/bin/python3 src/dspace_api_export.py \
+        --output ~/Downloads/scholaris_bitstreams.csv \
+        --logging_level ERROR \
+        --dso_type bitstreams 
+        
+    ```
+
 3. Use `compare_csv.py` supplying the output from steps 1 & 2 as input, a join and comparison function outputs a CSV file with the validation results. FYI: the join is an outer join which includes null matches in either input file in the output; tweak comparison configuration as required.
 
     ```bash
+    # Set environment variables
+    export DSPACE_API_ENDPOINT=https://${SERVER_NAME}/server/api/
+    export DSPACE_API_USERNAME=
+    export DSPACE_API_PASSWORD=''
 
-    # Communities validation results
+    # Communities audit results
     venv/bin/python src/compare_csv.py \
         --input_jupiter ~/Downloads/era_export/jupiter_community_2025-03-06_12-05-19.csv \
         --input_dspace ~/Downloads/scholaris_communities.csv \
-        --output /tmp/communities_validation_$(date +%Y-%m-%d_%H:%M:%S).csv \
+        --output /tmp/migration_audit_communities_$(date +%Y-%m-%d_%H:%M:%S).csv \
         --type communities
 
-    # Collections validation results
+    # Collections audit results
     venv/bin/python src/compare_csv.py \
         --input_jupiter ~/Downloads/era_export/jupiter_collection_2025-03-06_12-08-01.csv \
         --input_dspace ~/Downloads/scholaris_collections.csv \
-        --output /tmp/collections_validation_$(date +%Y-%m-%d_%H:%M:%S).csv \
+        --output /tmp/migration_audit_collections_$(date +%Y-%m-%d_%H:%M:%S).csv \
         --type collections
     
-    # Bitstream validation results
+    # Item audit results
     venv/bin/python src/compare_csv.py \
-        --input_jupiter ~/Downloads/era_export/jupiter_activestorage_2025-03-06_12-08-01.csv \
+        --input_jupiter ~/Downloads/era_export/jupiter_items_2025-03-06_12-08-01.csv \
+        --input_dspace ~/Downloads/scholaris_items.csv \
+        --output /tmp/migration_audit_bitstreams_$(date +%Y-%m-%d_%H:%M:%S).csv \
+        --type bitstreams 
+    
+    # Bitstream audit results
+    venv/bin/python src/compare_csv.py \
+        --input_jupiter ~/Downloads/era_export/jupiter_items_2025-03-06_12-08-01.csv \
         --input_dspace ~/Downloads/scholaris_bitstreams.csv \
-        --output /tmp/bitstreamss_validation_$(date +%Y-%m-%d_%H:%M:%S).csv \
+        --output /tmp/migration_audit_bitstreams_$(date +%Y-%m-%d_%H:%M:%S).csv \
         --type bitstreams 
     ```
 
 4. Review the results for PASS/FAIL notices on the validated columns.
+ 
+5. Audit bitstream access restrictions via the web UI
+
+    ``` bash
+    ./venv/bin/python src/bitstream_access_control_test.py \
+        --input /tmp/x
+        --output /tmp/z
+        --id_field uuid 
+        --root_url ${DSPACE_ROOT_URL} 
+        --logging_level INFO
+    ```
+
+    * Inspect the following
+      * access_restriction column: if blank, no access restriction
+      * bitstream_url: if contains "request-a-copy" in the URL then there is an access restriction
+      * note: if not empty then there was a failure to load the page or the URL contains no bitstreams
 
 ## dspace_api_export.py
 

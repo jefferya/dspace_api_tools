@@ -73,10 +73,14 @@ def get_url(root_url, item_id):
 def populate_result(identifier="", bitstream_url="", access="", note=""):
     """
     Build the dict for populating the CSV output
+    Inspect the following:
+        * access_restriction column: if blank, no access restriction
+        * bitstream_url: if contains "request-a-copy" in the URL then there is an access restriction
+        * note: if not empty then there was a failure to load the page or the URL contains no bitstreams
     """
     return {
         "item_id": f"{identifier}",
-        "bitstream": f"{bitstream_url}",
+        "bitstream_url": f"{bitstream_url}",
         "access_restriction": f"{access}",
         "note": f"{note}",
     }
