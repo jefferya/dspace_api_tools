@@ -1,4 +1,4 @@
-# Ruby irb script to output the metadata of a collection in CSV format
+# Output a set of Jupiter metadata via Ruby irb script to output the metadata in CSV format
 # Usage: irb -r ./juptiter_collection_metadata_to_CSV.rb
 
 class JupiterBasicMetadataToCSV
