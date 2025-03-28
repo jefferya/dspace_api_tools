@@ -2,6 +2,7 @@
 Script utility functions
 """
 
+import ast
 import csv
 import logging
 import json
@@ -407,6 +408,24 @@ def convert_string_to_json(string):
     try:
         return json.loads(string)
     except json.JSONDecodeError as e:
+        logging.error("Error decoding JSON string: [%s] error %s", string, e)
+        return None
+
+
+def convert_string_list_representation_to_list(string):
+    """
+    Convert a string representation of a list (e.g., "['a','b']") to a list
+    """
+    # try:
+    #    return json.loads(string) if isinstance(string, str) and string != '' else []
+    # except json.JSONDecodeError as e:
+    #    logging.error("Error decoding JSON string: [%s] error %s", string, e)
+    #    return None
+    try:
+        return (
+            ast.literal_eval(string) if isinstance(string, str) and string != "" else []
+        )
+    except ValueError as e:
         logging.error("Error decoding JSON string: [%s] error %s", string, e)
         return None
 

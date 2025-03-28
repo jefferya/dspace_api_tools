@@ -16,13 +16,14 @@ venv/bin/python src/compare_csv.py \
 import argparse
 import csv
 import logging
-import json
 import os
 import pathlib
 import re
 import sys
 
 import pandas
+
+from utils import utilities as utils
 
 
 def parse_args():
@@ -63,6 +64,26 @@ def string_compare(str1, str2):
     return str1 == str2
 
 
+#
+def access_rights_compare(str1, str2):
+    """
+    Compare access rights given the following mapping
+    """
+    access_rights = {
+        "http://terms.library.ualberta.ca/public": "open.access",
+        "http://terms.library.ualberta.ca/embargo": "metadata.only",
+        "http://terms.library.ualberta.ca/authenticated": "restricted",
+    }
+
+    logging.debug("%s ---- %s", str1, str2)
+
+    return (
+        str2 == access_rights[str1]
+        if isinstance(str1, str) and str1 in access_rights
+        else False
+    )
+
+
 # Scholaris removes trailing linebreaks
 def string_compare_ignore_whitespace(str1, str2):
     """
@@ -95,15 +116,47 @@ def member_of_list_compare(list1, list2):
 
 
 #
+def value_in_string_list_compare(str1, list2):
+    """
+    compare a simple string to the contents of a list represented as a string
+    """
+    logging.debug("%s ---- %s", str1, list2)
+    list2 = utils.convert_string_list_representation_to_list(list2)
+    logging.debug("%s ---- %s", str1, list2)
+
+    return True if not str1 and not list2 else str1 in list2
+
+
+#
+def string_lists_compare(list1, list2):
+    """
+    compare a the contents of two lists represented as a strings
+    """
+    logging.debug("%s ---- %s", list1, list2)
+    list1 = utils.convert_string_list_representation_to_list(list1)
+    list2 = utils.convert_string_list_representation_to_list(list2)
+    logging.debug("%s ---- %s", list1, list2)
+    return list1 == list2
+
+
+#
 def collection_parent_compare(list1, list2):
     """
     Compare two lists
     """
-    logging.debug("member_of_list_compare: %s ---- %s", list1, list2)
+    logging.debug("%s ---- %s", list1, list2)
+
+    # list 1 is nan if item not in Jupiter
+    list1 = "[]" if isinstance(list1, str) is False else list1
+
     list1_collection_ids = list(
-        path.split("/")[1] for path in json.loads(list1) if path
+        path.split("/")[1]
+        for path in utils.convert_string_to_json(list1)
+        if path and isinstance(list1, str)
     )
-    return list1_collection_ids == json.loads(list2)
+    return list1_collection_ids == utils.convert_string_list_representation_to_list(
+        list2
+    )
 
 
 #
@@ -128,9 +181,11 @@ def language_compare(list1, list2):
     }
     logging.debug("member_of_list_compare: %s ---- %s", list1, list2)
     conversion_result = list(
-        easy_language_mapping[language] for language in json.loads(list1) if language
+        easy_language_mapping[language]
+        for language in utils.convert_string_list_representation_to_list(list1)
+        if language
     )
-    return conversion_result == json.loads(list2)
+    return conversion_result == utils.convert_string_list_representation_to_list(list2)
 
 
 #
@@ -138,7 +193,7 @@ def special_type_compare(row, key, value):
     """
     Special type comparision
     """
-    logging.debug("special_type_compare: [%s] %s ---- %s", key, value, row)
+    logging.debug("special_type_compare: [%s] %s", key, value)
 
     # Adapted from the original migration
     # https://gist.github.com/lagoan/839cf8ce997fa17b529d84776b91cdac
@@ -162,12 +217,26 @@ def special_type_compare(row, key, value):
         "http://terms.library.ualberta.ca/learningObject": "http://purl.org/coar/resource_type/c_e059",
     }
 
-    list1 = [row[value["columns"]["jupiter"][0]]] + json.loads(
-        row[value["columns"]["jupiter"][1]]
+    # nan float if jupiter item not found
+    list1 = (
+        [row[value["columns"]["jupiter"][0]]]
+        if isinstance(row[value["columns"]["jupiter"][0]], str)
+        else []
     )
-    # str1 = " ".join(easy_item_type_mapping[type] for type in list1 if type)
+    if (
+        isinstance(row[value["columns"]["jupiter"][1]], str)
+        and row[value["columns"]["jupiter"][1]]
+    ):
+        list1 = list1 + utils.convert_string_list_representation_to_list(
+            row[value["columns"]["jupiter"][1]]
+        )
+
+    logging.debug("special_type_compare: %s", list1)
+
     list1 = list(easy_item_type_mapping[type] for type in list1 if type)
-    list2 = json.loads(row[value["columns"]["dspace"]])
+    list2 = utils.convert_string_list_representation_to_list(
+        row[value["columns"]["dspace"]]
+    )
 
     logging.debug("special_type_compare: %s ---- %s", list1, list2)
 
@@ -341,7 +410,7 @@ item_columns_to_compare = {
         "description": {
             "columns": {
                 "jupiter": "description",
-                "dspace": "metadata.dc.description.0.value",
+                "dspace": "metadata.dc.description",
             },
             "comparison_function": string_compare_ignore_whitespace,
         },
@@ -353,7 +422,7 @@ item_columns_to_compare = {
             "comparison_function": collection_parent_compare,
         },
         "dc.title": {
-            "columns": {"jupiter": "title", "dspace": "metadata.dc.title.0.value"},
+            "columns": {"jupiter": "title", "dspace": "metadata.dc.title"},
             "comparison_function": string_compare,
         },
         "dc.contributor.author": {
@@ -361,14 +430,14 @@ item_columns_to_compare = {
                 "jupiter": "creators" "",
                 "dspace": "metadata.dc.contributor.author",
             },
-            "comparison_function": member_of_list_compare,
+            "comparison_function": string_lists_compare,
         },
         "dc.contributor.other": {
             "columns": {
                 "jupiter": "contributors" "",
                 "dspace": "metadata.dc.contributor.other",
             },
-            "comparison_function": member_of_list_compare,
+            "comparison_function": string_lists_compare,
         },
         "dc.type": {
             "columns": {
@@ -383,19 +452,19 @@ item_columns_to_compare = {
         },
         "dc.subject": {
             "columns": {"jupiter": "subject", "dspace": "metadata.dc.subject"},
-            "comparison_function": member_of_list_compare,
+            "comparison_function": string_lists_compare,
         },
         "dc.date.issued": {
             "columns": {"jupiter": "created", "dspace": "metadata.dc.date.issued"},
-            "comparison_function": string_compare,
+            "comparison_function": value_in_string_list_compare,
         },
         "dc.rights": {
             "columns": {"jupiter": "rights", "dspace": "metadata.dc.rights"},
-            "comparison_function": member_of_list_compare,
+            "comparison_function": value_in_string_list_compare,
         },
         "dc.rights.license": {
             "columns": {"jupiter": "license", "dspace": "metadata.dc.rights.license"},
-            "comparison_function": member_of_list_compare,
+            "comparison_function": value_in_string_list_compare,
         },
         # "dissertant": {
         #    "columns": {"jupiter": "", "dspace": "metadata.dissertant"},
@@ -409,6 +478,10 @@ item_columns_to_compare = {
         #     "columns": {"jupiter": "", "dspace": "metadata.graduation_date"},
         #     "comparison_function": string_compare,
         # },
+        "access_rights": {
+            "columns": {"jupiter": "visibility", "dspace": "access_rights"},
+            "comparison_function": access_rights_compare,
+        },
     },
 }
 
@@ -424,12 +497,22 @@ def process_row(row, columns_to_compare):
         dspace_column = f"{value['columns']['dspace']}"
         comparison_function = value["comparison_function"]
 
+        logging.debug(
+            "comparison [%s]: jupiter_column [%s] --- dspace_column [%s]",
+            comparison_function.__name__,
+            jupiter_column,
+            dspace_column,
+        )
+
         if key == "dc.type":
             comparison_output[key] = comparison_function(row, key, value)
         elif comparison_function(row[jupiter_column], row[dspace_column]):
             comparison_output[key] = "PASS"
         else:
             comparison_output[key] = "FAIL"
+
+        logging.debug("key: [%s] status:[%s]", key, comparison_output[key])
+
     return comparison_output
 
 
@@ -478,6 +561,9 @@ def process_input(
 
     # Iterate over the rows in the aligned dataframe and compare the columns
     for index, row in aligned_df.iterrows():
+
+        logging.debug("ID [%s]", index)
+
         comparison_output = {
             "index (empty if no ERA obj)": index,
             "label": row[comparison_config["label_column"]],
@@ -509,6 +595,7 @@ def process_input(
         comparison_output.update(
             process_row(row, comparison_config["comparison_types"])
         )
+        logging.debug("output: [%s]", comparison_output)
         writer.writerow(comparison_output)
 
 

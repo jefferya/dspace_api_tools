@@ -256,3 +256,4 @@ def test_input_process_item_valid(tmp_path):
     assert output_df["dc.rights"][0] == "PASS"
     assert output_df["dc.rights.license"][0] == "PASS"
     assert output_df["dc.type"][0] == "PASS"
+    assert output_df["access_rights"][0] == "PASS"
