@@ -180,7 +180,9 @@ def process(csv_reader, csv_writer, web_driver, args):
             # Two causes: page unavailable or no files to download on the page (e.g., a password protected item)
             # add logic to handle the two cases (note: complicated by dynamically generated HTML)
             check_login = check_for_login_prompt(web_driver)
-            access = "Login required to view metadata & bitstreams" if check_login else ""
+            access = (
+                "Login required to view metadata & bitstreams" if check_login else ""
+            )
             logging.info(
                 "  Timeout: id[%s] [%s] [%s]",
                 row[args.id_field],

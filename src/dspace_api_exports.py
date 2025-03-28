@@ -85,7 +85,9 @@ def process_items(dspace_client, output_file):
     Process items
     """
     print("\n\n+++++++++++++++++++")
-    print("\n Items fields only included in output if explictily added to CSV dict header and JSON flattening.\n")
+    print(
+        "\n Items fields only included in output if explictily added to CSV dict header and JSON flattening.\n"
+    )
     print("+++++++++++++++++++\n\n")
     writer = utils.output_init(output_file, "item")
     items = dspace_client.search_objects_iter(query="*:*", dso_type="item")
