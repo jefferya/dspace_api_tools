@@ -22,7 +22,7 @@ References for using the DSpace API
   * pytest
   * nox
 
-## Audit steps 
+## Audit steps
 
 Setup
 
@@ -102,7 +102,7 @@ The steps to set up a validation run.
     ```
 
 4. Review the results for PASS/FAIL notices on the validated columns.
- 
+
 5. Audit bitstream access restrictions via the web UI
 
     ``` bash
