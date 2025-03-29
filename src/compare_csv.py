@@ -417,7 +417,7 @@ item_columns_to_compare = {
         "collection_parent": {
             "columns": {
                 "jupiter": "member_of_paths",
-                "dspace": "metadata.ual.jupiterCollection",
+                "dspace": "provenance.ual.jupiterId.collection",
             },
             "comparison_function": collection_parent_compare,
         },
