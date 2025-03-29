@@ -139,7 +139,7 @@ def process_bitstreams(dspace_client, output_file):
                 logging.debug("%s", bundle.to_json_pretty())
                 tmp_dict = {
                     "item.handle": item.handle,
-                    "item.id": item.id,
+                    "item.uuid": item.uuid,
                     "item.name": item.name,
                     "provenance.ual.jupiterId.item": ual_jupiterid_item,
                     "bundle.name": bundle.name,

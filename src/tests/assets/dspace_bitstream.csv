@@ -1,3 +1,3 @@
-item.handle,item.id,item.name,provenance.ual.jupiterId.item,bitstream.bundleName,bitstream.sizeBytes,bitstream.id,bitstream.name,bitstream.sequenceId,bitstream.checksum.value,bitstream.checksum_algorithm,bitstream.uuid,bitstream.metadata.dc.title.0.value,bitstream.metadata.dc.source.0.value,bitstream.metadata.dc.description.0.value,bundle.name
+item.handle,item.uuid,item.name,provenance.ual.jupiterId.item,bitstream.bundleName,bitstream.sizeBytes,bitstream.id,bitstream.name,bitstream.sequenceId,bitstream.checksum.value,bitstream.checksum_algorithm,bitstream.uuid,bitstream.metadata.dc.title.0.value,bitstream.metadata.dc.source.0.value,bitstream.metadata.dc.description.0.value,bundle.name
 ,1,Test 1,123456789.1,,,,test_1.a.pdf,1,abcdef1,,,,,,
 ,1,Test 1,123456789.1,,,,test_1.b.pdf,2,abcdef2,,,,,,

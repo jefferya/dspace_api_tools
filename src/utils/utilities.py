@@ -155,7 +155,7 @@ CSV_FLATTENED_HEADERS = {
     ],
     "bitstream": [
         "item.handle",
-        "item.id",
+        "item.uuid",
         "item.name",
         "provenance.ual.jupiterId.item",
         "bitstream.bundleName",

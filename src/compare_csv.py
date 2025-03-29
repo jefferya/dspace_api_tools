@@ -347,7 +347,7 @@ bitstream_columns_to_compare = {
         "dspace": ["provenance.ual.jupiterId.item", "bitstream.sequenceId"],
     },
     "label_column": "item.name",
-    "identifier": {"jupiter": "provenance.ual.jupiterId.item", "dspace": "item.id"},
+    "identifier": {"jupiter": "provenance.ual.jupiterId.item", "dspace": "item.uuid"},
     "last_modified": {"jupiter": "created_at", "dspace": None},
     "comparison_types": {
         "name": {
