@@ -60,7 +60,7 @@ def string_compare(str1, str2):
     """
     Compare two strings
     """
-    logging.debug("string_compare: %s ---- %s", str1, str2)
+    logging.debug("%s ---- %s", str1, str2)
     return str1 == str2
 
 
@@ -98,7 +98,7 @@ def string_compare_ignore_whitespace(str1, str2):
     else:
         ret = regex.sub("", str(str1)) == regex.sub("", str(str2))
     logging.debug(
-        "string_compare_ignore_whitespace: %s ---- %s %s",
+        "%s ---- %s %s",
         str(str1),
         str(str2),
         str(ret),
@@ -111,7 +111,7 @@ def member_of_list_compare(list1, list2):
     """
     Compare two lists
     """
-    logging.debug("member_of_list_compare: %s ---- %s", list1, list2)
+    logging.debug("%s ---- %s", list1, list2)
     return list1 == list2
 
 
@@ -147,13 +147,18 @@ def collection_parent_compare(list1, list2):
     logging.debug("%s ---- %s", list1, list2)
 
     # list 1 is nan if item not in Jupiter
-    list1 = "[]" if isinstance(list1, str) is False else list1
+    list1 = "['']" if isinstance(list1, str) is False else list1
+
+    logging.debug("%s ---- %s", list1, list2)
 
     list1_collection_ids = list(
         path.split("/")[1]
         for path in utils.convert_string_to_json(list1)
         if path and isinstance(list1, str)
     )
+
+    logging.debug("%s ---- %s", list1_collection_ids, list2)
+
     return list1_collection_ids == utils.convert_string_list_representation_to_list(
         list2
     )
@@ -179,7 +184,7 @@ def language_compare(list1, list2):
         "http://id.loc.gov/vocabulary/iso639-2/zxx": "No linguistic content",
         "http://terms.library.ualberta.ca/other": "other",
     }
-    logging.debug("member_of_list_compare: %s ---- %s", list1, list2)
+    logging.debug("%s ---- %s", list1, list2)
     conversion_result = list(
         easy_language_mapping[language]
         for language in utils.convert_string_list_representation_to_list(list1)
@@ -347,7 +352,7 @@ bitstream_columns_to_compare = {
         "dspace": ["provenance.ual.jupiterId.item", "bitstream.sequenceId"],
     },
     "label_column": "item.name",
-    "identifier": {"jupiter": "provenance.ual.jupiterId.item", "dspace": "item.uuid"},
+    "identifier": {"jupiter": "item.id", "dspace": "item.uuid"},
     "last_modified": {"jupiter": "created_at", "dspace": None},
     "comparison_types": {
         "name": {
@@ -371,7 +376,7 @@ bitstream_columns_to_compare = {
         "parent_item_id": {
             "columns": {
                 "jupiter": "provenance.ual.jupiterId.item_jupiter",
-                "dspace": "provenance.ual.jupiterId.item_jupiter",
+                "dspace": "provenance.ual.jupiterId.item_dspace",
             },
             "comparison_function": string_compare,
         },
@@ -423,11 +428,11 @@ item_columns_to_compare = {
         },
         "dc.title": {
             "columns": {"jupiter": "title", "dspace": "metadata.dc.title"},
-            "comparison_function": string_compare,
+            "comparison_function": value_in_string_list_compare,
         },
         "dc.contributor.author": {
             "columns": {
-                "jupiter": "creators" "",
+                "jupiter": "creators",
                 "dspace": "metadata.dc.contributor.author",
             },
             "comparison_function": string_lists_compare,
@@ -436,6 +441,13 @@ item_columns_to_compare = {
             "columns": {
                 "jupiter": "contributors" "",
                 "dspace": "metadata.dc.contributor.other",
+            },
+            "comparison_function": string_lists_compare,
+        },
+        "dc.creator": {
+            "columns": {
+                "jupiter": "creators",
+                "dspace": "metadata.dc.creator",
             },
             "comparison_function": string_lists_compare,
         },
@@ -584,13 +596,13 @@ def process_input(
                     ]
                 }
             )
+        if comparison_config["identifier"]["jupiter"] is not None:
+            comparison_output.update(
+                {"jupiter_id": row[comparison_config["identifier"]["jupiter"]]}
+            )
         if comparison_config["identifier"]["dspace"] is not None:
             comparison_output.update(
                 {"dspace_id": row[comparison_config["identifier"]["dspace"]]}
-            )
-        if comparison_config["identifier"]["jupiter"] is not None:
-            comparison_output.update(
-                {"jupiter_id": row[comparison_config["identifier"]["dspace"]]}
             )
         comparison_output.update(
             process_row(row, comparison_config["comparison_types"])

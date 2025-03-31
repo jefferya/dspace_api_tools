@@ -281,6 +281,7 @@ fields_deconstruct_to_list_of_values = [
     "ual.sortYear",
     "ual.stats.jupiterDownloads",
     "ual.stats.jupiterViews",
+    "provenance.ual.jupiterId.item",
     # "provenance.ual.jupiterId.collection",
 ]
 
@@ -301,6 +302,14 @@ def deconstruct_list_of_dicts_to_list_of_values(list_of_dicts):
 def deconstruct_list_of_dicts_to_a_single_value(list_of_dicts):
     """
     Deconstruct a list of dictionaries to a single value
+    Example, we only want the "value":
+        "dc.contributor.author" : [ {
+        "value" : "Item - Test Creator 1",
+        "language" : null,
+        "authority" : null,
+        "confidence" : -1,
+        "place" : 0
+        }
     """
     return list_of_dicts[0]["value"]
 

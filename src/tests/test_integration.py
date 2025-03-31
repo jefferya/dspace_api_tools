@@ -49,6 +49,52 @@ def test_member_of_list_compare():
     assert compare.member_of_list_compare(["a", "b", "c"], ["1"]) is False
 
 
+def test_value_in_string_list_compare():
+    """
+    Given a single value string compare to string representation of a list
+    """
+    assert compare.value_in_string_list_compare("a", "['a']") is True
+    assert compare.value_in_string_list_compare("", "[]") is True
+
+
+def test_string_lists_compare():
+    """
+    compare to string representations of lists
+    """
+    assert compare.string_lists_compare("['a','b']", "['a','b']") is True
+    assert compare.string_lists_compare("['a','b']", "['b','a']") is False
+    assert compare.string_lists_compare("", "[]") is True
+
+
+def test_collection_parent_compare():
+    """
+    Test the Jupiter member_of_path compared to the Scholaris collection id
+    """
+    assert compare.collection_parent_compare('["a/b"]', "['b']") is True
+    assert compare.collection_parent_compare('["a/b"]', "['c']") is False
+    assert compare.collection_parent_compare("[]", "[]") is True
+
+
+def test_language_compare():
+    """
+    Language tests
+    """
+    assert (
+        compare.language_compare(
+            '["http://id.loc.gov/vocabulary/iso639-2/jpn", "http://id.loc.gov/vocabulary/iso639-2/fre"]',
+            "['ja', 'fr']",
+        )
+        is True
+    )
+    assert (
+        compare.language_compare(
+            '["http://id.loc.gov/vocabulary/iso639-2/zxx", "http://id.loc.gov/vocabulary/iso639-2/ukr"]',
+            "['No linguistic content', 'uk']",
+        )
+        is True
+    )
+
+
 def test_input_process_community_valid(tmp_path):
     """
     Test process_input for community with valid data
