@@ -35,6 +35,67 @@ ITEM_SUBSET = [
 'f3678283-1807-4016-90e4-07f5dde4efd3'
 ].freeze
 
+THESIS_SUBSET = [
+'b5815a02-dd7f-4c9a-a69b-717e0c80e432',
+'b1e7fec6-80f8-448f-a9a1-05eeb180eff9',
+'0c22e6da-f19f-45d4-a487-9c9faa7423db',
+'0412e7d4-63f2-4deb-80ba-d1088d46c522',
+'49442413-75c8-400c-905a-ac93084893b9',
+'9001b1c8-74ae-4973-a6a0-ba6b3197b57d',
+'c85ec3eb-8cea-4b1a-b6cc-c88fa22289ba',
+'64d9b5e6-45cf-4d89-bbb4-09315b90165a',
+'a9ea310f-ca87-4529-9471-6110a323f9b3',
+'e50e8980-fa0a-498d-878d-5818fe57c6c5',
+'33e04d11-53bb-495c-a90d-d7a43391ebd4',
+'17dddffb-862e-4cd0-a924-e860cc3879a2',
+'2462ebf1-bc8d-4a27-b16e-323631a5dfea',
+'513af89a-0bd5-490c-9f58-4cb7d2dda91b',
+'28d9417a-4f55-4992-b5a3-b8aa1b1d6794',
+'0ff180ab-8a0e-41ce-bd0e-d01d02b8560c',
+'f977690e-403a-4705-9057-c88fde4efd42',
+'9e0abecd-4517-4db6-9634-a38c61c01390',
+'cf64445a-fcd9-4a62-b462-5e71840c0f08',
+'7b0a5712-9dda-4c8c-80a9-116038848a79',
+'8e3f17b3-f580-497a-893e-73c921112d61',
+'90f4c222-e1f6-4207-87f9-10fc5c771d1f',
+'7e6495ba-099c-45a0-b323-333ff694dcd3',
+'9ba70cda-217c-491a-a959-035067dd5f04',
+'6e23f6dc-8bb3-4f8e-a2f9-e5286cc57525',
+'0584ddf8-7455-4d2f-9ce7-6775cd773e97',
+'fbfc3d80-7ec0-4cc3-b637-0b45d3d27782',
+'749fe821-fe78-4390-a386-994e2f100255',
+'b0fcb068-14f1-4eae-98b2-15e19e906e2e',
+'9fef8dfd-abb0-4285-85cc-d5782be336d7',
+'865f666a-b097-4cd2-b92e-6eedb4383d8a',
+'8248a68a-6fb0-4b77-b9b4-29c004400cb1',
+'1bbc990a-d92e-41e0-83d0-c5725ff36f7d',
+'165cb3c5-5473-4094-945f-e536c5d11b2b',
+'bfd72ccc-b050-4f18-9d4a-c90d68df5a72',
+'492ba2d6-9fc9-4d61-a66a-9c1db4244de7',
+'b5357307-5c61-46a5-a28f-9291fba04a2d',
+'079283f4-3644-4320-8151-a4ffedd2b7c9',
+'87912c01-ceab-4c0b-8a97-e3326ce11b56',
+'5ef01c36-f1e1-4130-9d9d-399be3abdef6',
+'871b07c9-fbac-480e-84a7-bcd972605ac3',
+'fa5aad6d-c5c6-472c-8bdf-8f1c2932ab74',
+'84afc1dc-91bb-4f28-9dc0-1da36ba1ae04',
+'3b31a9f2-2f47-448c-a60f-b04dbf71907c',
+'7c300bd0-a4c5-4562-bcb1-a7643e5abfa6',
+'773d9696-8d70-43a1-888d-d2b18edff78f',
+'612a5863-60c2-4982-be21-c8f59539084b',
+'a9cc825f-f974-4284-ad06-7f81159fa450',
+'af31d209-52f4-4e3f-b481-7129e8db3c7d',
+'3975ecea-e51f-4897-9962-c71d9663dad8',
+'892743c8-8d9a-4fe2-996c-17504f751509',
+'dde1c8ae-c9ef-411f-a8e3-c411f37ab5ea',
+'fc83bb92-bbc6-4cce-9a81-b55f00ad3285',
+'235bc78a-f825-4162-8ab6-489a6c37c833',
+'e4ee653c-21ab-4a18-9802-bd1e1e6488c8',
+'907ac2b1-93a5-4575-bcef-3f65440a7588',
+'553cda41-a3fa-4c6a-a969-f21845297d38',
+'dd1038a1-95de-4ae6-905d-dd0c2c8d7d3f'
+].freeze
+
 #ITEM_SUBSET = [
   #"047630f2-beba-4895-b7da-78c1a0219a92"
 #].freeze
@@ -85,12 +146,27 @@ class JupiterItemMetadataToCSVSubset < JupiterBasicMetadataToCSV
   end
 end
 
+# Subset of Jupiter Thesis metadata 
+class JupiterThesisMetadataToCSVSubset < JupiterBasicMetadataToCSV
+  def initialize(output_directory)
+    super()
+    @date_time = Time.now.strftime("%Y-%m-%d_%H-%M-%S")
+    @output_file = output_directory + "jupiter_thesis_subset_#{@date_time}.csv"
+    @instance = Thesis 
+  end
+  def enumerable
+    THESIS_SUBSET.each do |i|
+      yield @instance.find(i)
+    end
+  end
+end
+
 
 # Juptier Active Storage Blob and Item metadata
-class JupiterActiveStorageBlobMetadataToCSV
+class JupiterItemActiveStorageBlobMetadataToCSV
   def initialize(output_directory)
     @date_time = Time.now.strftime("%Y-%m-%d_%H-%M-%S")
-    @output_file = output_directory + "jupiter_activestorage_#{@date_time}.csv"
+    @output_file = output_directory + "jupiter_item_activestorage_#{@date_time}.csv"
     @instance = Item
   end
   def enumerable
@@ -135,11 +211,26 @@ class JupiterActiveStorageBlobMetadataToCSV
   end
 end
 
-# Subset of Juptier Active Storage Blob and Item metadata
-class JupiterActiveStorageBlobMetadataToCSVSubset < JupiterActiveStorageBlobMetadataToCSV 
+# Subset of Juptier Active Storage Blob and Thesis metadata
+class JupiterItemActiveStorageBlobMetadataToCSVSubset < JupiterItemActiveStorageBlobMetadataToCSV 
   def initialize(output_directory)
     @date_time = Time.now.strftime("%Y-%m-%d_%H-%M-%S")
-    @output_file = output_directory + "jupiter_activestorage_subset_#{@date_time}.csv"
+    @instance = Thesis 
+    @output_file = output_directory + "jupiter_thesis_activestorage_subset_#{@date_time}.csv"
+  end
+  def enumerable
+    THESIS_SUBSET.each do |i|
+      yield @instance.find(i)
+    end
+  end
+end
+
+
+# Subset of Juptier Active Storage Blob and Item metadata
+class JupiterItemActiveStorageBlobMetadataToCSVSubset < JupiterItemActiveStorageBlobMetadataToCSV 
+  def initialize(output_directory)
+    @date_time = Time.now.strftime("%Y-%m-%d_%H-%M-%S")
+    @output_file = output_directory + "jupiter_item_activestorage_subset_#{@date_time}.csv"
     @instance = Item
   end
   def enumerable
@@ -149,10 +240,27 @@ class JupiterActiveStorageBlobMetadataToCSVSubset < JupiterActiveStorageBlobMeta
   end
 end
 
+# Subset of Juptier Active Storage Blob and Thesis metadata
+class JupiterThesisActiveStorageBlobMetadataToCSVSubset < JupiterItemActiveStorageBlobMetadataToCSV 
+  def initialize(output_directory)
+    @date_time = Time.now.strftime("%Y-%m-%d_%H-%M-%S")
+    @output_file = output_directory + "jupiter_thesis_activestorage_subset_#{@date_time}.csv"
+    @instance = Thesis 
+  end
+  def enumerable
+    THESIS_SUBSET.each do |i|
+      yield @instance.find(i)
+    end
+  end
+end
+
+
 #JupiterCommunityMetadataToCSV.new("/era_tmp/delete_me_by_2025-04-15/").run
 #JupiterCollectionMetadataToCSV.new("/era_tmp/delete_me_by_2025-04-15/").run
 #JupiterItemMetadataToCSV.new("/era_tmp/delete_me_by_2025-04-15/").run
 #JupiterActiveStorageBlobMetadataToCSV.new("/era_tmp/delete_me_by_2025-04-15/").run
 
+JupiterThesisMetadataToCSVSubset.new("/tmp/").run
 JupiterItemMetadataToCSVSubset.new("/tmp/").run
-JupiterActiveStorageBlobMetadataToCSVSubset.new("/tmp/").run
+JupiterItemActiveStorageBlobMetadataToCSVSubset.new("/tmp/").run
+JupiterThesisActiveStorageBlobMetadataToCSVSubset.new("/tmp/").run

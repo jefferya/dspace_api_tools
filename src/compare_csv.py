@@ -106,6 +106,19 @@ def string_compare_ignore_whitespace(str1, str2):
     return ret
 
 
+# Scholaris removes trailing linebreaks
+def string_in_list_compare_ignore_whitespace(str1, list2):
+    """
+    Compare a string to a string representation of a list
+    Item description is stored as an list of "things"
+    """
+    logging.debug("%s ---- %s", str1, list2)
+    list2 = utils.convert_string_list_representation_to_list(list2)
+    logging.debug("%s ---- %s", str1, list2)
+
+    return True if not str1 and not list2 else str(str1).strip() in list2
+
+
 #
 def member_of_list_compare(list1, list2):
     """
@@ -147,7 +160,7 @@ def collection_parent_compare(list1, list2):
     logging.debug("%s ---- %s", list1, list2)
 
     # list 1 is nan if item not in Jupiter
-    list1 = "['']" if isinstance(list1, str) is False else list1
+    list1 = '[""]' if isinstance(list1, str) is False else list1
 
     logging.debug("%s ---- %s", list1, list2)
 
@@ -417,7 +430,7 @@ item_columns_to_compare = {
                 "jupiter": "description",
                 "dspace": "metadata.dc.description",
             },
-            "comparison_function": string_compare_ignore_whitespace,
+            "comparison_function": string_in_list_compare_ignore_whitespace,
         },
         "collection_parent": {
             "columns": {
@@ -430,17 +443,10 @@ item_columns_to_compare = {
             "columns": {"jupiter": "title", "dspace": "metadata.dc.title"},
             "comparison_function": value_in_string_list_compare,
         },
-        "dc.contributor.author": {
+        "dc.contributor": {
             "columns": {
-                "jupiter": "creators",
-                "dspace": "metadata.dc.contributor.author",
-            },
-            "comparison_function": string_lists_compare,
-        },
-        "dc.contributor.other": {
-            "columns": {
-                "jupiter": "contributors" "",
-                "dspace": "metadata.dc.contributor.other",
+                "jupiter": "contributors",
+                "dspace": "metadata.dc.contributor",
             },
             "comparison_function": string_lists_compare,
         },
@@ -478,21 +484,49 @@ item_columns_to_compare = {
             "columns": {"jupiter": "license", "dspace": "metadata.dc.rights.license"},
             "comparison_function": value_in_string_list_compare,
         },
-        # "dissertant": {
-        #    "columns": {"jupiter": "", "dspace": "metadata.dissertant"},
-        #    "comparison_function": string_compare,
-        # },
-        # "abstract": {
-        #     "columns": {"jupiter": "", "dspace": "metadata.dc.abstract"},
-        #     "comparison_function": string_compare,
-        # },
-        # "graduation_date": {
-        #     "columns": {"jupiter": "", "dspace": "metadata.graduation_date"},
-        #     "comparison_function": string_compare,
-        # },
+        "abstract": {
+            "columns": {
+                "jupiter": "abstract",
+                "dspace": "metadata.dc.description.abstract",
+            },
+            "comparison_function": string_compare,
+        },
         "access_rights": {
             "columns": {"jupiter": "visibility", "dspace": "access_rights"},
             "comparison_function": access_rights_compare,
+        },
+        # "if_thesis_degree.discipline": {
+        #     "columns": {"jupiter": "", "dspace": "metadata.thesis.degree.discipline"},
+        #     "comparison_function": value_in_string_list_compare,
+        # },
+        "if_thesis_degree.grantor": {
+            "columns": {
+                "jupiter": "institution",
+                "dspace": "metadata.thesis.degree.grantor",
+            },
+            "comparison_function": value_in_string_list_compare,
+        },
+        "if_thesis_degree.level": {
+            "columns": {
+                "jupiter": "thesis_level",
+                "dspace": "metadata.thesis.degree.level",
+            },
+            "comparison_function": value_in_string_list_compare,
+        },
+        "if_thesis_degree.name": {
+            "columns": {"jupiter": "degree", "dspace": "metadata.thesis.degree.name"},
+            "comparison_function": value_in_string_list_compare,
+        },
+        "if_thesis_data.graduation": {
+            "columns": {
+                "jupiter": "graduation_date",
+                "dspace": "metadata.ual.date.graduation",
+            },
+            "comparison_function": value_in_string_list_compare,
+        },
+        "if_thesis_ual.department": {
+            "columns": {"jupiter": "departments", "dspace": "metadata.ual.department"},
+            "comparison_function": value_in_string_list_compare,
         },
     },
 }

@@ -35,7 +35,8 @@ Setup
 The steps to set up a validation run.
 
 1. Use `./jupiter_output_scripts/juptiter_collection_metadata_to_CSV.rb` to export (CSV) Jupiter metadata
-2. Use `./dspace_api_export.py` to export (CSV) DSpace metadata
+2. Use `./combine_jupiter_item_and_thesis.py` to combine the Jupiter Item and Thesis CSV into a singel CSV to ease comparisioin with Scholaris as Scholaris uses a single type to store both using optional field to store thesis related metadata.
+3. Use `./dspace_api_export.py` to export (CSV) DSpace metadata
 
     ```bash
     # DSpace export: communities
@@ -64,7 +65,7 @@ The steps to set up a validation run.
         
     ```
 
-3. Use `compare_csv.py` supplying the output from steps 1 & 2 as input, a join and comparison function outputs a CSV file with the validation results. FYI: the join is an outer join which includes null matches in either input file in the output; tweak comparison configuration as required.
+4. Use `compare_csv.py` supplying the output from steps 1 & 2 as input, a join and comparison function outputs a CSV file with the validation results. FYI: the join is an outer join which includes null matches in either input file in the output; tweak comparison configuration as required.
 
     ```bash
     # Set environment variables
@@ -101,9 +102,9 @@ The steps to set up a validation run.
         --type bitstreams 
     ```
 
-4. Review the results for PASS/FAIL notices on the validated columns.
+5. Review the results for PASS/FAIL notices on the validated columns.
 
-5. Audit bitstream access restrictions via the web UI
+6. Audit bitstream access restrictions via the web UI
 
     ``` bash
     ./venv/bin/python src/bitstream_access_control_test.py \

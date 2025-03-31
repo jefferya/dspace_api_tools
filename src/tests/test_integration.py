@@ -38,6 +38,18 @@ def test_string_compare_ignore_whitespace():
     assert compare.string_compare_ignore_whitespace(float(), float()) is True
 
 
+def test_string_in_list_compare_ignore_whitespace():
+    """
+    Strip trailing and leading whitespace (e.g., description in Jupiter)
+    """
+    assert compare.string_in_list_compare_ignore_whitespace("asdf", "['asdf']") is True
+    assert compare.string_in_list_compare_ignore_whitespace("f ", "['f']") is True
+    # Missing "Nan" in DataFrame, we don't want it to match empty
+    assert (
+        compare.string_in_list_compare_ignore_whitespace(float("NaN"), "['']") is False
+    )
+
+
 def test_member_of_list_compare():
     """
     Test member_of_list_compare
@@ -294,8 +306,7 @@ def test_input_process_item_valid(tmp_path):
     assert output_df["description"][0] == "PASS"
     assert output_df["collection_parent"][0] == "PASS"
     assert output_df["dc.title"][0] == "PASS"
-    assert output_df["dc.contributor.author"][0] == "PASS"
-    assert output_df["dc.contributor.other"][0] == "PASS"
+    assert output_df["dc.contributor"][0] == "PASS"
     assert output_df["dc.language"][0] == "PASS"
     assert output_df["dc.subject"][0] == "PASS"
     assert output_df["dc.date.issued"][0] == "PASS"
