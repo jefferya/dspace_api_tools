@@ -22,6 +22,23 @@ def test_string_compare():
     assert compare.string_compare("", "") is True
 
 
+def test_activestorage_to_dspace_checksum_compare():
+    """
+    Test checksum comparisons
+    """
+    assert compare.activestorage_to_dspace_checksum_compare(
+        "joLf+gnmKnDv4/ZSUQjD9g==",
+        "8e82dffa09e62a70efe3f6525108c3f6"
+    ) is True
+    assert compare.activestorage_to_dspace_checksum_compare(
+        float("NaN"),
+        ""
+    ) is True
+    assert compare.activestorage_to_dspace_checksum_compare(
+        float("NaN"),
+        "8e82dffa09e62a70efe3f6525108c3f6"
+    ) is False 
+
 def test_string_compare_ignore_whitespace():
     """
     Test string_compare_ignore_whitespace: ignore trailing whitespace

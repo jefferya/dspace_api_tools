@@ -49,14 +49,18 @@ def process(input_item, input_thesis, output):
             csv_output = csv.DictWriter(output, fieldnames=combined_headers)
             csv_output.writeheader()
 
+            # For each column name / key in the header, populate a dict
+            # with either the key value in the row or a "" if not present,
+            # for example, a Jupiter Item will not have a thesis_level.
+            # Uses a dictionary comprehension to iterate
             for row in csv_item:
                 csv_output.writerow(
-                    {header: row.get(header, "") for header in combined_headers}
+                    {key: row.get(key, "") for key in combined_headers}
                 )
 
             for row in csv_thesis:
                 csv_output.writerow(
-                    {header: row.get(header, "") for header in combined_headers}
+                    {key: row.get(key, "") for key in combined_headers}
                 )
 
 

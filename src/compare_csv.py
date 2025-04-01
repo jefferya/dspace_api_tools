@@ -14,6 +14,7 @@ venv/bin/python src/compare_csv.py \
 """
 
 import argparse
+import base64
 import csv
 import logging
 import os
@@ -62,6 +63,17 @@ def string_compare(str1, str2):
     """
     logging.debug("%s ---- %s", str1, str2)
     return str1 == str2
+
+
+def activestorage_to_dspace_checksum_compare(str1, str2):
+    """
+    Compare two checksums; Ruby ActiveStorage uses a base63 encoding plus md5 
+    """
+    logging.debug("%s ---- %s", str1, str2)
+    str1_md5_hex = base64.b64decode(str1).hex() if isinstance(str1, str) else ""
+
+    logging.debug("%s ---- %s", str1_md5_hex, str2)
+    return str1_md5_hex == str2
 
 
 #
@@ -377,7 +389,7 @@ bitstream_columns_to_compare = {
                 "jupiter": "checksum",
                 "dspace": "bitstream.checksum.value",
             },
-            "comparison_function": string_compare,
+            "comparison_function": activestorage_to_dspace_checksum_compare,
         },
         "sequence": {
             "columns": {
