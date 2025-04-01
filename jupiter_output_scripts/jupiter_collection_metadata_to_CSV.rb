@@ -13,7 +13,7 @@ class JupiterBasicMetadataToCSV
       @instance.find_each do |i|
         csv << i.decorate.attributes.values
       end
-    end
+    end;
   end
 end
 
@@ -41,9 +41,9 @@ class JupiterCollectionMetadataToCSV < JupiterBasicMetadataToCSV
     headers = @instance.new.decorate.attributes.keys + ["community.title"]
     CSV.open(@output_file, 'wb', write_headers: true, headers: headers) do |csv|
       @instance.find_each do |i|
-        community = Community.find(i.community_id)
+        community = Community.find(i.community_id); nil
         csv << i.decorate.attributes.values + [community.title]
-      end
+      end;
     end
   end
 end
@@ -53,16 +53,28 @@ class JupiterItemMetadataToCSV < JupiterBasicMetadataToCSV
   def initialize(output_directory)
     super()
     @date_time = Time.now.strftime("%Y-%m-%d_%H-%M-%S")
-    @output_file = output_directory + "jupiter_item_#{@date_time}.csv"
     @instance = Item 
+    @output_file = output_directory + "jupiter_#{@instance.name}_#{@date_time}.csv"
   end
 end
 
+# Jupiter Item metadata 
+class JupiterThesisMetadataToCSV < JupiterBasicMetadataToCSV
+  def initialize(output_directory)
+    super()
+    @date_time = Time.now.strftime("%Y-%m-%d_%H-%M-%S")
+    @instance = Thesis 
+    @output_file = output_directory + "jupiter_#{@instance.name}_#{@date_time}.csv"
+  end
+end
+
+
 # Juptier Active Storage Blob and Item metadata
-class JupiterActiveStorageBlobMetadataToCSV
+class JupiterItemActiveStorageBlobMetadataToCSV
   def initialize(output_directory)
     @date_time = Time.now.strftime("%Y-%m-%d_%H-%M-%S")
-    @output_file = output_directory + "jupiter_activestorage_#{@date_time}.csv"
+    @instance = Item 
+    @output_file = output_directory + "jupiter_#{@instance.name}_activestorage_#{@date_time}.csv"
   end
   def run
     # "provenance.ual.jupiterId.item" & "bitstream.sequenceId" labels need to align
@@ -80,9 +92,9 @@ class JupiterActiveStorageBlobMetadataToCSV
                 "checksum",
                 "created_at"] 
     CSV.open(@output_file, 'wb', write_headers: true, headers: headers) do |csv|
-      Item.find_each do |item|
+      @instance.find_each do |item|
         sequence_num = 0
-        item.ordered_files.each do |f|
+          item.ordered_files.each do |f|
           sequence_num += 1
           csv << [item.id,
                   item.title,
@@ -95,13 +107,35 @@ class JupiterActiveStorageBlobMetadataToCSV
                   f.blob.byte_size,
                   f.blob.checksum,
                   f.blob.created_at]
-        end
-      end
+        end; nil
+      end; nil
     end
   end
 end
 
+# Juptier Active Storage Blob and Thesis metadata
+class JupiterThesisActiveStorageBlobMetadataToCSV < JupiterItemActiveStorageBlobMetadataToCSV 
+  def initialize(output_directory)
+    @date_time = Time.now.strftime("%Y-%m-%d_%H-%M-%S")
+    @instance = Thesis 
+    @output_file = output_directory + "jupiter_#{@instance.name}_activestorage_#{@date_time}.csv"
+  end
+end
+
+
+IRB.conf[:INSPECT_MODE] = false
+ActiveRecord::Base.logger = nil
+
+# Community
 JupiterCommunityMetadataToCSV.new("/era_tmp/delete_me_by_2025-04-15/").run
+
+# Collection
 JupiterCollectionMetadataToCSV.new("/era_tmp/delete_me_by_2025-04-15/").run
+
+# Item
 JupiterItemMetadataToCSV.new("/era_tmp/delete_me_by_2025-04-15/").run
-JupiterActiveStorageBlobMetadataToCSV.new("/era_tmp/delete_me_by_2025-04-15/").run
+JupiterItemActiveStorageBlobMetadataToCSV.new("/era_tmp/delete_me_by_2025-04-15/").run
+
+# Thesis
+JupiterThesisMetadataToCSV.new("/era_tmp/delete_me_by_2025-04-15/").run
+JupiterThesisActiveStorageBlobMetadataToCSV.new("/era_tmp/delete_me_by_2025-04-15/").run
