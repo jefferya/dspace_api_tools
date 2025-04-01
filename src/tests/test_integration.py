@@ -57,6 +57,15 @@ def test_string_compare_ignore_whitespace():
     assert compare.string_compare_ignore_whitespace(float(), float()) is True
 
 
+def test_abstract_compare():
+    """
+    Test abstract
+    """
+    assert compare.abstract_compare("a", "['a']") is True
+    assert compare.abstract_compare("a", "['<p>a</p>']") is True
+    assert compare.abstract_compare("a. ", "['<p>a. </p>']") is True
+
+
 def test_string_in_list_compare_ignore_whitespace():
     """
     Strip trailing and leading whitespace (e.g., description in Jupiter)

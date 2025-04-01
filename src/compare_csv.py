@@ -118,6 +118,20 @@ def string_compare_ignore_whitespace(str1, str2):
     return ret
 
 
+#
+def abstract_compare(str1, list2):
+    """
+    Thesis abstract REST API result have <p></p> elements
+    remove from comparison
+    """
+    logging.debug("%s ---- %s", str1, list2)
+    list2 = list2.replace("<p>", "").replace("</p>", "")
+    list2 = utils.convert_string_list_representation_to_list(list2)
+    logging.debug("%s ---- %s", str1, list2)
+
+    return True if not str1 and not list2 else str1 in list2
+
+
 # Scholaris removes trailing linebreaks
 def string_in_list_compare_ignore_whitespace(str1, list2):
     """
@@ -501,7 +515,7 @@ item_columns_to_compare = {
                 "jupiter": "abstract",
                 "dspace": "metadata.dc.description.abstract",
             },
-            "comparison_function": string_compare,
+            "comparison_function": abstract_compare,
         },
         "access_rights": {
             "columns": {"jupiter": "visibility", "dspace": "access_rights"},
