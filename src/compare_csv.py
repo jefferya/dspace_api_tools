@@ -67,7 +67,7 @@ def string_compare(str1, str2):
 
 def activestorage_to_dspace_checksum_compare(str1, str2):
     """
-    Compare two checksums; Ruby ActiveStorage uses a base63 encoding plus md5 
+    Compare two checksums; Ruby ActiveStorage uses a base63 encoding plus md5
     """
     logging.debug("%s ---- %s", str1, str2)
     str1_md5_hex = base64.b64decode(str1).hex() if isinstance(str1, str) else ""
@@ -511,6 +511,27 @@ item_columns_to_compare = {
         #     "columns": {"jupiter": "", "dspace": "metadata.thesis.degree.discipline"},
         #     "comparison_function": value_in_string_list_compare,
         # },
+        "if_thesis_dissertant": {
+            "columns": {
+                "jupiter": "dissertant",
+                "dspace": "metadata.dc.contributor.author",
+            },
+            "comparison_function": value_in_string_list_compare,
+        },
+        "if_thesis_supervisor": {
+            "columns": {
+                "jupiter": "supervisors",
+                "dspace": "metadata.dc.contributor.advisor",
+            },
+            "comparison_function": string_lists_compare,
+        },
+        "if_thesis_committee_members": {
+            "columns": {
+                "jupiter": "committee_members",
+                "dspace": "metadata.dc.contributor.other",
+            },
+            "comparison_function": string_lists_compare,
+        },
         "if_thesis_degree.grantor": {
             "columns": {
                 "jupiter": "institution",

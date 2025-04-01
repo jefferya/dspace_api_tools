@@ -54,14 +54,10 @@ def process(input_item, input_thesis, output):
             # for example, a Jupiter Item will not have a thesis_level.
             # Uses a dictionary comprehension to iterate
             for row in csv_item:
-                csv_output.writerow(
-                    {key: row.get(key, "") for key in combined_headers}
-                )
+                csv_output.writerow({key: row.get(key, "") for key in combined_headers})
 
             for row in csv_thesis:
-                csv_output.writerow(
-                    {key: row.get(key, "") for key in combined_headers}
-                )
+                csv_output.writerow({key: row.get(key, "") for key in combined_headers})
 
 
 #
