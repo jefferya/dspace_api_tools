@@ -22,9 +22,133 @@ References for using the DSpace API
   * pytest
   * nox
 
-## Audit steps
+## Audit
 
-Setup
+One piece of the migration from Jupiter to Scholaris, in particular the validation stage, is a content audit stage. The overview section describes the audit with a following section describing the technical steps to run the audit workflow.
+
+### Audit: Overview
+
+The audit workflow starts with CSV exports of content (i.e., communities, collections, items, thesis, and bitstreams) from both Jupiter and a DSpace instance. An audit or comparison script runs a set of tests and builds a report for human review with potential audit error flagged for further human investigation.
+
+What is content is audited:
+
+* Community
+  * existence
+  * fields (labels from DSpace API): name, description, abstract, title
+
+* Collection
+  * existence
+  * associated to the correct community (by name as DSpace doesn't store legacy community jupiter id)
+  * fields (labels from DSpace API): name, description, abstract, title
+
+* Bitstream 
+  * existence
+  * associated with the correct Item (ID & Name)
+  * correct sequence number
+  * fields (labels from DSpace API): file_name, checksum
+
+* Item
+  * existence
+  * associated with the correct collection
+  * fields: name, description, title, contributor, creator, type, language, subject, date.issued, rights/license, abstract, access_rights, dissertant, supervisor, committee members, degree grantor, degree level, date.graduation, department
+
+A second audit process includes auditing the web UI to determine the access rights of the bitstreams.
+
+### Audit: details
+
+1. Export Jupiter metadata as CSV via [./jupiter_output_scripts/jupiter_collection_metadata_to_CSV](./jupiter_output_scripts/jupiter_collection_metadata_to_CSV)
+    * Export Community, Collection, Item, Thesis, and Bitstream metadata as CSV. Includes special handling for the following types to allow auditing of associations (e.g., collection associated with correct community) :
+        * Collection: include the Community label as Scholaris doesn't retain Community Jupiter provenance
+        * Bitstreams: include Item association information
+
+2. Combine Item and Thesis into a common CSV [./src/combine_juptiter_item_and_thesis.py](./src/combine_jupiter_item_and_thesis.py)
+    * DSpace combines item and thesis into a single data type "Item" thus to ease comparison, item and thesis CSV from Jupiter are combined into a single CSV
+
+3. Export DSpace metadata as CSV from the DSpace REST API [./src/dspace_api_exports.py](./src/dspace_api_exports.py).
+    * Export Community, collection, Item, and Bitstreams and flattens the JSON output into a CSV
+
+4. Content audit  [./src/compare_csv.py](./src/compare_csv.py)
+    * Audit based on a configurable set of named verification steps specific to each type (i.e., Community, Collection, Item, Bitstream) and produce a CSV output summerizing the results. Adding additional steps is highly configurable and may take as little as 10min to add.
+
+5. Bitstream URL audit [./src/bitstream_access_control_test.py](./src/bitstream_access_control_test.py)
+    * Audit a list of URL's as an unauthenicated/anonymous user to determine if the Bitstreams are
+      * reachable
+      * metadata reachable but bitstreams restricted
+      * metadata and bitstreams restricted
+      * or the url is not found
+
+6. Human review of the output of the last two steps
+    * Content audit:
+      * Review the audit summary for "FAIL" messages
+      * Used the following to help diagnose: the Google Sheet contains tabs for the audit output plus the Jupiter and DSpace CSV export used in the audit along with the logging output of the script
+
+#### How to use the audit output
+
+The content audit report will generate a CSV file summarizing the results. If the script is run with `DEBUG` logging level one can gain more insight into the results, if necessary.
+
+The resulting CSV contain three types of columns:
+
+* first column is the index (empty if no ERA object)
+* contextual columns: label, jupiter_updated_at,dspace_lastModified,jupiter_id,dspace_id
+* audit pass/fail column with a header label matching a config entry in `compare_csv.py`
+
+For example, the bitstream audit header:
+
+``` csv
+index (empty if no ERA obj),label,jupiter_updated_at,dspace_lastModified,jupiter_id,dspace_id,name,checksum,sequence,parent_item_id,parent_item_name
+```
+
+``` csv
+"('fc83bb92-bbc6-4cce-9a81-b55f00ad3285', 1)",The Whisper of the Scarlet Buffalo,2018-09-25 23:53:16 UTC,,fc83bb92-bbc6-4cce-9a81-b55f00ad3285,5defda8a-05d7-44db-a650-df028a5dd525,PASS,PASS,PASS,PASS,PASS
+```
+
+I'll import into a Google Sheet to leverage the power of the grid layout
+
+`index` is empty if a thing is not found in Jupiter (e.g., a UI entered, hand-crafted test in Scholaris)
+`dspace_id` is nan/empty if a thing is not found in DSpace (e.g., an ERA item has not been migrated into Scholaris)
+
+
+#### Audit: how to enhance
+
+##### JSON flattening
+
+DSpace API produces JSON. The JSON is flattened into CSV (`flatten_json` method). The `utilities.py` contains a set of methods to flatten the JSON in different ways depending on the key. For example, we only want the "value":
+
+``` python
+        "dc.contributor.author" : [ {
+        "value" : "Item - Test Creator 1",
+        "language" : null,
+        "authority" : null,
+        "confidence" : -1,
+        "place" : 0
+        }
+```
+
+There is list in `utilities.py` that contains the JSON keys to export (`CSV_FLATTENED_HEADERS`) and the JSON keys to deconstruct (`fields_deconstruct_to_list_of_values`) in the above example. If a "key not found" error occurs, then the key needs to be added to `CSV_FLATTENED_HEADERS` and possibily `fields_deconstruct_to_list_of_values`. Also, perhaps a `src/tests/asset` file if a new test is added.
+
+##### How to add new audit cases via config
+
+The content audit is configured and run via `src/compare_csv.py`. For each DSpace data model type, there is a configuration named `${type}_columns_to_compoare` (e.g., bitstreams_columns_to_compoare). Each comparison looks like:
+
+``` python
+"comparison_types": {
+        "name": {
+            "columns": {"jupiter": "filename", "dspace": "bitstream.name"},
+            "comparison_function": string_compare,
+        },
+        "checksum": {
+            "columns": {
+                "jupiter": "checksum",
+                "dspace": "bitstream.checksum.value",
+            },
+            "comparison_function": activestorage_to_dspace_checksum_compare,
+        },
+        ...
+```
+
+where the key (e.g., `name`) is the output CSV column label, the columns determine the Jupiter and DSpace fields to compare and the `comparison_function` determines how the comparison is undertaken. These comparision functions are defined earlier in the script. 
+
+### Audit: Setup and Run
 
 ```bash
     python3 -m venv ./venv/ \
