@@ -472,14 +472,14 @@ item_columns_to_compare = {
         "dc.contributor": {
             "columns": {
                 "jupiter": "contributors",
-                "dspace": "metadata.dc.contributor",
+                "dspace": "metadata.dc.contributor.other",
             },
             "comparison_function": string_lists_compare,
         },
         "dc.creator": {
             "columns": {
                 "jupiter": "creators",
-                "dspace": "metadata.dc.creator",
+                "dspace": "metadata.dc.contributor.author",
             },
             "comparison_function": string_lists_compare,
         },
