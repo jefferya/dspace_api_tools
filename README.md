@@ -163,6 +163,11 @@ The steps to set up a validation run.
 3. Use `./dspace_api_export.py` to export (CSV) DSpace metadata
 
     ```bash
+    # Set environment variables
+    export DSPACE_API_ENDPOINT=https://${SERVER_NAME}/server/api/
+    export DSPACE_API_USERNAME=
+    export DSPACE_API_PASSWORD=''
+
     # DSpace export: communities
     ./venv/bin/python3 src/dspace_api_export.py \
         --output ~/Downloads/scholaris_communities.csv \
@@ -192,10 +197,6 @@ The steps to set up a validation run.
 4. Use `compare_csv.py` supplying the output from steps 1 & 2 as input, a join and comparison function outputs a CSV file with the validation results. FYI: the join is an outer join which includes null matches in either input file in the output; tweak comparison configuration as required.
 
     ```bash
-    # Set environment variables
-    export DSPACE_API_ENDPOINT=https://${SERVER_NAME}/server/api/
-    export DSPACE_API_USERNAME=
-    export DSPACE_API_PASSWORD=''
 
     # Communities audit results
     venv/bin/python src/compare_csv.py \
