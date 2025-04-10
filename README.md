@@ -277,6 +277,24 @@ Run Python from the virtual environment (see Python Virtual Environment document
 
 Where `--dso_type` is `[communities|collections|items|people|bitstreams]`
 
+
+## Jupiter Delta
+
+`jupiter_output_scripts/jupiter_delta.rb`
+
+## Jupiter Statistics to Scholaris
+
+Rough outline
+
+* Generate CSV report of Jupiter statistics, see `jupiter_output_scripts/jupiter_statistics_metadata_to_CSV`
+* Generate CSV report from DSpace, `dsapce_api_exports.py`
+* The quick approach: 
+  * place both CSV reports into separate tabs in a Google Sheet
+  * use XLOOKUP to align based on jupiter ID
+  * add column to that compares the "view"|"download" counts between the two reports (`IF` to add a sortable value in the new column)
+    * optional: change colour if different
+  * add column with Scholaris URL for usability
+
 ## How to Test & Lint
 
 To have the code ready for production, simply run:
