@@ -277,10 +277,63 @@ Run Python from the virtual environment (see Python Virtual Environment document
 
 Where `--dso_type` is `[communities|collections|items|people|bitstreams]`
 
+## Jupiter Delta Report
 
-## Jupiter Delta
+### Jupiter Delta Report: Overview
 
-`jupiter_output_scripts/jupiter_delta.rb`
+Given that not all ERA content can be frozen, a delta report aims to communicate any changes to the ERA content from a specified date until the time the report is run. The report aims to communicate each content change leveraging the same data enabling ERA/Jupiter versions UI. Each change event is recorded as a row in a Google Sheet contain both the changed Jupiter fieldname/value data and the Scholaris mappings for the fieldname/value data.
+
+The assumption is the number of actionable changes is small and a human can leverage the information in the report to
+
+* see that a Jupiter object has changed
+* identify the Scholaris fieldnames to update and the Scholaris value
+
+### Delta Report: How to use
+
+The report can be presented and shared as a Google Doc to allow users to sort, search, modify as needed.
+
+An early example <https://docs.google.com/spreadsheets/d/1GWxwEtM0EOyoPP5RUrf1oQCtIVz1re-8n0Be4Kybt8E/edit?gid=0#gid=0>
+
+The header includes:
+
+```csv
+type,change_id,jupiter_id,is_jupiter_currently_readonly,changed at,event,jupiter delta,scholaris mapped delta,jupiter delta formatted,scholaris mapped delta formatted 
+```
+
+Where:
+
+* type: item|thesis
+* change_id: change event id (PaperTrail::Version ID)
+* jupiter_id: ERA ID
+* is_jupiter_currently_readonly: "true" if the ERA object is currently read only
+* read_only_event: "true" if this change event only updated the read only field and the obj updated at timestamp 
+* changed_at: change event timestamp
+* event: the type of the change record: update|destroy
+* jupiter delta: jupiter change event details (what field plus old => new values)
+* jupiter delta formatted: an easier to read version
+* scholaris mapper: the jupiter delta mapped to Scholaris fieldname and new value equivalents
+* scholaris mapper formatted: an easier to read version
+
+Process thoughts:
+
+* In ERA, changing an object to "read only" creates a new version change event: the read_only_event column that indicated if change event only updates read only status thus allow one to filter/order these events if too numerous
+* Sort by item_id & date ascending: this allows grouping a sequence of updates over time; if the same field changed multiple times then use the most recent.
+* Event "destroy" means the object has been deleted and there will be no Scholaris mapping
+
+Question:
+
+* How best to present such that given a Jupiter on can easily find the Scholaris equivalent.
+
+### Delta Report: How to generate
+
+See script details: `jupiter_output_scripts/jupiter_delta.rb`
+
+Rough outline:
+
+* Needs the Ruby Class used in step 1 of SAF package generation
+* Run `jupiter_output_scripts/jupiter_delta.rb`
+* Upload CSV into Google Docs for Sharing 
+
 
 ## Jupiter Statistics to Scholaris
 
