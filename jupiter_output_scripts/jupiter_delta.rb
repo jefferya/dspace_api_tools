@@ -26,34 +26,43 @@ class ChangesReport
 
   # Based on and try to reuse the mapping methods in the class
   # https://gist.github.com/lagoan/839cf8ce997fa17b529d84776b91cdac#file-export_collections_csv-rb-L181-L196
-  def map_change_event_to_scholaris_item(change_event)
-    #result = CollectionCSVExporter.item_data_row(change_event.item)
-    item = change_event.item.decorate
-    itemTranslation = ItemCSVExporter.new
+  def map_change_event_to_scholaris_item(change_event, obj)
+
     scholaris_mapped_change_event = {} 
-    itemTranslation.easy_dspace_mapping do |method_key, _method_mapping|
-      # keys starting with "manual_" are special cases that need to be handled differently
-      jupiter_key = method_key.sub(/^manual_/,'')
-      # only caputure value if the key exists in the list of object changes in the change event
-      if change_event.object_changes && change_event.object_changes.key?(jupiter_key)
-        value = if method_key.start_with?('manual_')
-                  itemTranslation.handle_manual_value(item, method_key)
-                else
-                  item.send(method_key)
-                end
-        scholaris_mapped_change_event[_method_mapping] = value
-      end
-    end;
+    itemTranslation = ItemCSVExporter.new
+    begin 
+      item = obj.decorate
+      itemTranslation.easy_dspace_mapping do |method_key, _method_mapping|
+        # keys starting with "manual_" are special cases that need to be handled differently
+        jupiter_key = method_key.sub(/^manual_/,'')
+        # only caputure value if the key exists in the list of object changes in the change event
+        if change_event.object_changes && change_event.object_changes.key?(jupiter_key)
+          value = if method_key.start_with?('manual_')
+                    itemTranslation.handle_manual_value(item, method_key)
+                  else
+                    item.send(method_key)
+                  end
+          scholaris_mapped_change_event[_method_mapping] = value
+        end
+      end;
+    rescue NoMethodError
+      puts "Mapping Error on jupiter ID #{change_event.item_id} of type #{change_event.item_type} and event #{change_event.event}"
+    end
     return scholaris_mapped_change_event
   end
 
-  def process_change_event(change_event)
+  def process_change_event(change_event, obj)
 
-    if change_event.item_type == "Thesis"
-    elsif change_event.item_type == "Item"
-      result = map_change_event_to_scholaris_item(change_event)
+    if change_event.event == "destroy"
+      result = {}
     else
-      result = '{"error"}'
+      if change_event.item_type == "Thesis"
+        result = '{"scholaris mapping unsupported"}'
+      elsif change_event.item_type == "Item"
+        result = map_change_event_to_scholaris_item(change_event, obj)
+      else
+        result = '{"error"}'
+      end
     end
 
     # return dictionary of key value pairs
@@ -65,7 +74,7 @@ class ChangesReport
 
   def perform()
     CSV.open(@output_file, 'wb') do |csv|
-      csv << ['type', 'change_id', 'jupiter_id', 'changed at', 'event', 'jupiter delta', 'scholaris mapped delta', 'jupiter delta formatted', 'scholaris mapped delta formatted']
+      csv << ['type', 'change_id', 'jupiter_id', 'is_jupiter_currently_readonly', 'changed at', 'event', 'jupiter delta', 'scholaris mapped delta', 'jupiter delta formatted', 'scholaris mapped delta formatted']
       PaperTrail::Version.where(created_at: @date..).find_each do |row|
         # How to communicate key/value mapping differences from Jupiter to DSpace?
         # First part, add documentation describing how to use the output
@@ -75,8 +84,10 @@ class ChangesReport
         # https://gist.github.com/lagoan/839cf8ce997fa17b529d84776b91cdac#file-export_collections_csv-rb-L181-L196
         # I.e., test if the key exists in the object_changes and creating a new
         # structure in a new column listing the Scholaris key/value pairs to update
-        scholaris_mapping = process_change_event(row)
-        csv << [row.item_type, row.id, row.item_id, row.created_at, row.event, row.object_changes, scholaris_mapping, JSON.pretty_generate(row.object_changes), JSON.pretty_generate(scholaris_mapping)]
+        obj = row.item
+        read_only = "True" if obj && obj.read_only?
+        scholaris_mapping = process_change_event(row, obj)
+        csv << [row.item_type, row.id, row.item_id, read_only, row.created_at, row.event, row.object_changes, scholaris_mapping, JSON.pretty_generate(row.object_changes), JSON.pretty_generate(scholaris_mapping)]
       end
     end
 
@@ -91,4 +102,4 @@ class ChangesReport
 
 end
 
-ChangesReport.new("/tmp/",Date.new(2005, 8, 8)).perform()
+ChangesReport.new("/tmp/",Date.new(2025, 3, 15)).perform()
