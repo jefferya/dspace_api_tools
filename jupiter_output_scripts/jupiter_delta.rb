@@ -74,7 +74,7 @@ class ChangesReport
 
   def perform()
     CSV.open(@output_file, 'wb') do |csv|
-      csv << ['type', 'change_id', 'jupiter_id', 'is_jupiter_currently_readonly', 'changed at', 'event', 'jupiter delta', 'scholaris mapped delta', 'jupiter delta formatted', 'scholaris mapped delta formatted']
+      csv << ['type', 'change_id', 'jupiter_id', 'is_jupiter_currently_readonly', 'read_only_event', 'changed at', 'event', 'jupiter delta', 'scholaris mapped delta', 'jupiter delta formatted', 'scholaris mapped delta formatted']
       PaperTrail::Version.where(created_at: @date..).find_each do |row|
         # How to communicate key/value mapping differences from Jupiter to DSpace?
         # First part, add documentation describing how to use the output
@@ -86,8 +86,9 @@ class ChangesReport
         # structure in a new column listing the Scholaris key/value pairs to update
         obj = row.item
         read_only = "True" if obj && obj.read_only?
+        read_only_event = "True" if row.object_changes && row.object_changes.keys.to_set == ["updated_at", "read_only"].to_set
         scholaris_mapping = process_change_event(row, obj)
-        csv << [row.item_type, row.id, row.item_id, read_only, row.created_at, row.event, row.object_changes, scholaris_mapping, JSON.pretty_generate(row.object_changes), JSON.pretty_generate(scholaris_mapping)]
+        csv << [row.item_type, row.id, row.item_id, read_only, read_only_event, row.created_at, row.event, row.object_changes, scholaris_mapping, JSON.pretty_generate(row.object_changes), JSON.pretty_generate(scholaris_mapping)]
       end
     end
 
