@@ -336,20 +336,24 @@ Process thoughts:
 * Sort by item_id & date ascending: this allows grouping a sequence of updates over time; if the same field changed multiple times then use the most recent.
 * Event "destroy" means the object has been deleted and there will be no Scholaris mapping
 
-Question:
-
-* How best to present such that given a Jupiter on can easily find the Scholaris equivalent.
-
 ### Delta Report: How to generate
 
-See script details: `jupiter_output_scripts/jupiter_delta.rb`
+For Item/Thesis/Collection/Community, see script for details: `jupiter_output_scripts/jupiter_delta.rb`
+
+ Rough outline:
+
+* Needs the Ruby Class used in step 1 of SAF package generation
+  * See `require_relative` in the script to populate Jupiter to Scholaris mappings
+* Set date in script and run `jupiter_output_scripts/jupiter_delta.rb`
+* Upload CSV into Google Docs for Sharing
+
+For the Bitstrams, see script for details: `jupiter_output_scripts/jupiter_delta_bitstreams.rb`
 
 Rough outline:
 
-* Needs the Ruby Class used in step 1 of SAF package generation
-* Run `jupiter_output_scripts/jupiter_delta.rb`
-* Upload CSV into Google Docs for Sharing 
-
+* Find ActivieStorage bitstreams created after given date
+* The list should be the same as `jupiter_delta.rb` as changing the metadata updates ActiveStorage created_at timestamps and there does not appear to be a way to update a bitstream (only create a new and delete the old).
+* Upload CSV into Google Docs for Sharing
 
 ## Jupiter Statistics to Scholaris
 

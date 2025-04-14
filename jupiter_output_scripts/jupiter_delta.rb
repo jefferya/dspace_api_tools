@@ -1,6 +1,8 @@
 # Delta a list of changes on Jupiter after a given date
 # base on https://github.com/ualbertalib/jupiter/pull/3626/files
+#   RAILS_ENV=development bundle exec rails runner jupiter_delta.rb 
 
+require_relative 'helpers/file-export_collections_csv'
 require 'json'
 
 

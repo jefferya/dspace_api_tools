@@ -1,5 +1,7 @@
 # Output a set of Jupiter metadata via Ruby irb script to output the metadata in CSV format
 # Usage: irb -r ./juptiter_collection_metadata_to_CSV.rb
+# Usage: RAILS_ENV=development bundle exec rails runner juptiter_collection_metadata_to_CSV.rb
+
 
 class JupiterBasicMetadataToCSV
   def initialize()
@@ -84,6 +86,7 @@ class JupiterItemActiveStorageBlobMetadataToCSV
                 "item.title",
                 "provenance.ual.jupiterId.item",
                 "bitstream.sequenceId",
+                "fileset_uuid",
                 "key",
                 "filename",
                 "content_type",
@@ -100,6 +103,7 @@ class JupiterItemActiveStorageBlobMetadataToCSV
                   item.title,
                   item.id,
                   sequence_num,
+                  f.fileset_uuid,
                   f.blob.key,
                   f.blob.filename,
                   f.blob.content_type,
