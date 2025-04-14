@@ -64,6 +64,7 @@ def test_abstract_compare():
     assert compare.abstract_compare("a", "['a']") is True
     assert compare.abstract_compare("a", "['<p>a</p>']") is True
     assert compare.abstract_compare("a. ", "['<p>a. </p>']") is True
+    assert compare.abstract_compare(float("NaN"), "['']") is True
 
 
 def test_string_in_list_compare_ignore_whitespace():

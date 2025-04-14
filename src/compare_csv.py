@@ -125,6 +125,8 @@ def abstract_compare(str1, list2):
     remove from comparison
     """
     logging.debug("%s ---- %s", str1, list2)
+    str1 = "" if isinstance(str1, float) else str1
+    list2 = "[]" if isinstance(list2, float) else list2
     list2 = list2.replace("<p>", "").replace("</p>", "")
     list2 = utils.convert_string_list_representation_to_list(list2)
     logging.debug("%s ---- %s", str1, list2)
@@ -307,19 +309,19 @@ community_columns_to_compare = {
         "description": {
             "columns": {
                 "jupiter": "description",
-                "dspace": "metadata.dc.description.0.value",
+                "dspace": "metadata.dc.description",
             },
             "comparison_function": string_compare_ignore_whitespace,
         },
         "abstract": {
             "columns": {
                 "jupiter": "description",
-                "dspace": "metadata.dc.description.abstract.0.value",
+                "dspace": "metadata.dc.description.abstract",
             },
             "comparison_function": string_compare_ignore_whitespace,
         },
         "dc.title": {
-            "columns": {"jupiter": "title", "dspace": "metadata.dc.title.0.value"},
+            "columns": {"jupiter": "title", "dspace": "metadata.dc.title"},
             "comparison_function": string_compare,
         },
     },
@@ -348,24 +350,24 @@ collection_columns_to_compare = {
         "description": {
             "columns": {
                 "jupiter": "description",
-                "dspace": "metadata.dc.description.0.value",
+                "dspace": "metadata.dc.description",
             },
             "comparison_function": string_compare_ignore_whitespace,
         },
         "abstract": {
             "columns": {
                 "jupiter": "description",
-                "dspace": "metadata.dc.description.abstract.0.value",
+                "dspace": "metadata.dc.description.abstract",
             },
             "comparison_function": string_compare_ignore_whitespace,
         },
         "dc.title": {
-            "columns": {"jupiter": "title", "dspace": "metadata.dc.title.0.value"},
+            "columns": {"jupiter": "title", "dspace": "metadata.dc.title"},
             "comparison_function": string_compare,
         },
         "collection_parent_expect_to_fail_due_to_lack_of_community_provenance": {
             "columns": {
-                "jupiter": "community.label",
+                "jupiter": "community.title",
                 "dspace": "provenance.ual.jupiterId.community",
             },
             "comparison_function": string_compare,

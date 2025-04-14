@@ -1,2 +1,2 @@
-uuid,name,metadata.dc.description.0.value,metadata.dc.description.abstract.0.value,metadata.dc.title.0.value,lastModified
+uuid,name,metadata.dc.description,metadata.dc.description.abstract,metadata.dc.title,lastModified
 1234,Test,Test description,Test description,Test,9999-01-02T03:04:05Z
