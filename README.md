@@ -160,7 +160,7 @@ The steps to set up a validation run.
 
 1. Use `./jupiter_output_scripts/juptiter_collection_metadata_to_CSV.rb` to export (CSV) Jupiter metadata
 2. Use `./combine_jupiter_item_and_thesis.py` to combine the Jupiter Item and Thesis CSV into a singel CSV to ease comparisioin with Scholaris as Scholaris uses a single type to store both using optional field to store thesis related metadata.
-3. Use `./dspace_api_export.py` to export (CSV) DSpace metadata
+3. Use `./dspace_api_exports.py` to export (CSV) DSpace metadata
 
     ```bash
     # Set environment variables
@@ -169,25 +169,25 @@ The steps to set up a validation run.
     export DSPACE_API_PASSWORD=''
 
     # DSpace export: communities
-    ./venv/bin/python3 src/dspace_api_export.py \
+    ./venv/bin/python3 src/dspace_api_exports.py \
         --output ~/Downloads/scholaris_communities.csv \
         --logging_level ERROR \
         --dso_type communities
 
     # Dspace export: collections 
-    ./venv/bin/python3 src/dspace_api_export.py \
+    ./venv/bin/python3 src/dspace_api_exports.py \
         --output ~/Downloads/scholaris_collections.csv \
         --logging_level ERROR \
         --dso_type collections 
 
     # DSpace export: items 
-    ./venv/bin/python3 src/dspace_api_export.py \
+    ./venv/bin/python3 src/dspace_api_exports.py \
         --output ~/Downloads/scholaris_items.csv \
         --logging_level ERROR \
         --dso_type items 
         
     # DSpace export: bibstreams 
-    ./venv/bin/python3 src/dspace_api_export.py \
+    ./venv/bin/python3 src/dspace_api_exports.py \
         --output ~/Downloads/scholaris_bitstreams.csv \
         --logging_level ERROR \
         --dso_type bitstreams 
@@ -246,7 +246,7 @@ The steps to set up a validation run.
       * note: if not empty then there was a failure to load the page or the URL contains no bitstreams
         * TimeoutException can mean that a login prompt was detected or that the site couldn't load
 
-## dspace_api_export.py
+## dspace_api_exports.py
 
 Test exporting content from the DSpace API using <https://pypi.org/project/dspace-rest-client>.
 
@@ -269,7 +269,7 @@ export DSPACE_API_PASSWORD=''
 Run Python from the virtual environment (see Python Virtual Environment documentation for details). One method:
 
 ```bash
-./venv/bin/python3 src/dspace_api_export.py \
+./venv/bin/python3 src/dspace_api_exports.py \
     --output /tmp/z.log \
     --logging_level ERROR \
     --dso_type communities
