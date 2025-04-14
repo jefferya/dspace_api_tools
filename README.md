@@ -108,9 +108,9 @@ I'll import into a Google Sheet to leverage the power of the grid layout
 `dspace_id` is nan/empty if a thing is not found in DSpace (e.g., an ERA item has not been migrated into Scholaris)
 
 
-#### Audit: how to enhance
+#### Audit: Technical Details
 
-##### JSON flattening
+##### Hot to how to extend the JSON flattening
 
 DSpace API produces JSON. The JSON is flattened into CSV (`flatten_json` method). The `utilities.py` contains a set of methods to flatten the JSON in different ways depending on the key. For example, we only want the "value":
 
@@ -339,6 +339,12 @@ Process thoughts:
 Question:
 
 * How best to present such that given a Jupiter on can easily find the Scholaris equivalent.
+
+### Status
+
+* 2025-04-14:
+  * Prototype of Jupiter Items
+  * In-progress: Jupiter community, collection, thesis, and bitstreams
 
 ### Delta Report: How to generate
 
