@@ -211,20 +211,20 @@ The steps to set up a validation run.
         --input_dspace ~/Downloads/scholaris_collections.csv \
         --output /tmp/migration_audit_collections_$(date +%Y-%m-%d_%H:%M:%S).csv \
         --type collections
-    
+
     # Item audit results
     venv/bin/python src/compare_csv.py \
         --input_jupiter ~/Downloads/era_export/jupiter_items_2025-03-06_12-08-01.csv \
         --input_dspace ~/Downloads/scholaris_items.csv \
-        --output /tmp/migration_audit_bitstreams_$(date +%Y-%m-%d_%H:%M:%S).csv \
-        --type bitstreams 
-    
+        --output /tmp/migration_audit_items_$(date +%Y-%m-%d_%H:%M:%S).csv \
+        --type items 
+
     # Bitstream audit results
     venv/bin/python src/compare_csv.py \
         --input_jupiter ~/Downloads/era_export/jupiter_items_2025-03-06_12-08-01.csv \
         --input_dspace ~/Downloads/scholaris_bitstreams.csv \
         --output /tmp/migration_audit_bitstreams_$(date +%Y-%m-%d_%H:%M:%S).csv \
-        --type bitstreams 
+        --type bitstreams
     ```
 
 5. Review the results for PASS/FAIL notices on the validated columns.

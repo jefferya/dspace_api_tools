@@ -157,7 +157,7 @@ def process_bitstreams(dspace_client, output_file):
                 if "dc.title" in bitstream.metadata:
                     tmp_dict.update(
                         {
-                            "bitstream.metadata.dc.title.0.value": bitstream.metadata[
+                            "bitstream.metadata.dc.title": bitstream.metadata[
                                 "dc.title"
                             ][0]["value"]
                         }
@@ -173,13 +173,9 @@ def process_bitstreams(dspace_client, output_file):
                 if "dc.description" in bitstream.metadata:
                     tmp_dict.update(
                         {
-                            "bitstream.metadata.dc.description.0.value": bitstream.metadata[
+                            "bitstream.metadata.dc.description": bitstream.metadata[
                                 "dc.description"
-                            ][
-                                0
-                            ][
-                                "value"
-                            ],
+                            ][0]["value"],
                         }
                     )
 

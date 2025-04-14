@@ -142,9 +142,9 @@ CSV_FLATTENED_HEADERS = {
         "bitstream.checksum.value",
         "bitstream.checksum_algorithm",
         "bitstream.uuid",
-        "bitstream.metadata.dc.title.0.value",
+        "bitstream.metadata.dc.title",
         "bitstream.metadata.dc.source.0.value",
-        "bitstream.metadata.dc.description.0.value",
+        "bitstream.metadata.dc.description",
         "bundle.name",
     ],
     "user": [
