@@ -1,5 +1,7 @@
 # Output Jupiter statistics via Ruby irb script in CSV format
 # Usage: irb -r ./juptiter_statistics_metadata_to_CSV.rb
+# Usage: RAILS_ENV=development bundle exec rails runner juptiter_statistics_metadata_to_CSV.rb 
+:
 
 class JupiterBaseStatisticsToCSV
   def initialize()
