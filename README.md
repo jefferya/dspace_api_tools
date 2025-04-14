@@ -159,7 +159,23 @@ where the key (e.g., `name`) is the output CSV column label, the columns determi
 The steps to set up a validation run.
 
 1. Use `./jupiter_output_scripts/juptiter_collection_metadata_to_CSV.rb` to export (CSV) Jupiter metadata
+   
 2. Use `./combine_jupiter_item_and_thesis.py` to combine the Jupiter Item and Thesis CSV into a singel CSV to ease comparisioin with Scholaris as Scholaris uses a single type to store both using optional field to store thesis related metadata.
+
+    ``` bash
+    # Combine Item and Thesis metadata
+    ./venv/bin/python src/combine_jupiter_item_and_thesis.py \
+        --input_item ~/Downloads/era_export/jupiter_item_2025-03-31_16-26-48.csv \
+        --input_thesis ~/Downloads/era_export/jupiter_thesis_2025-03-31_16-26-28.csv \
+        --output /tmp/jupiter_combined_item_thesis.csv
+    
+    # Combine item and Thesis ActiveStorage
+    ./venv/bin/python src/combine_jupiter_item_and_thesis.py \
+        --input_item ~/Downloads/era_export/jupiter_item_activestorage_2025-03-31_16-26-48.csv \
+        --input_thesis ~/Downloads/era_export/jupiter_thesis_activestroage_2025-03-31_16-26-28.csv \
+        --output /tmp/jupiter_combined_activestorage.csv
+   ```
+  
 3. Use `./dspace_api_exports.py` to export (CSV) DSpace metadata
 
     ```bash
@@ -214,14 +230,14 @@ The steps to set up a validation run.
 
     # Item audit results
     venv/bin/python src/compare_csv.py \
-        --input_jupiter ~/Downloads/era_export/jupiter_items_2025-03-06_12-08-01.csv \
+        --input_jupiter ~/Downloads/era_export/jupiter_combined_item_thesis.csv \
         --input_dspace ~/Downloads/scholaris_items.csv \
         --output /tmp/migration_audit_items_$(date +%Y-%m-%d_%H:%M:%S).csv \
         --type items 
 
     # Bitstream audit results
     venv/bin/python src/compare_csv.py \
-        --input_jupiter ~/Downloads/era_export/jupiter_items_2025-03-06_12-08-01.csv \
+        --input_jupiter ~/Downloads/era_export/jupiter_combined_activestorage.csv \
         --input_dspace ~/Downloads/scholaris_bitstreams.csv \
         --output /tmp/migration_audit_bitstreams_$(date +%Y-%m-%d_%H:%M:%S).csv \
         --type bitstreams
