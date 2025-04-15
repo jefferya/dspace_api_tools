@@ -351,6 +351,7 @@ Process thoughts:
 * In ERA, changing an object to "read only" creates a new version change event: the read_only_event column that indicated if change event only updates read only status thus allow one to filter/order these events if too numerous
 * Sort by item_id & date ascending: this allows grouping a sequence of updates over time; if the same field changed multiple times then use the most recent.
 * Event "destroy" means the object has been deleted and there will be no Scholaris mapping
+  * Event "destroy" will create a long change record -- "top align" text in cells to see the text
 
 ### Status
 

@@ -1,2 +1,2 @@
 uuid,name,metadata.dc.description,metadata.dc.description.abstract,metadata.dc.title,provenance.ual.jupiterId.collection,provenance.ual.jupiterId.community,lastModified
-1234,Test,Test description,Test description,Test,123456789.1,community_2,9999-01-02T03:04:05Z
+1234,Test,"['Test description']","['Test description']","['Test']",123456789.1,community_2,9999-01-02T03:04:05Z

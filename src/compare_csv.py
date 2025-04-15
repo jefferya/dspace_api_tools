@@ -235,6 +235,128 @@ def language_compare(list1, list2):
 
 
 #
+def item_or_thesis_jupiter_strings_to_single_dspace(row, key, value):
+    """
+    Special dc.issue_data comparison: jupiter item and thesis have different fields
+    that migrated into the dc.date.issued
+    """
+    logging.debug(": [%s] %s", key, value)
+
+    col_1 = row[value["columns"]["jupiter"][0]]
+    col_2 = row[value["columns"]["jupiter"][1]]
+    list_dspace = utils.convert_string_list_representation_to_list(
+        row[value["columns"]["dspace"]]
+    )
+
+    logging.debug(
+        ": %s[%s] %s[%s] %s[%s]",
+        value["columns"]["jupiter"][0],
+        col_1,
+        value["columns"]["jupiter"][1],
+        col_2,
+        value["columns"]["dspace"],
+        list_dspace,
+    )
+
+    ret = "FAIL"
+    if not col_1 and not col_2 and not list_dspace:
+        ret = "PASS"
+    elif col_1 in list_dspace or col_2 in list_dspace:
+        ret = "PASS"
+    return ret
+
+
+#
+def item_or_thesis_jupiter_list_and_string_to_single_dspace(row, key, value):
+    """
+    Special comparison: jupiter item and thesis have different fields, one list and one string
+    that migrated into the Scholaris field
+    """
+    logging.debug(": [%s] %s", key, value)
+
+    logging.debug(
+        ": %s[%s] %s[%s] %s[%s]",
+        value["columns"]["jupiter"][0],
+        row[value["columns"]["jupiter"][0]],
+        value["columns"]["jupiter"][1],
+        row[value["columns"]["jupiter"][1]],
+        value["columns"]["dspace"],
+        row[value["columns"]["dspace"]],
+    )
+
+    list_1 = utils.convert_string_list_representation_to_list(
+        row[value["columns"]["jupiter"][0]]
+    )
+    str_1 = row[value["columns"]["jupiter"][1]]
+    list_dspace = utils.convert_string_list_representation_to_list(
+        row[value["columns"]["dspace"]]
+    )
+
+    logging.debug(
+        ": %s[%s] %s[%s] %s[%s]",
+        value["columns"]["jupiter"][0],
+        list_1,
+        value["columns"]["jupiter"][1],
+        str_1,
+        value["columns"]["dspace"],
+        list_dspace,
+    )
+
+    ret = "FAIL"
+    if not list_1 and not str_1 and not list_dspace:
+        ret = "PASS"
+    elif list_1 == list_dspace or str_1 in list_dspace:
+        ret = "PASS"
+    return ret
+
+
+#
+def item_or_thesis_jupiter_lists_to_single_dspace(row, key, value):
+    """
+    Special comparison: jupiter item and thesis have different fields
+    that migrated into the field
+    """
+    logging.debug(": [%s] %s", key, value)
+
+    logging.debug(
+        ": %s[%s] %s[%s] %s[%s]",
+        value["columns"]["jupiter"][0],
+        row[value["columns"]["jupiter"][0]],
+        value["columns"]["jupiter"][1],
+        row[value["columns"]["jupiter"][1]],
+        value["columns"]["dspace"],
+        row[value["columns"]["dspace"]],
+    )
+
+    list_1 = utils.convert_string_list_representation_to_list(
+        row[value["columns"]["jupiter"][0]]
+    )
+    list_2 = utils.convert_string_list_representation_to_list(
+        row[value["columns"]["jupiter"][1]]
+    )
+    list_dspace = utils.convert_string_list_representation_to_list(
+        row[value["columns"]["dspace"]]
+    )
+
+    logging.debug(
+        ": %s[%s] %s[%s] %s[%s]",
+        value["columns"]["jupiter"][0],
+        list_1,
+        value["columns"]["jupiter"][1],
+        list_2,
+        value["columns"]["dspace"],
+        list_dspace,
+    )
+
+    ret = "FAIL"
+    if not list_1 and not list_2 and not list_dspace:
+        ret = "PASS"
+    elif list_dspace in (list_1, list_2):
+        ret = "PASS"
+    return ret
+
+
+#
 def special_type_compare(row, key, value):
     """
     Special type comparision
@@ -286,7 +408,12 @@ def special_type_compare(row, key, value):
 
     logging.debug("special_type_compare: %s ---- %s", list1, list2)
 
-    return "PASS" if list1 == list2 else "FAIL"
+    ret = "FAIL"
+    if list1 == list2:
+        ret = "PASS"
+    elif not list1 and list2 == ["http://purl.org/coar/resource_type/c_46ec"]:
+        ret = "STATIC VALUE ADDED (thesis?)"
+    return ret
 
 
 # Define the columns to compare and how to compare them
@@ -311,18 +438,18 @@ community_columns_to_compare = {
                 "jupiter": "description",
                 "dspace": "metadata.dc.description",
             },
-            "comparison_function": string_compare_ignore_whitespace,
+            "comparison_function": string_in_list_compare_ignore_whitespace,
         },
         "abstract": {
             "columns": {
                 "jupiter": "description",
                 "dspace": "metadata.dc.description.abstract",
             },
-            "comparison_function": string_compare_ignore_whitespace,
+            "comparison_function": string_in_list_compare_ignore_whitespace,
         },
         "dc.title": {
             "columns": {"jupiter": "title", "dspace": "metadata.dc.title"},
-            "comparison_function": string_compare,
+            "comparison_function": value_in_string_list_compare,
         },
     },
 }
@@ -352,18 +479,18 @@ collection_columns_to_compare = {
                 "jupiter": "description",
                 "dspace": "metadata.dc.description",
             },
-            "comparison_function": string_compare_ignore_whitespace,
+            "comparison_function": string_in_list_compare_ignore_whitespace,
         },
         "abstract": {
             "columns": {
                 "jupiter": "description",
                 "dspace": "metadata.dc.description.abstract",
             },
-            "comparison_function": string_compare_ignore_whitespace,
+            "comparison_function": string_in_list_compare_ignore_whitespace,
         },
         "dc.title": {
             "columns": {"jupiter": "title", "dspace": "metadata.dc.title"},
-            "comparison_function": string_compare,
+            "comparison_function": value_in_string_list_compare,
         },
         "collection_parent_expect_to_fail_due_to_lack_of_community_provenance": {
             "columns": {
@@ -471,19 +598,19 @@ item_columns_to_compare = {
             "columns": {"jupiter": "title", "dspace": "metadata.dc.title"},
             "comparison_function": value_in_string_list_compare,
         },
-        "dc.contributor": {
+        "dc.contributor.other": {
             "columns": {
-                "jupiter": "contributors",
+                "jupiter": ["contributors", "committee_members"],
                 "dspace": "metadata.dc.contributor.other",
             },
-            "comparison_function": string_lists_compare,
+            "comparison_function": item_or_thesis_jupiter_lists_to_single_dspace,
         },
-        "dc.creator": {
+        "dc.contributor.author": {
             "columns": {
-                "jupiter": "creators",
+                "jupiter": ["creators", "dissertant"],
                 "dspace": "metadata.dc.contributor.author",
             },
-            "comparison_function": string_lists_compare,
+            "comparison_function": item_or_thesis_jupiter_list_and_string_to_single_dspace,
         },
         "dc.type": {
             "columns": {
@@ -501,8 +628,11 @@ item_columns_to_compare = {
             "comparison_function": string_lists_compare,
         },
         "dc.date.issued": {
-            "columns": {"jupiter": "created", "dspace": "metadata.dc.date.issued"},
-            "comparison_function": value_in_string_list_compare,
+            "columns": {
+                "jupiter": ["created", "graduation_date"],
+                "dspace": "metadata.dc.date.issued",
+            },
+            "comparison_function": item_or_thesis_jupiter_strings_to_single_dspace,
         },
         "dc.rights": {
             "columns": {"jupiter": "rights", "dspace": "metadata.dc.rights"},
@@ -527,13 +657,13 @@ item_columns_to_compare = {
         #     "columns": {"jupiter": "", "dspace": "metadata.thesis.degree.discipline"},
         #     "comparison_function": value_in_string_list_compare,
         # },
-        "if_thesis_dissertant": {
-            "columns": {
-                "jupiter": "dissertant",
-                "dspace": "metadata.dc.contributor.author",
-            },
-            "comparison_function": value_in_string_list_compare,
-        },
+        # "if_thesis_dissertant": {
+        #    "columns": {
+        #        "jupiter": "dissertant",
+        #        "dspace": "metadata.dc.contributor.author",
+        #    },
+        #    "comparison_function": value_in_string_list_compare,
+        # },
         "if_thesis_supervisor": {
             "columns": {
                 "jupiter": "supervisors",
@@ -541,13 +671,13 @@ item_columns_to_compare = {
             },
             "comparison_function": string_lists_compare,
         },
-        "if_thesis_committee_members": {
-            "columns": {
-                "jupiter": "committee_members",
-                "dspace": "metadata.dc.contributor.other",
-            },
-            "comparison_function": string_lists_compare,
-        },
+        # "if_thesis_committee_members": {
+        #    "columns": {
+        #        "jupiter": "committee_members",
+        #        "dspace": "metadata.dc.contributor.other",
+        #    },
+        #    "comparison_function": string_lists_compare,
+        # },
         "if_thesis_degree.grantor": {
             "columns": {
                 "jupiter": "institution",
@@ -575,7 +705,7 @@ item_columns_to_compare = {
         },
         "if_thesis_ual.department": {
             "columns": {"jupiter": "departments", "dspace": "metadata.ual.department"},
-            "comparison_function": value_in_string_list_compare,
+            "comparison_function": string_lists_compare,
         },
     },
 }
@@ -599,7 +729,13 @@ def process_row(row, columns_to_compare):
             dspace_column,
         )
 
-        if key == "dc.type":
+        if comparison_function.__name__ in [
+            "special_type_compare",
+            "item_or_thesis_jupiter_strings_to_single_dspace",
+            "item_or_thesis_jupiter_list_and_string_to_single_dspace",
+            "item_or_thesis_jupiter_lists_to_single_dspace",
+        ]:
+            # special comparison function
             comparison_output[key] = comparison_function(row, key, value)
         elif comparison_function(row[jupiter_column], row[dspace_column]):
             comparison_output[key] = "PASS"
