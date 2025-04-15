@@ -59,11 +59,15 @@ class ChangesReport
       result = {}
     else
       if change_event.item_type == "Thesis"
-        result = '{"scholaris mapping unsupported"}'
+        result = '{"Thesis: scholaris mapping unsupported"}'
       elsif change_event.item_type == "Item"
         result = map_change_event_to_scholaris_item(change_event, obj)
+      elsif change_event.item_type == "Community"
+        result = '{"Community: scholaris mapping unsupported"}'
+      elsif change_event.item_type == "Collection"
+        result = '{"Collection: scholaris mapping unsupported"}'
       else
-        result = '{"error"}'
+        result = '{"Unsupported type"}'
       end
     end
 
@@ -105,4 +109,4 @@ class ChangesReport
 
 end
 
-ChangesReport.new("/tmp/",Date.new(2025, 3, 15)).perform()
+ChangesReport.new("/era_tmp/delete_me_by_2025-05-14/",Date.new(2025, 3, 15)).perform()

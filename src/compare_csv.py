@@ -621,8 +621,10 @@ def process_input(
     """
     Process input from Jupiter and DSpace.
     """
-    jupiter_df = pandas.read_csv(jupiter_input, keep_default_na=False)
-    dspace_df = pandas.read_csv(dspace_input, keep_default_na=False)
+    # dtype=str for all to avoid mixed type errors
+    #   DtypeWarning: Columns (35) have mixed types. Specify dtype option on import or set low_memory=False.
+    jupiter_df = pandas.read_csv(jupiter_input, keep_default_na=False, dtype=str)
+    dspace_df = pandas.read_csv(dspace_input, keep_default_na=False, dtype=str)
 
     # Merge the two dataframes and align on the column values in the title/name
     # drop=False to keep the column in the dataframe

@@ -1,7 +1,7 @@
 # Output a set of Jupiter metadata via Ruby irb script to output the metadata in CSV format
 # Usage: irb -r ./juptiter_collection_metadata_to_CSV.rb
-# Usage: RAILS_ENV=development bundle exec rails runner juptiter_collection_metadata_to_CSV.rb
-
+# Usage: RAILS_ENV=development bundle exec rails runner jupiter_collection_metadata_to_CSV.rb
+# Runtime: approximately 10min (staging)
 
 class JupiterBasicMetadataToCSV
   def initialize()
@@ -127,19 +127,21 @@ class JupiterThesisActiveStorageBlobMetadataToCSV < JupiterItemActiveStorageBlob
 end
 
 
-IRB.conf[:INSPECT_MODE] = false
+IRB.conf[:INSPECT_MODE] = false if Object.const_defined?('IRB')
 ActiveRecord::Base.logger = nil
 
+base_dir = "/era_tmp/delete_me_by_2025-05-15/"
+
 # Community
-JupiterCommunityMetadataToCSV.new("/era_tmp/delete_me_by_2025-04-15/").run
+JupiterCommunityMetadataToCSV.new(base_dir).run
 
 # Collection
-JupiterCollectionMetadataToCSV.new("/era_tmp/delete_me_by_2025-04-15/").run
+JupiterCollectionMetadataToCSV.new(base_dir).run
 
 # Item
-JupiterItemMetadataToCSV.new("/era_tmp/delete_me_by_2025-04-15/").run
-JupiterItemActiveStorageBlobMetadataToCSV.new("/era_tmp/delete_me_by_2025-04-15/").run
+JupiterItemMetadataToCSV.new(base_dir).run
+JupiterItemActiveStorageBlobMetadataToCSV.new(base_dir).run
 
 # Thesis
-JupiterThesisMetadataToCSV.new("/era_tmp/delete_me_by_2025-04-15/").run
-JupiterThesisActiveStorageBlobMetadataToCSV.new("/era_tmp/delete_me_by_2025-04-15/").run
+JupiterThesisMetadataToCSV.new(base_dir).run
+JupiterThesisActiveStorageBlobMetadataToCSV.new(base_dir).run
