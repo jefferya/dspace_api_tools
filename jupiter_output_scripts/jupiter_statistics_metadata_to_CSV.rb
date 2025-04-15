@@ -1,5 +1,7 @@
 # Output Jupiter statistics via Ruby irb script in CSV format
 # Usage: irb -r ./juptiter_statistics_metadata_to_CSV.rb
+# Usage: RAILS_ENV=development bundle exec rails runner juptiter_statistics_metadata_to_CSV.rb 
+
 
 class JupiterBaseStatisticsToCSV
   def initialize()
@@ -24,12 +26,26 @@ class JupiterItemStatisticsToCSV < JupiterBaseStatisticsToCSV
     super()
     @date_time = Time.now.strftime("%Y-%m-%d_%H-%M-%S")
     @instance = Item 
-    @output_file = output_directory + "jupiter_#{@instance.name}_#{@date_time}.csv"
+    @output_file = output_directory + "jupiter_statistics_#{@instance.name}_#{@date_time}.csv"
   end
 end
 
-IRB.conf[:INSPECT_MODE] = false
+# Jupiter Thesis metadata 
+class JupiterItemStatisticsToCSV < JupiterBaseStatisticsToCSV
+  def initialize(output_directory)
+    super()
+    @date_time = Time.now.strftime("%Y-%m-%d_%H-%M-%S")
+    @instance = Thesis 
+    @output_file = output_directory + "jupiter_statistics_#{@instance.name}_#{@date_time}.csv"
+  end
+end
+
+
+IRB.conf[:INSPECT_MODE] = false if Object.const_defined?('IRB')
 ActiveRecord::Base.logger = nil
 
 # Item data model
 JupiterItemStatisticsToCSV.new("/tmp/").run
+
+# Thesis data model
+JupiterThesisStatisticsToCSV.new("/tmp/").run

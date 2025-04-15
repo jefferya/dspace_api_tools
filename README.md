@@ -107,10 +107,9 @@ I'll import into a Google Sheet to leverage the power of the grid layout
 `index` is empty if a thing is not found in Jupiter (e.g., a UI entered, hand-crafted test in Scholaris)
 `dspace_id` is nan/empty if a thing is not found in DSpace (e.g., an ERA item has not been migrated into Scholaris)
 
-
 #### Audit: Technical Details
 
-##### Hot to how to extend the JSON flattening
+##### How to how to extend the JSON flattening
 
 DSpace API produces JSON. The JSON is flattened into CSV (`flatten_json` method). The `utilities.py` contains a set of methods to flatten the JSON in different ways depending on the key. For example, we only want the "value":
 
@@ -146,9 +145,19 @@ The content audit is configured and run via `src/compare_csv.py`. For each DSpac
         ...
 ```
 
-where the key (e.g., `name`) is the output CSV column label, the columns determine the Jupiter and DSpace fields to compare and the `comparison_function` determines how the comparison is undertaken. These comparision functions are defined earlier in the script. 
+where the key (e.g., `name`) is the output CSV column label, the columns determine the Jupiter and DSpace fields to compare and the `comparison_function` determines how the comparison is undertaken. These comparison functions are defined earlier in the script. 
 
 ### Audit: Setup and Run
+
+Setup for Ruby scripts
+
+Consider cloning this repository into `/tmp` and
+
+* sudo -u apache bash -c "cd /var/www/sites/jupiter && RAILS_ENV=staging bundle exec rails runner /tmp/dspace_api_tools/jupiter_output_scripts/jupiter_collection_metadata_to_CSV.rb"
+  * change `RAIL_ENV` as needed [development|staging|production]
+  * change script as needed
+
+Setup for Python scripts
 
 ```bash
     python3 -m venv ./venv/ \
@@ -158,25 +167,27 @@ where the key (e.g., `name`) is the output CSV column label, the columns determi
 
 The steps to set up a validation run.
 
-1. Use `./jupiter_output_scripts/juptiter_collection_metadata_to_CSV.rb` to export (CSV) Jupiter metadata
-   
-2. Use `./combine_jupiter_item_and_thesis.py` to combine the Jupiter Item and Thesis CSV into a singel CSV to ease comparisioin with Scholaris as Scholaris uses a single type to store both using optional field to store thesis related metadata.
+1. `./jupiter_output_scripts/juptiter_collection_metadata_to_CSV.rb` to export (CSV) Jupiter metadata (see script for how to run)
+
+2. `./combine_jupiter_item_and_thesis.py` to combine the Jupiter Item and Thesis CSV into a single CSV to ease comparison with Scholaris as Scholaris uses a single data type to store both using optional field to store thesis related metadata.
 
     ``` bash
+    export JUPITER_DIR=~/Downloads/era_export
+
     # Combine Item and Thesis metadata
     ./venv/bin/python src/combine_jupiter_item_and_thesis.py \
-        --input_item ~/Downloads/era_export/jupiter_item_2025-03-31_16-26-48.csv \
-        --input_thesis ~/Downloads/era_export/jupiter_thesis_2025-03-31_16-26-28.csv \
+        --input_item ${JUPITER_DIR}/era_export/jupiter_item_2025-03-31_16-26-48.csv \
+        --input_thesis ${JUPITER_DIR}/era_export/jupiter_thesis_2025-03-31_16-26-28.csv \
         --output /tmp/jupiter_combined_item_thesis.csv
-    
+
     # Combine item and Thesis ActiveStorage
     ./venv/bin/python src/combine_jupiter_item_and_thesis.py \
-        --input_item ~/Downloads/era_export/jupiter_item_activestorage_2025-03-31_16-26-48.csv \
-        --input_thesis ~/Downloads/era_export/jupiter_thesis_activestroage_2025-03-31_16-26-28.csv \
+        --input_item ${JUPITER_DIR}/era_export/jupiter_item_activestorage_2025-03-31_16-26-48.csv \
+        --input_thesis ${JUPITER_DIR}/era_export/jupiter_thesis_activestroage_2025-03-31_16-26-28.csv \
         --output /tmp/jupiter_combined_activestorage.csv
    ```
-  
-3. Use `./dspace_api_exports.py` to export (CSV) DSpace metadata
+
+3. `./dspace_api_exports.py` to export (CSV) DSpace metadata
 
     ```bash
     # Set environment variables
@@ -184,61 +195,66 @@ The steps to set up a validation run.
     export DSPACE_API_USERNAME=
     export DSPACE_API_PASSWORD=''
 
+    export SCHOLARIS_DIR=~/Downloads
+
     # DSpace export: communities
     ./venv/bin/python3 src/dspace_api_exports.py \
-        --output ~/Downloads/scholaris_communities.csv \
+        --output ${SCHOLARIS}/scholaris_communities.csv \
         --logging_level ERROR \
         --dso_type communities
 
-    # Dspace export: collections 
+    # Dspace export: collections
     ./venv/bin/python3 src/dspace_api_exports.py \
-        --output ~/Downloads/scholaris_collections.csv \
+        --output ${SCHOLARIS}/scholaris_collections.csv \
         --logging_level ERROR \
-        --dso_type collections 
+        --dso_type collections
 
-    # DSpace export: items 
+    # DSpace export: items
     ./venv/bin/python3 src/dspace_api_exports.py \
-        --output ~/Downloads/scholaris_items.csv \
+        --output ${SCHOLARIS}/scholaris_items.csv \
         --logging_level ERROR \
-        --dso_type items 
-        
-    # DSpace export: bibstreams 
+        --dso_type items
+
+    # DSpace export: bitstreams
     ./venv/bin/python3 src/dspace_api_exports.py \
-        --output ~/Downloads/scholaris_bitstreams.csv \
+        --output ${SCHOLARIS}/scholaris_bitstreams.csv \
         --logging_level ERROR \
-        --dso_type bitstreams 
-        
+        --dso_type bitstreams
+
     ```
 
 4. Use `compare_csv.py` supplying the output from steps 1 & 2 as input, a join and comparison function outputs a CSV file with the validation results. FYI: the join is an outer join which includes null matches in either input file in the output; tweak comparison configuration as required.
 
     ```bash
 
+    export JUPITER_DIR=~/Downloads/era_export
+    export SCHOLARIS_DIR=~/Downloads
+
     # Communities audit results
     venv/bin/python src/compare_csv.py \
-        --input_jupiter ~/Downloads/era_export/jupiter_community_2025-03-06_12-05-19.csv \
-        --input_dspace ~/Downloads/scholaris_communities.csv \
+        --input_jupiter ${JUPITER_DIR}/jupiter_community_2025-03-06_12-05-19.csv \
+        --input_dspace ${SCHOLARIS_DIR}/scholaris_communities.csv \
         --output /tmp/migration_audit_communities_$(date +%Y-%m-%d_%H:%M:%S).csv \
         --type communities
 
     # Collections audit results
     venv/bin/python src/compare_csv.py \
-        --input_jupiter ~/Downloads/era_export/jupiter_collection_2025-03-06_12-08-01.csv \
-        --input_dspace ~/Downloads/scholaris_collections.csv \
+        --input_jupiter ${JUPITER_DIR}/jupiter_collection_2025-03-06_12-08-01.csv \
+        --input_dspace ${SCHOLARIS_DIR}/scholaris_collections.csv \
         --output /tmp/migration_audit_collections_$(date +%Y-%m-%d_%H:%M:%S).csv \
         --type collections
 
     # Item audit results
     venv/bin/python src/compare_csv.py \
-        --input_jupiter ~/Downloads/era_export/jupiter_combined_item_thesis.csv \
-        --input_dspace ~/Downloads/scholaris_items.csv \
+        --input_jupiter ${JUPITER_DIR}/jupiter_combined_item_thesis.csv \
+        --input_dspace ${SCHOLARIS_DIR}/scholaris_items.csv \
         --output /tmp/migration_audit_items_$(date +%Y-%m-%d_%H:%M:%S).csv \
-        --type items 
+        --type items
 
     # Bitstream audit results
     venv/bin/python src/compare_csv.py \
-        --input_jupiter ~/Downloads/era_export/jupiter_combined_activestorage.csv \
-        --input_dspace ~/Downloads/scholaris_bitstreams.csv \
+        --input_jupiter ${JUPITER_DIR}/jupiter_combined_activestorage.csv \
+        --input_dspace ${SCHOLARIS_DIR}/scholaris_bitstreams.csv \
         --output /tmp/migration_audit_bitstreams_$(date +%Y-%m-%d_%H:%M:%S).csv \
         --type bitstreams
     ```
@@ -336,10 +352,6 @@ Process thoughts:
 * Sort by item_id & date ascending: this allows grouping a sequence of updates over time; if the same field changed multiple times then use the most recent.
 * Event "destroy" means the object has been deleted and there will be no Scholaris mapping
 
-Question:
-
-* How best to present such that given a Jupiter on can easily find the Scholaris equivalent.
-
 ### Status
 
 * 2025-04-14:
@@ -348,14 +360,22 @@ Question:
 
 ### Delta Report: How to generate
 
-See script details: `jupiter_output_scripts/jupiter_delta.rb`
+For Item/Thesis/Collection/Community, see script for details: `jupiter_output_scripts/jupiter_delta.rb`
+
+ Rough outline:
+
+* Needs the Ruby Class used in step 1 of SAF package generation
+  * See `require_relative` in the script to populate Jupiter to Scholaris mappings
+* Set date in script and run `jupiter_output_scripts/jupiter_delta.rb`
+* Upload CSV into Google Docs for Sharing
+
+For the Bitstrams, see script for details: `jupiter_output_scripts/jupiter_delta_bitstreams.rb`
 
 Rough outline:
 
-* Needs the Ruby Class used in step 1 of SAF package generation
-* Run `jupiter_output_scripts/jupiter_delta.rb`
-* Upload CSV into Google Docs for Sharing 
-
+* Find ActivieStorage bitstreams created after given date
+* The list should be the same as `jupiter_delta.rb` as changing the metadata updates ActiveStorage created_at timestamps and there does not appear to be a way to update a bitstream (only create a new and delete the old).
+* Upload CSV into Google Docs for Sharing
 
 ## Jupiter Statistics to Scholaris
 
