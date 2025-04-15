@@ -1,2 +1,2 @@
 uuid,name,metadata.dc.description,metadata.dc.description.abstract,metadata.dc.title,lastModified
-i1234,Test,Test description 2,Test description 2,Test 2,9999-01-02T03:04:05Z
+i1234,Test,"['Test description 2']","['Test description 2']","['Test 2']",9999-01-02T03:04:05Z
