@@ -17,7 +17,6 @@ import argparse
 import base64
 import csv
 import logging
-import math
 import os
 import pathlib
 import re
@@ -259,9 +258,7 @@ def special_language_compare(row, key, value):
 
     logging.debug("%s ---- %s", jupiter_list, dspace_list)
     conversion_result = list(
-        easy_language_mapping[language]
-        for language in jupiter_list
-        if language
+        easy_language_mapping[language] for language in jupiter_list if language
     )
     logging.debug("%s ---- %s", conversion_result, dspace_list)
 
@@ -733,13 +730,13 @@ item_columns_to_compare = {
             "columns": {"jupiter": "degree", "dspace": "metadata.thesis.degree.name"},
             "comparison_function": value_in_string_list_compare,
         },
-        #"if_thesis_data.graduation": {
+        # "if_thesis_data.graduation": {
         #    "columns": {
         #        "jupiter": "graduation_date",
         #        "dspace": "metadata.ual.date.graduation",
         #    },
         #    "comparison_function": value_in_string_list_compare,
-        #},
+        # },
         "if_thesis_ual.department": {
             "columns": {"jupiter": "departments", "dspace": "metadata.ual.department"},
             "comparison_function": string_lists_compare,
