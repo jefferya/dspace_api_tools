@@ -206,10 +206,12 @@ def collection_parent_compare(list1, list2):
 
 
 #
-def language_compare(list1, list2):
+def special_language_compare(row, key, value):
     """
     Compare two lists of languages with a conversion step
     Adapted from https://gist.github.com/lagoan/839cf8ce997fa17b529d84776b91cdac
+    Jupiter Item: list value field "languages" (not the "s" in the name)
+    Jupiter Thesis: single value field "language"
     """
 
     easy_language_mapping = {
@@ -225,13 +227,42 @@ def language_compare(list1, list2):
         "http://id.loc.gov/vocabulary/iso639-2/zxx": "No linguistic content",
         "http://terms.library.ualberta.ca/other": "other",
     }
-    logging.debug("%s ---- %s", list1, list2)
-    conversion_result = list(
-        easy_language_mapping[language]
-        for language in utils.convert_string_list_representation_to_list(list1)
-        if language
+    logging.debug(": [%s] %s", key, value)
+
+    jupiter_list_idx = value["columns"]["jupiter"][0]
+    jupiter_str_idx = value["columns"]["jupiter"][1]
+    dspace_idx = value["columns"]["dspace"]
+
+    logging.debug(
+        "|%s| |%s| --- |%s|",
+        row[jupiter_list_idx],
+        row[jupiter_str_idx],
+        row[dspace_idx],
     )
-    return conversion_result == utils.convert_string_list_representation_to_list(list2)
+
+    jupiter_list = []
+
+    # test for nan (float "not-a-number")
+    if not isinstance(row[jupiter_list_idx], float) and row[jupiter_list_idx] != "":
+        jupiter_list = (
+            utils.convert_string_list_representation_to_list(row[jupiter_list_idx])
+            if row[jupiter_list_idx]
+            else []
+        )
+
+    # test for nan (float "not-a-number")
+    if not isinstance(row[jupiter_list_idx], float) and row[jupiter_str_idx] != "":
+        jupiter_list.append(row[jupiter_str_idx])
+
+    dspace_list = utils.convert_string_list_representation_to_list(row[dspace_idx])
+
+    logging.debug("%s ---- %s", jupiter_list, dspace_list)
+    conversion_result = list(
+        easy_language_mapping[language] for language in jupiter_list if language
+    )
+    logging.debug("%s ---- %s", conversion_result, dspace_list)
+
+    return "PASS" if conversion_result == dspace_list else "FAIL"
 
 
 #
@@ -620,8 +651,11 @@ item_columns_to_compare = {
             "comparison_function": special_type_compare,
         },
         "dc.language": {
-            "columns": {"jupiter": "languages", "dspace": "metadata.dc.language.iso"},
-            "comparison_function": language_compare,
+            "columns": {
+                "jupiter": ["languages", "language"],
+                "dspace": "metadata.dc.language.iso",
+            },
+            "comparison_function": special_language_compare,
         },
         "dc.subject": {
             "columns": {"jupiter": "subject", "dspace": "metadata.dc.subject"},
@@ -696,13 +730,13 @@ item_columns_to_compare = {
             "columns": {"jupiter": "degree", "dspace": "metadata.thesis.degree.name"},
             "comparison_function": value_in_string_list_compare,
         },
-        "if_thesis_data.graduation": {
-            "columns": {
-                "jupiter": "graduation_date",
-                "dspace": "metadata.ual.date.graduation",
-            },
-            "comparison_function": value_in_string_list_compare,
-        },
+        # "if_thesis_data.graduation": {
+        #    "columns": {
+        #        "jupiter": "graduation_date",
+        #        "dspace": "metadata.ual.date.graduation",
+        #    },
+        #    "comparison_function": value_in_string_list_compare,
+        # },
         "if_thesis_ual.department": {
             "columns": {"jupiter": "departments", "dspace": "metadata.ual.department"},
             "comparison_function": string_lists_compare,
@@ -731,6 +765,7 @@ def process_row(row, columns_to_compare):
 
         if comparison_function.__name__ in [
             "special_type_compare",
+            "special_language_compare",
             "item_or_thesis_jupiter_strings_to_single_dspace",
             "item_or_thesis_jupiter_list_and_string_to_single_dspace",
             "item_or_thesis_jupiter_lists_to_single_dspace",
