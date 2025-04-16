@@ -120,20 +120,49 @@ def test_language_compare():
     """
     Language tests
     """
-    assert (
-        compare.language_compare(
-            '["http://id.loc.gov/vocabulary/iso639-2/jpn", "http://id.loc.gov/vocabulary/iso639-2/fre"]',
-            "['ja', 'fr']",
-        )
-        is True
-    )
-    assert (
-        compare.language_compare(
-            '["http://id.loc.gov/vocabulary/iso639-2/zxx", "http://id.loc.gov/vocabulary/iso639-2/ukr"]',
-            "['No linguistic content', 'uk']",
-        )
-        is True
-    )
+    item_column_key = "languages"
+    thesis_column_key = "language"
+    dspace_column_key = "metadata.dc.language.iso"
+    key = "dc.language"
+    value = {
+        "columns": {
+            "jupiter": [item_column_key, thesis_column_key],
+            "dspace": dspace_column_key,
+        }
+    }
+
+    # Test item where only "languages" is set
+    item_column_value = "['http://id.loc.gov/vocabulary/iso639-2/jpn', 'http://id.loc.gov/vocabulary/iso639-2/fre']"
+    thesis_column_value = ""
+    dspace_column_value = "['ja', 'fr']"
+    row = {
+        item_column_key: item_column_value,
+        thesis_column_key: thesis_column_value,
+        dspace_column_key: dspace_column_value,
+    }
+
+    assert compare.special_language_compare(row, key, value) == "PASS"
+
+    # Test thesis where only "language" is set
+    item_column_value = ""
+    thesis_column_value = "http://id.loc.gov/vocabulary/iso639-2/eng"
+    dspace_column_value = "['en']"
+    row = {
+        item_column_key: item_column_value,
+        thesis_column_key: thesis_column_value,
+        dspace_column_key: dspace_column_value,
+    }
+    assert compare.special_language_compare(row, key, value) == "PASS"
+
+    item_column_value = float("NaN")
+    thesis_column_value = float("NaN")
+    dspace_column_value = "[]"
+    row = {
+        item_column_key: item_column_value,
+        thesis_column_key: thesis_column_value,
+        dspace_column_key: dspace_column_value,
+    }
+    assert compare.special_language_compare(row, key, value) == "PASS"
 
 
 def test_input_process_community_valid(tmp_path):

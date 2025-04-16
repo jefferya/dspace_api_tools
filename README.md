@@ -199,25 +199,25 @@ The steps to set up a validation run.
 
     # DSpace export: communities
     ./venv/bin/python3 src/dspace_api_exports.py \
-        --output ${SCHOLARIS}/scholaris_communities.csv \
+        --output ${SCHOLARIS_DIR}/scholaris_communities.csv \
         --logging_level ERROR \
         --dso_type communities
 
     # Dspace export: collections
     ./venv/bin/python3 src/dspace_api_exports.py \
-        --output ${SCHOLARIS}/scholaris_collections.csv \
+        --output ${SCHOLARIS_DIR}/scholaris_collections.csv \
         --logging_level ERROR \
         --dso_type collections
 
     # DSpace export: items
     ./venv/bin/python3 src/dspace_api_exports.py \
-        --output ${SCHOLARIS}/scholaris_items.csv \
+        --output ${SCHOLARIS_DIR}/scholaris_items.csv \
         --logging_level ERROR \
         --dso_type items
 
     # DSpace export: bitstreams
     ./venv/bin/python3 src/dspace_api_exports.py \
-        --output ${SCHOLARIS}/scholaris_bitstreams.csv \
+        --output ${SCHOLARIS_DIR}/scholaris_bitstreams.csv \
         --logging_level ERROR \
         --dso_type bitstreams
 
@@ -232,16 +232,18 @@ The steps to set up a validation run.
 
     # Communities audit results
     venv/bin/python src/compare_csv.py \
-        --input_jupiter ${JUPITER_DIR}/jupiter_community_2025-03-06_12-05-19.csv \
+        --input_jupiter ${JUPITER_DIR}/jupiter_community.csv \
         --input_dspace ${SCHOLARIS_DIR}/scholaris_communities.csv \
         --output /tmp/migration_audit_communities_$(date +%Y-%m-%d_%H:%M:%S).csv \
+        --logging_level ERROR \
         --type communities
 
     # Collections audit results
     venv/bin/python src/compare_csv.py \
-        --input_jupiter ${JUPITER_DIR}/jupiter_collection_2025-03-06_12-08-01.csv \
+        --input_jupiter ${JUPITER_DIR}/jupiter_collection.csv \
         --input_dspace ${SCHOLARIS_DIR}/scholaris_collections.csv \
         --output /tmp/migration_audit_collections_$(date +%Y-%m-%d_%H:%M:%S).csv \
+        --logging_level ERROR \
         --type collections
 
     # Item audit results
@@ -249,6 +251,7 @@ The steps to set up a validation run.
         --input_jupiter ${JUPITER_DIR}/jupiter_combined_item_thesis.csv \
         --input_dspace ${SCHOLARIS_DIR}/scholaris_items.csv \
         --output /tmp/migration_audit_items_$(date +%Y-%m-%d_%H:%M:%S).csv \
+        --logging_level ERROR \
         --type items
 
     # Bitstream audit results
@@ -256,6 +259,7 @@ The steps to set up a validation run.
         --input_jupiter ${JUPITER_DIR}/jupiter_combined_activestorage.csv \
         --input_dspace ${SCHOLARIS_DIR}/scholaris_bitstreams.csv \
         --output /tmp/migration_audit_bitstreams_$(date +%Y-%m-%d_%H:%M:%S).csv \
+        --logging_level ERROR \
         --type bitstreams
     ```
 
