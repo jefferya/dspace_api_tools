@@ -2,17 +2,28 @@
 # base on https://github.com/ualbertalib/jupiter/pull/3626/files
 #   RAILS_ENV=development bundle exec rails runner jupiter_delta.rb 
 
-require_relative 'helpers/file-export_collections_csv'
+#require_relative 'helpers/file-export_collections_csv'
+require_relative 'helpers/export_items_collections_csv'
+require_relative 'helpers/export_theses_collections_csv'
 require 'json'
 
 
-# Parent class from
-# https://gist.github.com/lagoan/839cf8ce997fa17b529d84776b91cdac#file-export_collections_csv-rb-L181-L196
-class ItemCSVExporter < CollectionCSVExporter
+class ItemCSVExporter < CollectionCSVItemExporter 
   attr_accessor :easy_dspace_mapping
 
   def easy_dspace_mapping
     @easy_dspace_mapping.each do |key, value|
+      yield key, value
+    end
+  end
+
+end
+
+class ThesisCSVExporter < CollectionCSVThesisExporter 
+  attr_accessor :easy_dspace_mapping
+
+  def easy_dspace_mapping
+    @easy_thesis_dspace_mapping.each do |key, value|
       yield key, value
     end
   end
@@ -26,8 +37,7 @@ class ChangesReport
     @output_file = File.join(output_directory, "#{date}_changes.csv")
   end
 
-  # Based on and try to reuse the mapping methods in the class
-  # https://gist.github.com/lagoan/839cf8ce997fa17b529d84776b91cdac#file-export_collections_csv-rb-L181-L196
+  # Based on and try to reuse the mapping methods in the class CollectionCSVItemExporter.item_data_row
   def map_change_event_to_scholaris_item(change_event, obj)
 
     scholaris_mapped_change_event = {} 
@@ -53,13 +63,41 @@ class ChangesReport
     return scholaris_mapped_change_event
   end
 
+  # Based on and try to reuse the mapping methods in the class CollectionCSVThesisExporter.thesis_data_row
+  def map_change_event_to_scholaris_thesis(change_event, obj)
+
+    scholaris_mapped_change_event = {} 
+    thesisTranslation = ThesisCSVExporter.new
+    begin 
+      thesis = obj.decorate
+      thesisTranslation.easy_dspace_mapping do |method_key, _method_mapping|
+        # keys starting with "manual_" are special cases that need to be handled differently
+        jupiter_key = method_key.sub(/^manual_/,'')
+        # only caputure value if the key exists in the list of object changes in the change event
+        if change_event.object_changes && change_event.object_changes.key?(jupiter_key)
+          value = if method_key.start_with?('manual_')
+                    itemTranslation.handle_manual_value(item, method_key)
+                  else
+                    thesis.send(method_key)
+                  end
+          scholaris_mapped_change_event[_method_mapping] = value
+        end
+      end;
+    rescue NoMethodError
+      puts "Mapping Error on jupiter ID #{change_event.item_id} of type #{change_event.item_type} and event #{change_event.event}"
+    end
+    return scholaris_mapped_change_event
+  end
+
+
+
   def process_change_event(change_event, obj)
 
     if change_event.event == "destroy"
       result = {}
     else
       if change_event.item_type == "Thesis"
-        result = '{"Thesis: scholaris mapping unsupported"}'
+        result = map_change_event_to_scholaris_thesis(change_event, obj)
       elsif change_event.item_type == "Item"
         result = map_change_event_to_scholaris_item(change_event, obj)
       elsif change_event.item_type == "Community"
@@ -80,7 +118,18 @@ class ChangesReport
 
   def perform()
     CSV.open(@output_file, 'wb') do |csv|
-      csv << ['type', 'change_id', 'jupiter_id', 'is_jupiter_currently_readonly', 'read_only_event', 'changed at', 'event', 'jupiter delta', 'scholaris mapped delta', 'jupiter delta formatted', 'scholaris mapped delta formatted']
+      csv << ['type',
+        'change_id',
+        'jupiter_id',
+        'is_jupiter_currently_readonly',
+        'read_only_event',
+        'assm_state_event',
+        'changed at',
+        'event',
+        'jupiter delta',
+        'scholaris mapped delta',
+        'jupiter delta formatted',
+        'scholaris mapped delta formatted']
       PaperTrail::Version.where(created_at: @date..).find_each do |row|
         # How to communicate key/value mapping differences from Jupiter to DSpace?
         # First part, add documentation describing how to use the output
@@ -93,8 +142,20 @@ class ChangesReport
         obj = row.item
         read_only = "True" if obj && obj.read_only?
         read_only_event = "True" if row.object_changes && row.object_changes.keys.to_set == ["updated_at", "read_only"].to_set
+        assm_state_event = "True" if row.object_changes && row.object_changes.keys.to_set == ["updated_at", "assm_state"].to_set
         scholaris_mapping = process_change_event(row, obj)
-        csv << [row.item_type, row.id, row.item_id, read_only, read_only_event, row.created_at, row.event, row.object_changes, scholaris_mapping, JSON.pretty_generate(row.object_changes), JSON.pretty_generate(scholaris_mapping)]
+        csv << [row.item_type,
+          row.id,
+          row.item_id,
+          read_only,
+          read_only_event,
+          assm_state_event,
+          row.created_at,
+          row.event,
+          row.object_changes,
+          scholaris_mapping,
+          JSON.pretty_generate(row.object_changes),
+          JSON.pretty_generate(scholaris_mapping)]
       end
     end
 

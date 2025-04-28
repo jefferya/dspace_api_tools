@@ -83,7 +83,7 @@ def access_rights_compare(str1, str2):
     """
     access_rights = {
         "http://terms.library.ualberta.ca/public": "open.access",
-        "http://terms.library.ualberta.ca/embargo": "metadata.only",
+        "http://terms.library.ualberta.ca/embargo": "embargo",
         "http://terms.library.ualberta.ca/authenticated": "restricted",
     }
 
@@ -181,6 +181,20 @@ def string_lists_compare(list1, list2):
 
 
 #
+def string_lists_compare_trim_whitespace(list1, list2):
+    """
+    compare a the contents of two lists represented as a strings
+    Trim leading and trailing whitespace
+    """
+    logging.debug("%s ---- %s", list1, list2)
+    tmp_list1 = utils.convert_string_list_representation_to_list(list1)
+    tmp_list2 = utils.convert_string_list_representation_to_list(list2)
+    tmp_list1 = [item.strip() for item in tmp_list2]
+    logging.debug("%s ---- %s", tmp_list1, tmp_list2)
+    return tmp_list1 == tmp_list2
+
+
+#
 def collection_parent_compare(list1, list2):
     """
     Compare two lists
@@ -269,7 +283,7 @@ def special_language_compare(row, key, value):
 def item_or_thesis_jupiter_strings_to_single_dspace(row, key, value):
     """
     Special dc.issue_data comparison: jupiter item and thesis have different fields
-    that migrated into the dc.date.issued
+    that migrated into a single dspace field
     """
     logging.debug(": [%s] %s", key, value)
 
@@ -278,6 +292,7 @@ def item_or_thesis_jupiter_strings_to_single_dspace(row, key, value):
     list_dspace = utils.convert_string_list_representation_to_list(
         row[value["columns"]["dspace"]]
     )
+    list_dspace = [item.strip() for item in list_dspace]
 
     logging.debug(
         ": %s[%s] %s[%s] %s[%s]",
@@ -659,7 +674,7 @@ item_columns_to_compare = {
         },
         "dc.subject": {
             "columns": {"jupiter": "subject", "dspace": "metadata.dc.subject"},
-            "comparison_function": string_lists_compare,
+            "comparison_function": string_lists_compare_trim_whitespace,
         },
         "dc.date.issued": {
             "columns": {
