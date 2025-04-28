@@ -107,6 +107,22 @@ def test_string_lists_compare():
     assert compare.string_lists_compare("", "[]") is True
 
 
+def test_string_lists_compare_trim_whitespace():
+    """
+    compare to string representations of lists; ignore leading and trailing whitespace
+    """
+    assert (
+        compare.string_lists_compare_trim_whitespace("['a','b']", "['a','b']") is True
+    )
+    assert (
+        compare.string_lists_compare_trim_whitespace("['a','b']", "['b','a']") is True
+    )
+    assert (
+        compare.string_lists_compare_trim_whitespace("[' c','d ']", "['c','d']") is True
+    )
+    assert compare.string_lists_compare_trim_whitespace("", "[]") is True
+
+
 def test_collection_parent_compare():
     """
     Test the Jupiter member_of_path compared to the Scholaris collection id
@@ -163,6 +179,176 @@ def test_language_compare():
         dspace_column_key: dspace_column_value,
     }
     assert compare.special_language_compare(row, key, value) == "PASS"
+
+
+def test_special_type_compare():
+    """
+    Test an item field or thesis field if different names againsta a single dspace field
+    """
+    item_column_key = "item_type"
+    thesis_column_key = "publication_status"
+    dspace_column_key = "metadata.dc.type"
+    key = "dc.type"
+    value = {
+        "columns": {
+            "jupiter": [item_column_key, thesis_column_key],
+            "dspace": dspace_column_key,
+        }
+    }
+
+    item_column_value = "http://purl.org/ontology/bibo/Book"
+    thesis_column_value = ""
+    dspace_column_value = "['http://purl.org/coar/resource_type/c_2f33']"
+    row = {
+        item_column_key: item_column_value,
+        thesis_column_key: thesis_column_value,
+        dspace_column_key: dspace_column_value,
+    }
+
+    assert compare.special_type_compare(row, key, value) == "PASS"
+
+    item_column_value = ""
+    thesis_column_value = ""
+    dspace_column_value = "['http://purl.org/coar/resource_type/c_46ec']"
+    row = {
+        item_column_key: item_column_value,
+        thesis_column_key: thesis_column_value,
+        dspace_column_key: dspace_column_value,
+    }
+
+    assert (
+        compare.special_type_compare(row, key, value) == "STATIC VALUE ADDED (thesis?)"
+    )
+
+
+def test_item_or_thesis_jupiter_strings_to_single_dspace():
+    """
+    Test an item field or thesis field if different names againsta a single dspace field
+    """
+    item_column_key = "created"
+    thesis_column_key = "graduation_date"
+    dspace_column_key = "metadata.dc.date.issued"
+    key = "dc.date_issued"
+    value = {
+        "columns": {
+            "jupiter": [item_column_key, thesis_column_key],
+            "dspace": dspace_column_key,
+        }
+    }
+
+    item_column_value = "2999"
+    thesis_column_value = ""
+    dspace_column_value = "['2999']"
+    row = {
+        item_column_key: item_column_value,
+        thesis_column_key: thesis_column_value,
+        dspace_column_key: dspace_column_value,
+    }
+
+    assert (
+        compare.item_or_thesis_jupiter_strings_to_single_dspace(row, key, value)
+        == "PASS"
+    )
+
+    item_column_value = ""
+    thesis_column_value = "3000"
+    dspace_column_value = "['3000']"
+    row = {
+        item_column_key: item_column_value,
+        thesis_column_key: thesis_column_value,
+        dspace_column_key: dspace_column_value,
+    }
+
+    assert (
+        compare.item_or_thesis_jupiter_strings_to_single_dspace(row, key, value)
+        == "PASS"
+    )
+
+
+def test_item_or_thesis_jupiter_lists_to_single_dspace():
+    """
+    Test an item field or thesis field if different names againsta a single dspace field
+    """
+    item_column_key = "contributors"
+    thesis_column_key = "committee_members"
+    dspace_column_key = "metadata.dc.contributor.other"
+    key = "dc.contributor.other"
+    value = {
+        "columns": {
+            "jupiter": [item_column_key, thesis_column_key],
+            "dspace": dspace_column_key,
+        }
+    }
+
+    item_column_value = "['A']"
+    thesis_column_value = ""
+    dspace_column_value = "['A']"
+    row = {
+        item_column_key: item_column_value,
+        thesis_column_key: thesis_column_value,
+        dspace_column_key: dspace_column_value,
+    }
+
+    assert (
+        compare.item_or_thesis_jupiter_lists_to_single_dspace(row, key, value) == "PASS"
+    )
+
+    item_column_value = ""
+    thesis_column_value = "['B']"
+    dspace_column_value = "['B']"
+    row = {
+        item_column_key: item_column_value,
+        thesis_column_key: thesis_column_value,
+        dspace_column_key: dspace_column_value,
+    }
+
+    assert (
+        compare.item_or_thesis_jupiter_lists_to_single_dspace(row, key, value) == "PASS"
+    )
+
+
+def test_item_or_thesis_jupiter_list_and_string_to_single_dspace():
+    """
+    Test an item field or thesis field if different names againsta a single dspace field
+    """
+    item_column_key = "creators"
+    thesis_column_key = "dissertant"
+    dspace_column_key = "metadata.dc.contributor.author"
+    key = "dc.contributor.author"
+    value = {
+        "columns": {
+            "jupiter": [item_column_key, thesis_column_key],
+            "dspace": dspace_column_key,
+        }
+    }
+
+    item_column_value = "['A']"
+    thesis_column_value = ""
+    dspace_column_value = "['A']"
+    row = {
+        item_column_key: item_column_value,
+        thesis_column_key: thesis_column_value,
+        dspace_column_key: dspace_column_value,
+    }
+
+    assert (
+        compare.item_or_thesis_jupiter_list_and_string_to_single_dspace(row, key, value)
+        == "PASS"
+    )
+
+    item_column_value = ""
+    thesis_column_value = "B"
+    dspace_column_value = "['B']"
+    row = {
+        item_column_key: item_column_value,
+        thesis_column_key: thesis_column_value,
+        dspace_column_key: dspace_column_value,
+    }
+
+    assert (
+        compare.item_or_thesis_jupiter_list_and_string_to_single_dspace(row, key, value)
+        == "PASS"
+    )
 
 
 def test_input_process_community_valid(tmp_path):
@@ -347,7 +533,7 @@ def test_input_process_item_valid(tmp_path):
     Test process_input for a Item with valid data
     """
     comparison_config = compare.item_columns_to_compare
-    jupiter_input = "src/tests/assets/jupiter_item.csv"
+    jupiter_input = "src/tests/assets/jupiter_combined_item.csv"
     dspace_input = "src/tests/assets/dspace_item.csv"
     tmp_file = tmp_path / "output.csv"
 
@@ -371,4 +557,37 @@ def test_input_process_item_valid(tmp_path):
     assert output_df["dc.rights"][0] == "PASS"
     assert output_df["dc.rights.license"][0] == "PASS"
     assert output_df["dc.type"][0] == "PASS"
+    assert output_df["access_rights"][0] == "PASS"
+
+
+def test_input_process_thesis_valid(tmp_path):
+    """
+    Test process_input for a Thesis with valid data
+    """
+    comparison_config = compare.item_columns_to_compare
+    jupiter_input = "src/tests/assets/jupiter_combined_thesis.csv"
+    dspace_input = "src/tests/assets/dspace_thesis.csv"
+    tmp_file = tmp_path / "output.csv"
+
+    with open(tmp_file, "wt", encoding="utf-8", newline="") as output_file:
+        compare.process_input(
+            jupiter_input,
+            dspace_input,
+            output_file,
+            comparison_config,
+        )
+
+    output_df = pandas.read_csv(tmp_file)
+    print(output_df.to_string())
+    assert output_df["name"][0] == "PASS"
+    assert output_df["abstract"][0] == "PASS"
+    assert output_df["collection_parent"][0] == "PASS"
+    assert output_df["dc.title"][0] == "PASS"
+    assert output_df["dc.contributor.author"][0] == "PASS"
+    assert output_df["dc.language"][0] == "PASS"
+    assert output_df["dc.subject"][0] == "PASS"
+    assert output_df["dc.date.issued"][0] == "PASS"
+    assert output_df["dc.rights"][0] == "PASS"
+    assert output_df["dc.rights.license"][0] == "PASS"
+    assert output_df["dc.type"][0] == "STATIC VALUE ADDED (thesis?)"
     assert output_df["access_rights"][0] == "PASS"
