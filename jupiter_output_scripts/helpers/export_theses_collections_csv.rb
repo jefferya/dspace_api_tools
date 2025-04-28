@@ -100,7 +100,7 @@ class CollectionCSVThesisExporter
     when 'manual_jupiter_filename'
       thesis.ordered_files.map { |file| file.filename.to_s }
     when 'manual_owner_id'
-      thesis.owner.email
+      thesis.owner.email if thesis.owner.present?
     when 'manual_embargo_end_date'
       thesis.embargo_end_date.strftime('%F') if thesis.embargo_end_date.present?
     when 'manual_file_paths'
@@ -170,6 +170,10 @@ class CollectionCSVThesisExporter
     user_info
   end
 
+  def remove_xml_invalid_characters(value)
+    value.gsub(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F]/, '')
+  end
+
   def thesis_data_row(thesis)
     # thesis = thesis.decorate
     @easy_thesis_dspace_mapping.map do |method_key, _method_mapping|
@@ -179,8 +183,10 @@ class CollectionCSVThesisExporter
               else
                 thesis.send(method_key)
               end
-      if value.is_a?(Array)
-        value.join('||')
+      value = value.join('||') if value.is_a?(Array)
+
+      if value.is_a?(String)
+        remove_xml_invalid_characters(value)
       else
         value
       end

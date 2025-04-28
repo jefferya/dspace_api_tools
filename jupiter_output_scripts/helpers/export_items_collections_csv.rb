@@ -1,7 +1,6 @@
 # From: https://github.com/lagoan/era_export/blob/main/export_items_collections_csv.rb
 # with the removal of "CollectionCSVItemExporter.new.run" to allow a "require"
 
-
 class CollectionCSVItemExporter
 
   def initialize
@@ -116,7 +115,7 @@ class CollectionCSVItemExporter
       # Merging ingest_batch and batch_ingest_id. Ignore nil or blank values
       [item.ingest_batch, item.batch_ingest_id].reject(&:blank?)
     when 'manual_owner_id'
-      item.owner.email
+      item.owner.email if item.owner.present?
     # when 'manual_collections'
     #   item.member_of_paths.map{ |path| Collection.find(path.split('/')[1]).title }
     when 'manual_edit_history'
@@ -184,6 +183,10 @@ class CollectionCSVItemExporter
     user_info
   end
 
+  def remove_xml_invalid_characters(value)
+    value.gsub(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F]/, '')
+  end
+
   def item_data_row(item)
     # item = item.decorate
     @easy_dspace_mapping.map do |method_key, _method_mapping|
@@ -193,8 +196,10 @@ class CollectionCSVItemExporter
               else
                 item.send(method_key)
               end
-      if value.is_a?(Array)
-        value.join('||')
+      value = value.join('||') if value.is_a?(Array)
+
+      if value.is_a?(String)
+        remove_xml_invalid_characters(value)
       else
         value
       end
