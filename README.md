@@ -282,6 +282,16 @@ The steps to set up a validation run.
       * note: if not empty then there was a failure to load the page or the URL contains no bitstreams
         * TimeoutException can mean that a login prompt was detected or that the site couldn't load
 
+7. Optional: filter a CSV results file by a set of IDs and the column name to filter on in the source CSV file
+
+    ``` bash
+    ./venv/bin/python src/filter_csv.py \
+        --input /tmp/x 
+        --ids_file /tmp/x_in
+        --column jupter_id
+        --output /tmp/x_out
+    ```
+
 ## dspace_api_exports.py
 
 Test exporting content from the DSpace API using <https://pypi.org/project/dspace-rest-client>.
