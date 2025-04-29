@@ -64,7 +64,13 @@ def test_abstract_compare():
     assert compare.abstract_compare("a", "['a']") is True
     assert compare.abstract_compare("a", "['<p>a</p>']") is True
     assert compare.abstract_compare("a. ", "['<p>a. </p>']") is True
-    assert compare.abstract_compare(float("NaN"), "['']") is True
+    assert compare.abstract_compare(float("NaN"), "['']") is False
+    assert (
+        compare.abstract_compare(
+            "\u0000\u0008\u000b\u000c\u000e\u001f\u007f\u009f", "['']"
+        )
+        is True
+    )
 
 
 def test_string_in_list_compare_ignore_whitespace():
@@ -76,6 +82,12 @@ def test_string_in_list_compare_ignore_whitespace():
     # Missing "Nan" in DataFrame, we don't want it to match empty
     assert (
         compare.string_in_list_compare_ignore_whitespace(float("NaN"), "['']") is False
+    )
+    assert (
+        compare.string_in_list_compare_ignore_whitespace(
+            "\u0000\u0008\u000b\u000c\u000e\u001f\u007f\u009f", "['']"
+        )
+        is True
     )
 
 
