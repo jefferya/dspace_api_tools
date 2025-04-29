@@ -76,7 +76,7 @@ class ChangesReport
         # only caputure value if the key exists in the list of object changes in the change event
         if change_event.object_changes && change_event.object_changes.key?(jupiter_key)
           value = if method_key.start_with?('manual_')
-                    itemTranslation.handle_manual_value(item, method_key)
+                    thesisTranslation.handle_manual_value(thesis, method_key)
                   else
                     thesis.send(method_key)
                   end
@@ -123,7 +123,7 @@ class ChangesReport
         'jupiter_id',
         'is_jupiter_currently_readonly',
         'read_only_event',
-        'assm_state_event',
+        'aasm_state_event',
         'changed at',
         'event',
         'jupiter delta',
@@ -142,14 +142,14 @@ class ChangesReport
         obj = row.item
         read_only = "True" if obj && obj.read_only?
         read_only_event = "True" if row.object_changes && row.object_changes.keys.to_set == ["updated_at", "read_only"].to_set
-        assm_state_event = "True" if row.object_changes && row.object_changes.keys.to_set == ["updated_at", "assm_state"].to_set
+        aasm_state_event = "True" if row.object_changes && row.object_changes.keys.to_set == ["updated_at", "aasm_state"].to_set
         scholaris_mapping = process_change_event(row, obj)
         csv << [row.item_type,
           row.id,
           row.item_id,
           read_only,
           read_only_event,
-          assm_state_event,
+          aasm_state_event,
           row.created_at,
           row.event,
           row.object_changes,

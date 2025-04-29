@@ -268,11 +268,14 @@ The steps to set up a validation run.
 6. Audit bitstream access restrictions via the web UI
 
     ``` bash
+    
+    export DSPACE_ROOT_URL=
+
     ./venv/bin/python src/bitstream_access_control_test.py \
-        --input /tmp/x
-        --output /tmp/z
-        --id_field uuid 
-        --root_url ${DSPACE_ROOT_URL} 
+        --input ${SCHOLARIS_DIR}/scholaris_items.csv \
+        --output /tmp/z \
+        --id_field uuid  \
+        --root_url ${DSPACE_ROOT_URL}  \
         --logging_level INFO
     ```
 
@@ -285,10 +288,11 @@ The steps to set up a validation run.
 7. Optional: filter a CSV results file by a set of IDs and the column name to filter on in the source CSV file
 
     ``` bash
+
     ./venv/bin/python src/filter_csv.py \
-        --input /tmp/x 
-        --ids_file /tmp/x_in
-        --column jupter_id
+        --input /tmp/x  \
+        --ids_file /tmp/x_in \
+        --column jupter_id \
         --output /tmp/x_out
     ```
 

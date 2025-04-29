@@ -27,6 +27,9 @@ import pandas
 from utils import utilities as utils
 
 
+INVALID_CHARACTER_PATTERN = r"[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F]"
+
+
 def parse_args():
     """
     Parse command line arguments
@@ -118,6 +121,13 @@ def string_compare_ignore_whitespace(str1, str2):
     return ret
 
 
+def remove_xml_invalid_characters(str1):
+    """
+    Remove invalid characters:
+    """
+    return re.sub(INVALID_CHARACTER_PATTERN, "", str1)
+
+
 #
 def abstract_compare(str1, list2):
     """
@@ -125,7 +135,10 @@ def abstract_compare(str1, list2):
     remove from comparison
     """
     logging.debug("%s ---- %s", str1, list2)
-    str1 = "" if isinstance(str1, float) else str1
+    if isinstance(str1, float):
+        str1 = str(str1)
+    else:
+        str1 = remove_xml_invalid_characters(str1)
     list2 = "[]" if isinstance(list2, float) else list2
     list2 = list2.replace("<p>", "").replace("</p>", "")
     list2 = utils.convert_string_list_representation_to_list(list2)
@@ -141,6 +154,10 @@ def string_in_list_compare_ignore_whitespace(str1, list2):
     Item description is stored as an list of "things"
     """
     logging.debug("%s ---- %s", str1, list2)
+    if isinstance(str1, float):
+        str1 = str(str1)
+    else:
+        str1 = remove_xml_invalid_characters(str1)
     list2 = utils.convert_string_list_representation_to_list(list2)
     logging.debug("%s ---- %s", str1, list2)
 
