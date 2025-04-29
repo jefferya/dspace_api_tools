@@ -84,7 +84,7 @@ class ChangesReport
         end
       end;
     rescue NoMethodError
-      puts "Mapping Error on jupiter ID #{change_event.item_id} of type #{change_event.item_type} and event #{change_event.event}"
+      puts "Mapping Error on jupiter ID #{change_event.item_id} of type #{change_event.item_type} and event #{change_event.event}. Check if object destroyed."
     end
     return scholaris_mapped_change_event
   end
