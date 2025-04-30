@@ -11,6 +11,7 @@
 """
 
 import argparse
+import csv
 import logging
 import os
 import pathlib
@@ -196,6 +197,64 @@ def process_users(dspace_client, output_file):
     logging.info("Count: [%d]", count)
 
 
+def process_collection_stats(dspace_client, output_file):
+    """
+    Process collections with the number of items in each collection
+    """
+    csv_writer = csv.DictWriter(
+        output_file,
+        fieldnames=[
+            "collection.uuid",
+            "collection.name",
+            "provenance.ual.jupiter.id",
+            "count",
+        ],
+    )
+    csv_writer.writeheader()
+
+    collection_mapping = utils.get_collection_mapping(dspace_client)
+
+    logging.debug("Collection Mapping: %s", collection_mapping)
+
+    # Without Solr
+    # items = dspace_client.search_objects_iter(query="*:*", dso_type="item")
+    # for item in items:
+    #     parent_collection = item.links["owningCollection"]["href"]
+    #     r_json = dspace_client.fetch_resource(url=parent_collection)
+    #     collection_uuid = r_json['uuid']
+    #     if collection_uuid not in collection_mapping:
+    #         logging.error(f"ERROR owning collection not found for item %s", collection_uuid)
+    #         collection_mapping[collection_uuid] = {
+    #            'count': 1,
+    #            'collection.name': "owningCollection not found",
+    #            'provenance.ual.jupiter.id': None
+    #            }
+    #    elif 'count' not in collection_mapping[collection_uuid]:
+    #        collection_mapping[collection_uuid]['count'] = 0
+    #    else:
+    #        collection_mapping[collection_uuid]['count'] = collection_mapping[collection_uuid]['count'] + 1
+    # logging.debug("Collection Mapping: %s", collection_mapping)
+
+    for key, value in collection_mapping.items():
+        logging.debug("Collection Mapping: %s", key)
+        logging.debug("Collection Mapping: %s", value)
+        items_iter = dspace_client.search_objects_iter(
+            query="*:*", scope=key, dso_type="item"
+        )
+        if items_iter:
+            value["count"] = len(list(items_iter))
+        if "count" not in value:
+            value["count"] = 0
+        csv_writer.writerow(
+            {
+                "collection.uuid": key,
+                "collection.name": value["collection.name"],
+                "provenance.ual.jupiter.id": value["provenance.ual.jupiter.id"],
+                "count": value["count"],
+            }
+        )
+
+
 #
 def process(dspace_client, output_file, dso_type):
     """
@@ -213,6 +272,8 @@ def process(dspace_client, output_file, dso_type):
             process_bitstreams(dspace_client, output_file)
         case "users":
             process_users(dspace_client, output_file)
+        case "collection_stats":
+            process_collection_stats(dspace_client, output_file)
         case _:
             logging.error("Unsupported DSO Type: %s", dso_type)
             sys.exit()
@@ -227,6 +288,7 @@ def main():
     args = parse_args()
 
     dspace_client = DSpaceClient(fake_user_agent=True)
+    dspace_client.ITER_PAGE_SIZE = 250
 
     # Configure logging
     log_level = getattr(logging, args.logging_level.upper(), None)

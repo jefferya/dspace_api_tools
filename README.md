@@ -41,7 +41,7 @@ What is content is audited:
   * associated to the correct community (by name as DSpace doesn't store legacy community jupiter id)
   * fields (labels from DSpace API): name, description, abstract, title
 
-* Bitstream 
+* Bitstream
   * existence
   * associated with the correct Item (ID & Name)
   * correct sequence number
@@ -153,7 +153,7 @@ Setup for Ruby scripts
 
 Consider cloning this repository into `/tmp` and
 
-* sudo -u apache bash -c "cd /var/www/sites/jupiter && RAILS_ENV=staging bundle exec rails runner /tmp/dspace_api_tools/jupiter_output_scripts/jupiter_collection_metadata_to_CSV.rb"
+* `sudo -u apache bash -c "cd /var/www/sites/jupiter && RAILS_ENV=staging bundle exec rails runner /tmp/dspace_api_tools/jupiter_output_scripts/jupiter_collection_metadata_to_CSV.rb"`
   * change `RAIL_ENV` as needed [development|staging|production]
   * change script as needed
 
@@ -294,6 +294,14 @@ The steps to set up a validation run.
         --ids_file /tmp/x_in \
         --column jupter_id \
         --output /tmp/x_out
+    ```
+
+8. Optional: Collection item counts
+
+    ``` bash
+    ./venv/bin/python3 src/dspace_api_exports.py \
+        --output /tmp/z \
+        --dso_type collection_stats
     ```
 
 ## dspace_api_exports.py

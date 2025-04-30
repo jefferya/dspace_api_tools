@@ -457,6 +457,36 @@ def get_access_rights(dspace_client, item):
     return r_json["status"]
 
 
+def get_collection_mapping(dspace_client):
+    """
+    Get the collection mapping
+    """
+    collection_iter = dspace_client.search_objects_iter(
+        query="*:*", dso_type="collection"
+    )
+    collection_mapping = {}
+    for collection in collection_iter:
+        collection_mapping[collection.uuid] = {
+            "collection.name": collection.name,
+            "provenance.ual.jupiter.id": get_provenance_ual_jupiter_id(
+                collection, "ual.jupiterId.collection"
+            ),
+            # "collection.url": collection.links["self"]["href"]
+        }
+    return collection_mapping
+
+
+def get_items_given_collection_id(dspace_client, collection_id):
+    """
+    Get the items given a collection ID
+    """
+    items = dspace_client.search_objects_iter(
+        query="*:*", scope=collection_id, dso_type="item"
+    )
+
+    return items
+
+
 def check_required_env_vars():
     """
     Check if the https://pypi.org/project/dspace-rest-client
