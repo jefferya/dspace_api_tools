@@ -107,6 +107,8 @@ I'll import into a Google Sheet to leverage the power of the grid layout
 `index` is empty if a thing is not found in Jupiter (e.g., a UI entered, hand-crafted test in Scholaris)
 `dspace_id` is nan/empty if a thing is not found in DSpace (e.g., an ERA item has not been migrated into Scholaris)
 
+Note for bitstreams, all DSpace bitstreams are included in the report, including the DSpace generated bitstreams. One can limit and remove if the bundlename is not ORIGINAL.
+
 #### Audit: Technical Details
 
 ##### How to how to extend the JSON flattening
