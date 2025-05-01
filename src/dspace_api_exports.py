@@ -44,7 +44,7 @@ def parse_args():
         required=False,
         default=100,
         type=int,
-        choices=range(0,101),
+        choices=range(0, 101),
         help="Trigger a random sample to speedup runtime (1-100 percent).",
     )
     parser.add_argument(
@@ -110,9 +110,9 @@ def process_items(dspace_client, output_file, random_sample_by_percentage=100):
         logging.debug("%s", item.to_json_pretty())
         if utils.include_in_random_sample(random_sample_by_percentage):
             provenance = {
-                "provenance.ual.jupiterId.item": utils.get_provenance_ual_jupiter_id(
-                    item, "ual.jupiterId.item"
-                ),
+                # "provenance.ual.jupiterId.item": utils.get_provenance_ual_jupiter_id(
+                #    item, "ual.jupiterId.item"
+                # ),
                 "provenance.ual.jupiterId.collection": utils.get_provenance_ual_jupiter_collection_id(
                     dspace_client, item
                 ),
@@ -123,6 +123,59 @@ def process_items(dspace_client, output_file, random_sample_by_percentage=100):
         else:
             logging.info("Not in random sample: %s (%s)", item.name, item.uuid)
     logging.info("Count: [%d]", count)
+
+
+def process_items_quick(dspace_client, output_file):
+    """
+    Process items quickly using Solr / Search API
+    """
+    print("\n\n+++++++++++++++++++")
+    print(
+        "\n Items fields only included in output if explictily added to CSV dict header and JSON flattening.\n"
+    )
+    print("+++++++++++++++++++\n\n")
+    writer = utils.output_init(output_file, "item")
+
+    collection_iter = dspace_client.search_objects_iter(
+        query="*:*", dso_type="collection"
+    )
+    item_count_total = 1
+    for collection in collection_iter:
+        logging.info("Collection %s (%s)", collection.name, collection.uuid)
+        logging.debug("%s", collection.to_json_pretty())
+
+        # server/api/discover/search/objects?query=test&embed=thumbnail&embed=item%2Fthumbnail&embed=accessStatus
+        # Consider adding the collection to each item via embed as opposed to
+        #    doing the above loop
+        #    embeds=["accessStatus", "owningCollection"]
+        items_iter = dspace_client.search_objects_iter(
+            query="*:*", scope=collection.uuid, dso_type="item", embeds=["accessStatus"]
+        )
+
+        for item in items_iter:
+
+            if item_count_total % 5000 == 0:
+                dspace_client.refresh_token()
+
+            logging.info("%s (%s)", item.name, item.uuid)
+            logging.debug("%s", item.to_json_pretty())
+
+            provenance = {
+                # "provenance.ual.jupiterId.item": utils.get_provenance_ual_jupiter_id(
+                #    item, "ual.jupiterId.item"
+                # ),
+                # "provenance.ual.jupiterId.item": item.metadata.get("ual.jupiterId", None),
+                "provenance.ual.jupiterId.collection": utils.get_provenance_ual_jupiter_id(
+                    collection, "ual.jupiterId.collection"
+                ),
+                "access_rights": item.embedded["accessStatus"]["status"],
+            }
+
+            logging.debug("------ provenance %s", provenance)
+            utils.output_writer(item, "item", writer, embbed=provenance)
+            item_count_total += 1
+
+    logging.info("Count: [%d]", item_count_total)
 
 
 def process_bitstreams(dspace_client, output_file, random_sample_by_percentage):
@@ -284,6 +337,8 @@ def process(dspace_client, output_file, dso_type, random_sample_percentage):
             process_collections(dspace_client, output_file)
         case "items":
             process_items(dspace_client, output_file, random_sample_percentage)
+        case "items_quick":
+            process_items_quick(dspace_client, output_file)
         case "bitstreams":
             process_bitstreams(dspace_client, output_file, random_sample_percentage)
         case "users":
@@ -306,8 +361,8 @@ def main():
     dspace_client = DSpaceClient(fake_user_agent=True)
     # don't set size over 100 otherwise a weird disconnect happens
     # between the requested page size, actual result size and # of pages
-    # If 512 items and size is set to 500, 
-    dspace_client.ITER_PAGE_SIZE = 100 
+    # If 512 items and size is set to 500,
+    dspace_client.ITER_PAGE_SIZE = 100
 
     # Configure logging
     log_level = getattr(logging, args.logging_level.upper(), None)

@@ -384,6 +384,7 @@ def get_provenance_ual_jupiter_id(dso, key):
     """
     dc_provenance_ual_jupiter_id = None
     if "dc.provenance" in dso.metadata:
+        logging.debug("Provenance: %s", dso.metadata["dc.provenance"])
         for provenance in dso.metadata["dc.provenance"]:
             if provenance["value"] != "":
                 provenance_json = convert_string_to_json(provenance["value"])
@@ -466,6 +467,7 @@ def get_collection_mapping(dspace_client):
         query="*:*", dso_type="collection"
     )
     collection_mapping = {}
+    cnt = 0
     for cnt, collection in enumerate(collection_iter, start=1):
         collection_mapping[collection.uuid] = {
             "collection.name": collection.name,
@@ -474,7 +476,7 @@ def get_collection_mapping(dspace_client):
             ),
             # "collection.url": collection.links["self"]["href"]
         }
-    logging.info("Total collections: %s",cnt)
+    logging.info("Total collections: %s", cnt)
     return collection_mapping
 
 
