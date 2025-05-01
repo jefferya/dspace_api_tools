@@ -39,6 +39,14 @@ def parse_args():
         default="communities",
     )
     parser.add_argument(
+        "--random_sample_by_percentage",
+        required=False,
+        default=100,
+        type=int,
+        choices=range(0,101),
+        help="Trigger a random sample to speedup runtime (1-100 percent).",
+    )
+    parser.add_argument(
         "--logging_level", required=False, help="Logging level.", default="INFO"
     )
 
@@ -81,7 +89,7 @@ def process_collections(dspace_client, output_file):
     logging.info("Count: [%d]", count)
 
 
-def process_items(dspace_client, output_file):
+def process_items(dspace_client, output_file, random_sample_by_percentage=100):
     """
     Process items
     """
@@ -99,21 +107,24 @@ def process_items(dspace_client, output_file):
             dspace_client.refresh_token()
         logging.info("%s (%s)", item.name, item.uuid)
         logging.debug("%s", item.to_json_pretty())
-        provenance = {
-            "provenance.ual.jupiterId.item": utils.get_provenance_ual_jupiter_id(
-                item, "ual.jupiterId.item"
-            ),
-            "provenance.ual.jupiterId.collection": utils.get_provenance_ual_jupiter_collection_id(
-                dspace_client, item
-            ),
-            "access_rights": utils.get_access_rights(dspace_client, item),
-        }
-        logging.debug("------ provenance %s", provenance)
-        utils.output_writer(item, "item", writer, embbed=provenance)
+        if utils.include_in_random_sample(random_sample_by_percentage):
+            provenance = {
+                "provenance.ual.jupiterId.item": utils.get_provenance_ual_jupiter_id(
+                    item, "ual.jupiterId.item"
+                ),
+                "provenance.ual.jupiterId.collection": utils.get_provenance_ual_jupiter_collection_id(
+                    dspace_client, item
+                ),
+                "access_rights": utils.get_access_rights(dspace_client, item),
+            }
+            logging.debug("------ provenance %s", provenance)
+            utils.output_writer(item, "item", writer, embbed=provenance)
+        else:
+            logging.info("Not in random sample: %s (%s)", item.name, item.uuid)
     logging.info("Count: [%d]", count)
 
 
-def process_bitstreams(dspace_client, output_file):
+def process_bitstreams(dspace_client, output_file, random_sample_by_percentage):
     """
     Process bitstreams: mainly for existence checks and bitstream checksums
     """
@@ -124,6 +135,10 @@ def process_bitstreams(dspace_client, output_file):
         # refresh auth token
         if count % 5000 == 0:
             dspace_client.refresh_token()
+
+        if not utils.include_in_random_sample(random_sample_by_percentage):
+            logging.info("Not in random sample: %s (%s)", item.name, item.uuid)
+            continue
 
         if "ual.jupiterId" in item.metadata:
             ual_jupiterid_item = utils.deconstruct_list_of_dicts_to_a_single_value(
@@ -256,7 +271,7 @@ def process_collection_stats(dspace_client, output_file):
 
 
 #
-def process(dspace_client, output_file, dso_type):
+def process(dspace_client, output_file, dso_type, random_sample_percentage):
     """
     Main processing function
     """
@@ -267,9 +282,9 @@ def process(dspace_client, output_file, dso_type):
         case "collections":
             process_collections(dspace_client, output_file)
         case "items":
-            process_items(dspace_client, output_file)
+            process_items(dspace_client, output_file, random_sample_percentage)
         case "bitstreams":
-            process_bitstreams(dspace_client, output_file)
+            process_bitstreams(dspace_client, output_file, random_sample_percentage)
         case "users":
             process_users(dspace_client, output_file)
         case "collection_stats":
@@ -309,7 +324,9 @@ def main():
 
     pathlib.Path(os.path.dirname(args.output)).mkdir(parents=True, exist_ok=True)
     with open(args.output, "wt", encoding="utf-8", newline="") as output_file:
-        process(dspace_client, output_file, args.dso_type)
+        process(
+            dspace_client, output_file, args.dso_type, args.random_sample_by_percentage
+        )
 
 
 #

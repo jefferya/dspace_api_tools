@@ -7,6 +7,7 @@ import csv
 import logging
 import json
 import os
+import random
 import sys
 
 
@@ -513,3 +514,14 @@ def configure_logging(logging_level):
         raise ValueError(f"Invalid log level: {logging_level}")
     # Options: DEBUG, INFO, WARNING, ERROR, CRITICAL
     logging.getLogger().setLevel(log_level)
+
+
+def include_in_random_sample(random_sample_by_percent=100) -> bool:
+    """
+    Return True if part of a random sample
+    """
+    if random_sample_by_percent >= 100:
+        return True
+    if random_sample_by_percent <= 0:
+        return False
+    return random.randint(1, 100) <= random_sample_by_percent

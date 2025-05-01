@@ -189,6 +189,8 @@ The steps to set up a validation run.
 
 3. `./dspace_api_exports.py` to export (CSV) DSpace metadata
 
+    * Option for items and bitstreams: `--random_sample_by_percentage` with default 100% and range between 1-100.
+
     ```bash
     # Set environment variables
     export DSPACE_API_ENDPOINT=https://${SERVER_NAME}/server/api/
