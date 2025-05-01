@@ -13,6 +13,7 @@
 import argparse
 import csv
 import logging
+import json
 import os
 import pathlib
 import sys
@@ -229,7 +230,7 @@ def process_collection_stats(dspace_client, output_file):
 
     collection_mapping = utils.get_collection_mapping(dspace_client)
 
-    logging.debug("Collection Mapping: %s", collection_mapping)
+    logging.debug("Collection Mapping: %s", json.dumps(collection_mapping, indent=2))
 
     # Without Solr
     # items = dspace_client.search_objects_iter(query="*:*", dso_type="item")
@@ -303,7 +304,10 @@ def main():
     args = parse_args()
 
     dspace_client = DSpaceClient(fake_user_agent=True)
-    dspace_client.ITER_PAGE_SIZE = 250
+    # don't set size over 100 otherwise a weird disconnect happens
+    # between the requested page size, actual result size and # of pages
+    # If 512 items and size is set to 500, 
+    dspace_client.ITER_PAGE_SIZE = 100 
 
     # Configure logging
     log_level = getattr(logging, args.logging_level.upper(), None)

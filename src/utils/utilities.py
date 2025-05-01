@@ -466,7 +466,7 @@ def get_collection_mapping(dspace_client):
         query="*:*", dso_type="collection"
     )
     collection_mapping = {}
-    for collection in collection_iter:
+    for cnt, collection in enumerate(collection_iter, start=1):
         collection_mapping[collection.uuid] = {
             "collection.name": collection.name,
             "provenance.ual.jupiter.id": get_provenance_ual_jupiter_id(
@@ -474,6 +474,7 @@ def get_collection_mapping(dspace_client):
             ),
             # "collection.url": collection.links["self"]["href"]
         }
+    logging.info("Total collections: %s",cnt)
     return collection_mapping
 
 
