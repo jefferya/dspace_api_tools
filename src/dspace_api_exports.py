@@ -19,6 +19,7 @@ import pathlib
 import sys
 
 from dspace_rest_client.client import DSpaceClient
+from dspace_rest_client.models import Bundle
 
 from utils import utilities as utils
 
@@ -171,7 +172,7 @@ def process_items_quick(dspace_client, output_file):
     logging.info("Count: [%d]", item_count_total)
 
 
-def process_bitstreams(dspace_client, output_file, random_sample_by_percentage):
+def process_bitstreams(dspace_client, output_file, random_sample_by_percentage=100):
     """
     Process bitstreams: mainly for existence checks and bitstream checksums
     """
@@ -187,63 +188,43 @@ def process_bitstreams(dspace_client, output_file, random_sample_by_percentage):
             logging.info("Not in random sample: %s (%s)", item.name, item.uuid)
             continue
 
-        if "ual.jupiterId" in item.metadata:
-            ual_jupiterid_item = utils.deconstruct_list_of_dicts_to_a_single_value(
-                item.metadata["ual.jupiterId"]
-            )
-        else:
-            ual_jupiterid_item = None
         bundles = dspace_client.get_bundles(parent=item)
         for bundle in bundles:
             bitstreams = dspace_client.get_bitstreams(bundle=bundle)
-            for bitstream in bitstreams:
-                logging.info("%s (%s)", bitstream.name, item.uuid)
-                logging.debug("%s", bitstream.to_json_pretty())
-                logging.debug("%s", bundle.to_json_pretty())
-                tmp_dict = {
-                    "item.handle": item.handle,
-                    "item.uuid": item.uuid,
-                    "item.name": item.name,
-                    "provenance.ual.jupiterId.item": ual_jupiterid_item,
-                    "bundle.name": bundle.name,
-                    "bitstream.name": bitstream.name,
-                    "bitstream.bundleName": bitstream.bundleName,
-                    "bitstream.checksum.value": bitstream.checkSum["value"],
-                    "bitstream.checksum_algorithm": bitstream.checkSum[
-                        "checkSumAlgorithm"
-                    ],
-                    "bitstream.sizeBytes": bitstream.sizeBytes,
-                    "bitstream.sequenceId": bitstream.sequenceId,
-                    "bitstream.id": bitstream.id,
-                    "bitstream.uuid": bitstream.uuid,
-                }
-                if "dc.title" in bitstream.metadata:
-                    tmp_dict.update(
-                        {
-                            "bitstream.metadata.dc.title": bitstream.metadata[
-                                "dc.title"
-                            ][0]["value"]
-                        }
-                    )
-                if "dc.source" in bitstream.metadata:
-                    tmp_dict.update(
-                        {
-                            "bitstream.metadata.dc.source.0.value": bitstream.metadata[
-                                "dc.source"
-                            ][0]["value"]
-                        }
-                    )
-                if "dc.description" in bitstream.metadata:
-                    tmp_dict.update(
-                        {
-                            "bitstream.metadata.dc.description": bitstream.metadata[
-                                "dc.description"
-                            ][0]["value"],
-                        }
-                    )
+            utils.output_bitstream(item, bundle, bitstreams, writer)
 
-                utils.output_writer(tmp_dict, "bitstream", writer)
     logging.info("Count: [%d]", count)
+
+
+def process_bitstreams_quick(dspace_client, output_file):
+    """
+    Process bitstreams: mainly for existence checks and bitstream checksums
+    Use the search API in this version
+    """
+    writer = utils.output_init(output_file, "bitstream")
+    items = dspace_client.search_objects_iter(
+        query="*:*", dso_type="item", embeds=["bundles"]
+    )
+    count = 0
+    for count, item in enumerate(items, start=1):
+        logging.info("Item: %s", item.to_json_pretty())
+        # refresh auth token
+
+        if count % 5000 == 0:
+            dspace_client.refresh_token()
+
+        if "bundles" in item.embedded:
+            # this could be a bug in the discovery search API the need have
+            # ["_embedded"]["bundles"]
+            logging.info("Embed: %s", item.embedded["bundles"]["_embedded"]["bundles"])
+            for bundle in item.embedded["bundles"]["_embedded"]["bundles"]:
+                logging.info("Bundle: %s", bundle)
+                if bundle.get("name", None) == "ORIGINAL":
+                    bundle_obj = Bundle(bundle)
+                    bitstreams = dspace_client.get_bitstreams(bundle=bundle_obj)
+                    utils.output_bitstream(item, bundle_obj, bitstreams, writer)
+
+    logging.info("Count items (not actual bitstreams): [%d]", count)
 
 
 def process_users(dspace_client, output_file):
@@ -334,6 +315,8 @@ def process(dspace_client, output_file, dso_type, random_sample_percentage):
             process_items_quick(dspace_client, output_file)
         case "bitstreams":
             process_bitstreams(dspace_client, output_file, random_sample_percentage)
+        case "bitstreams_quick":
+            process_bitstreams_quick(dspace_client, output_file)
         case "users":
             process_users(dspace_client, output_file)
         case "collection_stats":
@@ -356,6 +339,7 @@ def main():
     # between the requested page size, actual result size and # of pages
     # If 512 items and size is set to 500,
     # https://github.com/DSpace/DSpace/issues/8723
+    # http://198.168.187.81:8080/server/api/discover/search/objects?dsoType=collection&page=0&size=500
     dspace_client.ITER_PAGE_SIZE = 100
 
     # Configure logging

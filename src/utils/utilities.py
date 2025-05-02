@@ -377,6 +377,57 @@ def output_writer(dso, dso_type, writer, output_type="csv", embbed=None):
         sys.exit()
 
 
+def output_bitstream(item, bundle, bitstreams, writer):
+    """
+    Writer a Bistream export to the CSV file
+    """
+    for bitstream in bitstreams:
+        logging.info("%s (%s)", bitstream.name, item.uuid)
+        logging.debug("%s", bitstream.to_json_pretty())
+        logging.debug("%s", bundle.to_json_pretty())
+        tmp_dict = {
+            "item.handle": item.handle,
+            "item.uuid": item.uuid,
+            "item.name": item.name,
+            "provenance.ual.jupiterId.item": get_ual_jupiter_item_id(item),
+            "bundle.name": bundle.name,
+            "bitstream.name": bitstream.name,
+            "bitstream.bundleName": bitstream.bundleName,
+            "bitstream.checksum.value": bitstream.checkSum["value"],
+            "bitstream.checksum_algorithm": bitstream.checkSum["checkSumAlgorithm"],
+            "bitstream.sizeBytes": bitstream.sizeBytes,
+            "bitstream.sequenceId": bitstream.sequenceId,
+            "bitstream.id": bitstream.id,
+            "bitstream.uuid": bitstream.uuid,
+        }
+        if "dc.title" in bitstream.metadata:
+            tmp_dict.update(
+                {
+                    "bitstream.metadata.dc.title": bitstream.metadata["dc.title"][0][
+                        "value"
+                    ]
+                }
+            )
+        if "dc.source" in bitstream.metadata:
+            tmp_dict.update(
+                {
+                    "bitstream.metadata.dc.source.0.value": bitstream.metadata[
+                        "dc.source"
+                    ][0]["value"]
+                }
+            )
+        if "dc.description" in bitstream.metadata:
+            tmp_dict.update(
+                {
+                    "bitstream.metadata.dc.description": bitstream.metadata[
+                        "dc.description"
+                    ][0]["value"],
+                }
+            )
+
+        output_writer(tmp_dict, "bitstream", writer)
+
+
 def get_provenance_ual_jupiter_id(dso, key):
     """
     Get the DC provenance UAL Jupiter ID from the collection
@@ -447,6 +498,17 @@ def get_provenance_ual_jupiter_collection_id(dspace_client, item):
     for c in collections:
         ret.append(get_provenance_ual_jupiter_id(c, "ual.jupiterId.collection"))
     return ret
+
+
+def get_ual_jupiter_item_id(item):
+    """
+    Get the jupiter ID from an Item
+    """
+    if "ual.jupiterId" in item.metadata:
+        return deconstruct_list_of_dicts_to_a_single_value(
+            item.metadata["ual.jupiterId"]
+        )
+    return None
 
 
 def get_access_rights(dspace_client, item):
