@@ -7,6 +7,7 @@ import csv
 import logging
 import json
 import os
+import random
 import sys
 
 
@@ -51,7 +52,6 @@ CSV_FLATTENED_HEADERS = {
         "handle",
         "lastModified",
         "name",
-        "provenance.ual.jupiterId.item",
         "provenance.ual.jupiterId.collection",
         "type",
         "access_rights",
@@ -377,12 +377,64 @@ def output_writer(dso, dso_type, writer, output_type="csv", embbed=None):
         sys.exit()
 
 
+def output_bitstream(item, bundle, bitstreams, writer):
+    """
+    Writer a Bistream export to the CSV file
+    """
+    for bitstream in bitstreams:
+        logging.info("%s (%s)", bitstream.name, item.uuid)
+        logging.debug("%s", bitstream.to_json_pretty())
+        logging.debug("%s", bundle.to_json_pretty())
+        tmp_dict = {
+            "item.handle": item.handle,
+            "item.uuid": item.uuid,
+            "item.name": item.name,
+            "provenance.ual.jupiterId.item": get_ual_jupiter_item_id(item),
+            "bundle.name": bundle.name,
+            "bitstream.name": bitstream.name,
+            "bitstream.bundleName": bitstream.bundleName,
+            "bitstream.checksum.value": bitstream.checkSum["value"],
+            "bitstream.checksum_algorithm": bitstream.checkSum["checkSumAlgorithm"],
+            "bitstream.sizeBytes": bitstream.sizeBytes,
+            "bitstream.sequenceId": bitstream.sequenceId,
+            "bitstream.id": bitstream.id,
+            "bitstream.uuid": bitstream.uuid,
+        }
+        if "dc.title" in bitstream.metadata:
+            tmp_dict.update(
+                {
+                    "bitstream.metadata.dc.title": bitstream.metadata["dc.title"][0][
+                        "value"
+                    ]
+                }
+            )
+        if "dc.source" in bitstream.metadata:
+            tmp_dict.update(
+                {
+                    "bitstream.metadata.dc.source.0.value": bitstream.metadata[
+                        "dc.source"
+                    ][0]["value"]
+                }
+            )
+        if "dc.description" in bitstream.metadata:
+            tmp_dict.update(
+                {
+                    "bitstream.metadata.dc.description": bitstream.metadata[
+                        "dc.description"
+                    ][0]["value"],
+                }
+            )
+
+        output_writer(tmp_dict, "bitstream", writer)
+
+
 def get_provenance_ual_jupiter_id(dso, key):
     """
     Get the DC provenance UAL Jupiter ID from the collection
     """
     dc_provenance_ual_jupiter_id = None
     if "dc.provenance" in dso.metadata:
+        logging.debug("Provenance: %s", dso.metadata["dc.provenance"])
         for provenance in dso.metadata["dc.provenance"]:
             if provenance["value"] != "":
                 provenance_json = convert_string_to_json(provenance["value"])
@@ -448,6 +500,17 @@ def get_provenance_ual_jupiter_collection_id(dspace_client, item):
     return ret
 
 
+def get_ual_jupiter_item_id(item):
+    """
+    Get the jupiter ID from an Item
+    """
+    if "ual.jupiterId" in item.metadata:
+        return deconstruct_list_of_dicts_to_a_single_value(
+            item.metadata["ual.jupiterId"]
+        )
+    return None
+
+
 def get_access_rights(dspace_client, item):
     """
     Get the access rights assocated with the Item
@@ -455,6 +518,38 @@ def get_access_rights(dspace_client, item):
     access_rights_href = item.links["accessStatus"]["href"]
     r_json = dspace_client.fetch_resource(url=access_rights_href)
     return r_json["status"]
+
+
+def get_collection_mapping(dspace_client):
+    """
+    Get the collection mapping
+    """
+    collection_iter = dspace_client.search_objects_iter(
+        query="*:*", dso_type="collection"
+    )
+    collection_mapping = {}
+    cnt = 0
+    for cnt, collection in enumerate(collection_iter, start=1):
+        collection_mapping[collection.uuid] = {
+            "collection.name": collection.name,
+            "provenance.ual.jupiter.id": get_provenance_ual_jupiter_id(
+                collection, "ual.jupiterId.collection"
+            ),
+            # "collection.url": collection.links["self"]["href"]
+        }
+    logging.info("Total collections: %s", cnt)
+    return collection_mapping
+
+
+def get_items_given_collection_id(dspace_client, collection_id):
+    """
+    Get the items given a collection ID
+    """
+    items = dspace_client.search_objects_iter(
+        query="*:*", scope=collection_id, dso_type="item"
+    )
+
+    return items
 
 
 def check_required_env_vars():
@@ -483,3 +578,14 @@ def configure_logging(logging_level):
         raise ValueError(f"Invalid log level: {logging_level}")
     # Options: DEBUG, INFO, WARNING, ERROR, CRITICAL
     logging.getLogger().setLevel(log_level)
+
+
+def include_in_random_sample(random_sample_by_percent=100) -> bool:
+    """
+    Return True if part of a random sample
+    """
+    if random_sample_by_percent >= 100:
+        return True
+    if random_sample_by_percent <= 0:
+        return False
+    return random.randint(1, 100) <= random_sample_by_percent

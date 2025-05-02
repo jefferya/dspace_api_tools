@@ -58,7 +58,7 @@ class ChangesReport
         end
       end;
     rescue NoMethodError
-      puts "Mapping Error on jupiter ID #{change_event.item_id} of type #{change_event.item_type} and event #{change_event.event}"
+      puts "Mapping Error on jupiter ID #{change_event.item_id} of type #{change_event.item_type} and event #{change_event.event}. Check if object destroyed."
     end
     return scholaris_mapped_change_event
   end
@@ -170,4 +170,4 @@ class ChangesReport
 
 end
 
-ChangesReport.new("/era_tmp/delete_me_by_2025-05-14/",Date.new(2025, 3, 15)).perform()
+ChangesReport.new("/era_tmp/delete_me_by_2025-05-15/",Date.new(2025, 3, 15)).perform()

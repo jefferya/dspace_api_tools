@@ -11,12 +11,15 @@
 """
 
 import argparse
+import csv
 import logging
+import json
 import os
 import pathlib
 import sys
 
 from dspace_rest_client.client import DSpaceClient
+from dspace_rest_client.models import Bundle
 
 from utils import utilities as utils
 
@@ -36,6 +39,14 @@ def parse_args():
         required=False,
         help="DSpace Object Type ['communities', 'collections', 'items', 'users'].",
         default="communities",
+    )
+    parser.add_argument(
+        "--random_sample_by_percentage",
+        required=False,
+        default=100,
+        type=int,
+        choices=range(0, 101),
+        help="Trigger a random sample to speedup runtime (1-100 percent).",
     )
     parser.add_argument(
         "--logging_level", required=False, help="Logging level.", default="INFO"
@@ -80,7 +91,7 @@ def process_collections(dspace_client, output_file):
     logging.info("Count: [%d]", count)
 
 
-def process_items(dspace_client, output_file):
+def process_items(dspace_client, output_file, random_sample_by_percentage=100):
     """
     Process items
     """
@@ -98,21 +109,70 @@ def process_items(dspace_client, output_file):
             dspace_client.refresh_token()
         logging.info("%s (%s)", item.name, item.uuid)
         logging.debug("%s", item.to_json_pretty())
-        provenance = {
-            "provenance.ual.jupiterId.item": utils.get_provenance_ual_jupiter_id(
-                item, "ual.jupiterId.item"
-            ),
-            "provenance.ual.jupiterId.collection": utils.get_provenance_ual_jupiter_collection_id(
-                dspace_client, item
-            ),
-            "access_rights": utils.get_access_rights(dspace_client, item),
-        }
-        logging.debug("------ provenance %s", provenance)
-        utils.output_writer(item, "item", writer, embbed=provenance)
+        if utils.include_in_random_sample(random_sample_by_percentage):
+            provenance = {
+                "provenance.ual.jupiterId.collection": utils.get_provenance_ual_jupiter_collection_id(
+                    dspace_client, item
+                ),
+                "access_rights": utils.get_access_rights(dspace_client, item),
+            }
+            logging.debug("------ provenance %s", provenance)
+            utils.output_writer(item, "item", writer, embbed=provenance)
+        else:
+            logging.info("Not in random sample: %s (%s)", item.name, item.uuid)
     logging.info("Count: [%d]", count)
 
 
-def process_bitstreams(dspace_client, output_file):
+def process_items_quick(dspace_client, output_file):
+    """
+    Process items quickly using Solr / Search API
+    """
+    print("\n\n+++++++++++++++++++")
+    print(
+        "\n Items fields only included in output if explictily added to CSV dict header and JSON flattening.\n"
+    )
+    print("+++++++++++++++++++\n\n")
+    writer = utils.output_init(output_file, "item")
+
+    collection_iter = dspace_client.search_objects_iter(
+        query="*:*", dso_type="collection"
+    )
+    item_count_total = 1
+    for collection in collection_iter:
+        logging.info("Collection %s (%s)", collection.name, collection.uuid)
+        logging.debug("%s", collection.to_json_pretty())
+
+        # server/api/discover/search/objects?query=test&embed=thumbnail&embed=item%2Fthumbnail&embed=accessStatus
+        # Consider adding the collection to each item via embed as opposed to
+        #    doing the above loop
+        #    embeds=["accessStatus", "owningCollection"]
+        items_iter = dspace_client.search_objects_iter(
+            query="*:*", scope=collection.uuid, dso_type="item", embeds=["accessStatus"]
+        )
+
+        for item in items_iter:
+
+            if item_count_total % 5000 == 0:
+                dspace_client.refresh_token()
+
+            logging.info("%s (%s)", item.name, item.uuid)
+            logging.debug("%s", item.to_json_pretty())
+
+            provenance = {
+                "provenance.ual.jupiterId.collection": utils.get_provenance_ual_jupiter_id(
+                    collection, "ual.jupiterId.collection"
+                ),
+                "access_rights": item.embedded["accessStatus"]["status"],
+            }
+
+            logging.debug("------ provenance %s", provenance)
+            utils.output_writer(item, "item", writer, embbed=provenance)
+            item_count_total += 1
+
+    logging.info("Count: [%d]", item_count_total)
+
+
+def process_bitstreams(dspace_client, output_file, random_sample_by_percentage=100):
     """
     Process bitstreams: mainly for existence checks and bitstream checksums
     """
@@ -124,63 +184,47 @@ def process_bitstreams(dspace_client, output_file):
         if count % 5000 == 0:
             dspace_client.refresh_token()
 
-        if "ual.jupiterId" in item.metadata:
-            ual_jupiterid_item = utils.deconstruct_list_of_dicts_to_a_single_value(
-                item.metadata["ual.jupiterId"]
-            )
-        else:
-            ual_jupiterid_item = None
+        if not utils.include_in_random_sample(random_sample_by_percentage):
+            logging.info("Not in random sample: %s (%s)", item.name, item.uuid)
+            continue
+
         bundles = dspace_client.get_bundles(parent=item)
         for bundle in bundles:
             bitstreams = dspace_client.get_bitstreams(bundle=bundle)
-            for bitstream in bitstreams:
-                logging.info("%s (%s)", bitstream.name, item.uuid)
-                logging.debug("%s", bitstream.to_json_pretty())
-                logging.debug("%s", bundle.to_json_pretty())
-                tmp_dict = {
-                    "item.handle": item.handle,
-                    "item.uuid": item.uuid,
-                    "item.name": item.name,
-                    "provenance.ual.jupiterId.item": ual_jupiterid_item,
-                    "bundle.name": bundle.name,
-                    "bitstream.name": bitstream.name,
-                    "bitstream.bundleName": bitstream.bundleName,
-                    "bitstream.checksum.value": bitstream.checkSum["value"],
-                    "bitstream.checksum_algorithm": bitstream.checkSum[
-                        "checkSumAlgorithm"
-                    ],
-                    "bitstream.sizeBytes": bitstream.sizeBytes,
-                    "bitstream.sequenceId": bitstream.sequenceId,
-                    "bitstream.id": bitstream.id,
-                    "bitstream.uuid": bitstream.uuid,
-                }
-                if "dc.title" in bitstream.metadata:
-                    tmp_dict.update(
-                        {
-                            "bitstream.metadata.dc.title": bitstream.metadata[
-                                "dc.title"
-                            ][0]["value"]
-                        }
-                    )
-                if "dc.source" in bitstream.metadata:
-                    tmp_dict.update(
-                        {
-                            "bitstream.metadata.dc.source.0.value": bitstream.metadata[
-                                "dc.source"
-                            ][0]["value"]
-                        }
-                    )
-                if "dc.description" in bitstream.metadata:
-                    tmp_dict.update(
-                        {
-                            "bitstream.metadata.dc.description": bitstream.metadata[
-                                "dc.description"
-                            ][0]["value"],
-                        }
-                    )
+            utils.output_bitstream(item, bundle, bitstreams, writer)
 
-                utils.output_writer(tmp_dict, "bitstream", writer)
     logging.info("Count: [%d]", count)
+
+
+def process_bitstreams_quick(dspace_client, output_file):
+    """
+    Process bitstreams: mainly for existence checks and bitstream checksums
+    Use the search API in this version
+    """
+    writer = utils.output_init(output_file, "bitstream")
+    items = dspace_client.search_objects_iter(
+        query="*:*", dso_type="item", embeds=["bundles"]
+    )
+    count = 0
+    for count, item in enumerate(items, start=1):
+        logging.info("Item: %s", item.to_json_pretty())
+        # refresh auth token
+
+        if count % 5000 == 0:
+            dspace_client.refresh_token()
+
+        if "bundles" in item.embedded:
+            # this could be a bug in the discovery search API the need have
+            # ["_embedded"]["bundles"]
+            logging.info("Embed: %s", item.embedded["bundles"]["_embedded"]["bundles"])
+            for bundle in item.embedded["bundles"]["_embedded"]["bundles"]:
+                logging.info("Bundle: %s", bundle)
+                if bundle.get("name", None) == "ORIGINAL":
+                    bundle_obj = Bundle(bundle)
+                    bitstreams = dspace_client.get_bitstreams(bundle=bundle_obj)
+                    utils.output_bitstream(item, bundle_obj, bitstreams, writer)
+
+    logging.info("Count items (not actual bitstreams): [%d]", count)
 
 
 def process_users(dspace_client, output_file):
@@ -196,8 +240,66 @@ def process_users(dspace_client, output_file):
     logging.info("Count: [%d]", count)
 
 
+def process_collection_stats(dspace_client, output_file):
+    """
+    Process collections with the number of items in each collection
+    """
+    csv_writer = csv.DictWriter(
+        output_file,
+        fieldnames=[
+            "collection.uuid",
+            "collection.name",
+            "provenance.ual.jupiter.id",
+            "count",
+        ],
+    )
+    csv_writer.writeheader()
+
+    collection_mapping = utils.get_collection_mapping(dspace_client)
+
+    logging.debug("Collection Mapping: %s", json.dumps(collection_mapping, indent=2))
+
+    # Without Solr
+    # items = dspace_client.search_objects_iter(query="*:*", dso_type="item")
+    # for item in items:
+    #     parent_collection = item.links["owningCollection"]["href"]
+    #     r_json = dspace_client.fetch_resource(url=parent_collection)
+    #     collection_uuid = r_json['uuid']
+    #     if collection_uuid not in collection_mapping:
+    #         logging.error(f"ERROR owning collection not found for item %s", collection_uuid)
+    #         collection_mapping[collection_uuid] = {
+    #            'count': 1,
+    #            'collection.name': "owningCollection not found",
+    #            'provenance.ual.jupiter.id': None
+    #            }
+    #    elif 'count' not in collection_mapping[collection_uuid]:
+    #        collection_mapping[collection_uuid]['count'] = 0
+    #    else:
+    #        collection_mapping[collection_uuid]['count'] = collection_mapping[collection_uuid]['count'] + 1
+    # logging.debug("Collection Mapping: %s", collection_mapping)
+
+    for key, value in collection_mapping.items():
+        logging.debug("Collection Mapping: %s", key)
+        logging.debug("Collection Mapping: %s", value)
+        items_iter = dspace_client.search_objects_iter(
+            query="*:*", scope=key, dso_type="item"
+        )
+        if items_iter:
+            value["count"] = len(list(items_iter))
+        if "count" not in value:
+            value["count"] = 0
+        csv_writer.writerow(
+            {
+                "collection.uuid": key,
+                "collection.name": value["collection.name"],
+                "provenance.ual.jupiter.id": value["provenance.ual.jupiter.id"],
+                "count": value["count"],
+            }
+        )
+
+
 #
-def process(dspace_client, output_file, dso_type):
+def process(dspace_client, output_file, dso_type, random_sample_percentage):
     """
     Main processing function
     """
@@ -208,11 +310,17 @@ def process(dspace_client, output_file, dso_type):
         case "collections":
             process_collections(dspace_client, output_file)
         case "items":
-            process_items(dspace_client, output_file)
+            process_items(dspace_client, output_file, random_sample_percentage)
+        case "items_quick":
+            process_items_quick(dspace_client, output_file)
         case "bitstreams":
-            process_bitstreams(dspace_client, output_file)
+            process_bitstreams(dspace_client, output_file, random_sample_percentage)
+        case "bitstreams_quick":
+            process_bitstreams_quick(dspace_client, output_file)
         case "users":
             process_users(dspace_client, output_file)
+        case "collection_stats":
+            process_collection_stats(dspace_client, output_file)
         case _:
             logging.error("Unsupported DSO Type: %s", dso_type)
             sys.exit()
@@ -227,6 +335,12 @@ def main():
     args = parse_args()
 
     dspace_client = DSpaceClient(fake_user_agent=True)
+    # don't set size over 100 otherwise a weird disconnect happens
+    # between the requested page size, actual result size and # of pages
+    # If 512 items and size is set to 500,
+    # https://github.com/DSpace/DSpace/issues/8723
+    # http://198.168.187.81:8080/server/api/discover/search/objects?dsoType=collection&page=0&size=500
+    dspace_client.ITER_PAGE_SIZE = 100
 
     # Configure logging
     log_level = getattr(logging, args.logging_level.upper(), None)
@@ -247,7 +361,9 @@ def main():
 
     pathlib.Path(os.path.dirname(args.output)).mkdir(parents=True, exist_ok=True)
     with open(args.output, "wt", encoding="utf-8", newline="") as output_file:
-        process(dspace_client, output_file, args.dso_type)
+        process(
+            dspace_client, output_file, args.dso_type, args.random_sample_by_percentage
+        )
 
 
 #

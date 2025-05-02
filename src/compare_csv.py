@@ -64,7 +64,7 @@ def string_compare(str1, str2):
     """
     Compare two strings
     """
-    logging.debug("%s ---- %s", str1, str2)
+    logging.debug("|%s| ---- |%s|", str1, str2)
     return str1 == str2
 
 
@@ -113,7 +113,7 @@ def string_compare_ignore_whitespace(str1, str2):
     else:
         ret = regex.sub("", str(str1)) == regex.sub("", str(str2))
     logging.debug(
-        "%s ---- %s %s",
+        "|%s| ---- |%s| |%s|",
         str(str1),
         str(str2),
         str(ret),
@@ -153,13 +153,13 @@ def string_in_list_compare_ignore_whitespace(str1, list2):
     Compare a string to a string representation of a list
     Item description is stored as an list of "things"
     """
-    logging.debug("%s ---- %s", str1, list2)
+    logging.debug("|%s| ---- %s", str1, list2)
     if isinstance(str1, float):
         str1 = str(str1)
     else:
         str1 = remove_xml_invalid_characters(str1)
     list2 = utils.convert_string_list_representation_to_list(list2)
-    logging.debug("%s ---- %s", str1, list2)
+    logging.debug("|%s| ---- %s", str1, list2)
 
     return True if not str1 and not list2 else str(str1).strip() in list2
 
@@ -535,7 +535,7 @@ collection_columns_to_compare = {
     "comparison_types": {
         "name": {
             "columns": {"jupiter": "title", "dspace": "name"},
-            "comparison_function": string_compare,
+            "comparison_function": string_compare_ignore_whitespace,
         },
         "description": {
             "columns": {
@@ -553,7 +553,7 @@ collection_columns_to_compare = {
         },
         "dc.title": {
             "columns": {"jupiter": "title", "dspace": "metadata.dc.title"},
-            "comparison_function": value_in_string_list_compare,
+            "comparison_function": string_in_list_compare_ignore_whitespace,
         },
         "collection_parent_expect_to_fail_due_to_lack_of_community_provenance": {
             "columns": {

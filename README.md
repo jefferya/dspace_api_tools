@@ -41,7 +41,7 @@ What is content is audited:
   * associated to the correct community (by name as DSpace doesn't store legacy community jupiter id)
   * fields (labels from DSpace API): name, description, abstract, title
 
-* Bitstream 
+* Bitstream
   * existence
   * associated with the correct Item (ID & Name)
   * correct sequence number
@@ -107,6 +107,8 @@ I'll import into a Google Sheet to leverage the power of the grid layout
 `index` is empty if a thing is not found in Jupiter (e.g., a UI entered, hand-crafted test in Scholaris)
 `dspace_id` is nan/empty if a thing is not found in DSpace (e.g., an ERA item has not been migrated into Scholaris)
 
+Note for bitstreams, all DSpace bitstreams are included in the report, including the DSpace generated bitstreams. One can limit and remove if the bundlename is not ORIGINAL.
+
 #### Audit: Technical Details
 
 ##### How to how to extend the JSON flattening
@@ -153,7 +155,7 @@ Setup for Ruby scripts
 
 Consider cloning this repository into `/tmp` and
 
-* sudo -u apache bash -c "cd /var/www/sites/jupiter && RAILS_ENV=staging bundle exec rails runner /tmp/dspace_api_tools/jupiter_output_scripts/jupiter_collection_metadata_to_CSV.rb"
+* `sudo -u apache bash -c "cd /var/www/sites/jupiter && RAILS_ENV=staging bundle exec rails runner /tmp/dspace_api_tools/jupiter_output_scripts/jupiter_collection_metadata_to_CSV.rb"`
   * change `RAIL_ENV` as needed [development|staging|production]
   * change script as needed
 
@@ -188,6 +190,9 @@ The steps to set up a validation run.
    ```
 
 3. `./dspace_api_exports.py` to export (CSV) DSpace metadata
+
+    * Option for items and bitstreams: `--random_sample_by_percentage` with default 100% and range between 1-100.
+    * Option for items and bitstreams: `--dso_type=item_quick` and `--dso_type=bitstream_guick` which leverage Solr as much as possible to reduce number of API calls (not as well tested)
 
     ```bash
     # Set environment variables
@@ -267,8 +272,36 @@ The steps to set up a validation run.
 
 6. Audit bitstream access restrictions via the web UI
 
+    * Optional:to reduce runtime, split the input list of IDs into multiple files and run multiple instance of the script
+
     ``` bash
-    
+
+    export DSPACE_ROOT_URL=
+    export BITSTREAM_ACCESS_CONTROL_TEST_ROOT=/tmp/z3/z
+
+    ./venv/bin/python3 src/split_csv.py \
+        --input ${DSPACE_DIR}/scholaris_items.csv \
+        --output ${BITSTREAM_ACCESS_CONTROL_TEST_ROOT}/split/ \
+        --output_file_size 100
+
+    # To reduce runtime: remove some source files from ${BITSTREAM_ACCESS_CONTROL_TEST_OUTPUT_ROOT}
+   
+    for file in ${BITSTREAM_ACCESS_CONTROL_TEST_ROOT}/split/*; do
+        base_name=$(basename "$file" .csv) 
+        ./venv/bin/python src/bitstream_access_control_test.py \
+                --input ${file} \
+                --output "${BITSTREAM_ACCESS_CONTROL_TEST_ROOT}/reports/${base_name}_result.csv" \
+                --id_field uuid  \
+                --root_url ${DSPACE_ROOT_URL}  \
+                --logging_level ERROR \
+                &
+    done
+
+    ```
+
+    * To run sequentially:
+
+    ``` bash
     export DSPACE_ROOT_URL=
 
     ./venv/bin/python src/bitstream_access_control_test.py \
@@ -294,6 +327,14 @@ The steps to set up a validation run.
         --ids_file /tmp/x_in \
         --column jupter_id \
         --output /tmp/x_out
+    ```
+
+8. Optional: Collection item counts
+
+    ``` bash
+    ./venv/bin/python3 src/dspace_api_exports.py \
+        --output /tmp/z.csv \
+        --dso_type collection_stats
     ```
 
 ## dspace_api_exports.py
@@ -356,7 +397,7 @@ Where:
 * change_id: change event id (PaperTrail::Version ID)
 * jupiter_id: ERA ID
 * is_jupiter_currently_readonly: "true" if the ERA object is currently read only
-* read_only_event: "true" if this change event only updated the read only field and the obj updated at timestamp 
+* read_only_event: "true" if this change event only updated the read only field and the obj updated at timestamp
 * changed_at: change event timestamp
 * event: the type of the change record: update|destroy
 * jupiter delta: jupiter change event details (what field plus old => new values)
@@ -381,10 +422,11 @@ Process thoughts:
 
 For Item/Thesis/Collection/Community, see script for details: `jupiter_output_scripts/jupiter_delta.rb`
 
+* `sudo -u apache bash -c "cd /var/www/sites/jupiter && RAILS_ENV=staging bundle exec rails runner /tmp/dspace_api_tools/jupiter_output_scripts/delta_report.rb"`
+  * change `RAIL_ENV` as needed [development|staging|production]
+* 
  Rough outline:
 
-* Needs the Ruby Class used in step 1 of SAF package generation
-  * See `require_relative` in the script to populate Jupiter to Scholaris mappings
 * Set date in script and run `jupiter_output_scripts/jupiter_delta.rb`
 * Upload CSV into Google Docs for Sharing
 
@@ -401,7 +443,7 @@ Rough outline:
 Rough outline
 
 * Generate CSV report of Jupiter statistics, see `jupiter_output_scripts/jupiter_statistics_metadata_to_CSV`
-* Generate CSV report from DSpace, `dsapce_api_exports.py`
+* Generate CSV report from DSpace, `dspace_api_exports.py`
 * The quick approach: 
   * place both CSV reports into separate tabs in a Google Sheet
   * use XLOOKUP to align based on jupiter ID
