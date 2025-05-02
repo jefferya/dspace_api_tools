@@ -110,9 +110,6 @@ def process_items(dspace_client, output_file, random_sample_by_percentage=100):
         logging.debug("%s", item.to_json_pretty())
         if utils.include_in_random_sample(random_sample_by_percentage):
             provenance = {
-                # "provenance.ual.jupiterId.item": utils.get_provenance_ual_jupiter_id(
-                #    item, "ual.jupiterId.item"
-                # ),
                 "provenance.ual.jupiterId.collection": utils.get_provenance_ual_jupiter_collection_id(
                     dspace_client, item
                 ),
@@ -161,10 +158,6 @@ def process_items_quick(dspace_client, output_file):
             logging.debug("%s", item.to_json_pretty())
 
             provenance = {
-                # "provenance.ual.jupiterId.item": utils.get_provenance_ual_jupiter_id(
-                #    item, "ual.jupiterId.item"
-                # ),
-                # "provenance.ual.jupiterId.item": item.metadata.get("ual.jupiterId", None),
                 "provenance.ual.jupiterId.collection": utils.get_provenance_ual_jupiter_id(
                     collection, "ual.jupiterId.collection"
                 ),
@@ -362,6 +355,7 @@ def main():
     # don't set size over 100 otherwise a weird disconnect happens
     # between the requested page size, actual result size and # of pages
     # If 512 items and size is set to 500,
+    # https://github.com/DSpace/DSpace/issues/8723
     dspace_client.ITER_PAGE_SIZE = 100
 
     # Configure logging

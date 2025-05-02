@@ -52,7 +52,6 @@ CSV_FLATTENED_HEADERS = {
         "handle",
         "lastModified",
         "name",
-        "provenance.ual.jupiterId.item",
         "provenance.ual.jupiterId.collection",
         "type",
         "access_rights",
