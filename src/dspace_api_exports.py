@@ -18,10 +18,11 @@ import os
 import pathlib
 import sys
 
-from dspace_rest_client.client import DSpaceClient
+# from dspace_rest_client.client import DSpaceClient
 from dspace_rest_client.models import Bundle
 
 from utils import utilities as utils
+from utils.dspace_rest_client_local import DSpaceClientLocal
 
 
 def parse_args():
@@ -123,7 +124,7 @@ def process_items(dspace_client, output_file, random_sample_by_percentage=100):
     logging.info("Count: [%d]", count)
 
 
-def process_items_quick(dspace_client, output_file):
+def process_items_by_search(dspace_client, output_file):
     """
     Process items quickly using Solr / Search API
     """
@@ -196,7 +197,7 @@ def process_bitstreams(dspace_client, output_file, random_sample_by_percentage=1
     logging.info("Count: [%d]", count)
 
 
-def process_bitstreams_quick(dspace_client, output_file):
+def process_bitstreams_by_search(dspace_client, output_file):
     """
     Process bitstreams: mainly for existence checks and bitstream checksums
     Use the search API in this version
@@ -311,12 +312,12 @@ def process(dspace_client, output_file, dso_type, random_sample_percentage):
             process_collections(dspace_client, output_file)
         case "items":
             process_items(dspace_client, output_file, random_sample_percentage)
-        case "items_quick":
-            process_items_quick(dspace_client, output_file)
+        case "items_by_search":
+            process_items_by_search(dspace_client, output_file)
         case "bitstreams":
             process_bitstreams(dspace_client, output_file, random_sample_percentage)
-        case "bitstreams_quick":
-            process_bitstreams_quick(dspace_client, output_file)
+        case "bitstreams_by_search":
+            process_bitstreams_by_search(dspace_client, output_file)
         case "users":
             process_users(dspace_client, output_file)
         case "collection_stats":
@@ -334,13 +335,15 @@ def main():
 
     args = parse_args()
 
-    dspace_client = DSpaceClient(fake_user_agent=True)
+    # Base class should set this as an instance variable in the constructor
+    DSpaceClientLocal.ITER_PAGE_SIZE = 100
+    dspace_client = DSpaceClientLocal(fake_user_agent=False)
     # don't set size over 100 otherwise a weird disconnect happens
     # between the requested page size, actual result size and # of pages
     # If 512 items and size is set to 500,
     # https://github.com/DSpace/DSpace/issues/8723
     # http://198.168.187.81:8080/server/api/discover/search/objects?dsoType=collection&page=0&size=500
-    dspace_client.ITER_PAGE_SIZE = 100
+    # dspace_client.ITER_PAGE_SIZE = 100
 
     # Configure logging
     log_level = getattr(logging, args.logging_level.upper(), None)

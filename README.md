@@ -192,7 +192,7 @@ The steps to set up a validation run.
 3. `./dspace_api_exports.py` to export (CSV) DSpace metadata
 
     * Option for items and bitstreams: `--random_sample_by_percentage` with default 100% and range between 1-100.
-    * Option for items and bitstreams: `--dso_type=item_quick` and `--dso_type=bitstream_guick` which leverage Solr as much as possible to reduce number of API calls (not as well tested)
+    * Option for items and bitstreams: `--dso_type=item_by_search` and `--dso_type=bitstream_by_search` which leverage Solr as much as possible to reduce number of API calls (not as well tested)
 
     ```bash
     # Set environment variables
