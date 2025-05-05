@@ -24,7 +24,7 @@ from dspace_rest_client.models import Bundle
 from utils import utilities as utils
 from utils.dspace_rest_client_local import DSpaceClientLocal
 
-DSPACE_CLIENT_TOKEN_REFRESH=5
+DSPACE_CLIENT_TOKEN_REFRESH=500
 
 def parse_args():
     """
