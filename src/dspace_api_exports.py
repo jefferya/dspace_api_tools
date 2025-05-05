@@ -24,6 +24,7 @@ from dspace_rest_client.models import Bundle
 from utils import utilities as utils
 from utils.dspace_rest_client_local import DSpaceClientLocal
 
+DSPACE_CLIENT_TOKEN_REFRESH=1000
 
 def parse_args():
     """
@@ -105,9 +106,11 @@ def process_items(dspace_client, output_file, random_sample_by_percentage=100):
     items = dspace_client.search_objects_iter(query="*:*", dso_type="item")
     count = 0
     for count, item in enumerate(items, start=1):
+
         # refresh auth token
-        if count % 5000 == 0:
+        if count % DSPACE_CLIENT_TOKEN_REFRESH == 0:
             dspace_client.refresh_token()
+
         logging.info("%s (%s)", item.name, item.uuid)
         logging.debug("%s", item.to_json_pretty())
         if utils.include_in_random_sample(random_sample_by_percentage):
@@ -153,7 +156,7 @@ def process_items_by_search(dspace_client, output_file):
 
         for item in items_iter:
 
-            if item_count_total % 5000 == 0:
+            if item_count_total % DSPACE_CLIENT_TOKEN_REFRESH == 0:
                 dspace_client.refresh_token()
 
             logging.info("%s (%s)", item.name, item.uuid)
@@ -182,7 +185,7 @@ def process_bitstreams(dspace_client, output_file, random_sample_by_percentage=1
     count = 0
     for count, item in enumerate(items, start=1):
         # refresh auth token
-        if count % 5000 == 0:
+        if count % DSPACE_CLIENT_TOKEN_REFRESH == 0:
             dspace_client.refresh_token()
 
         if not utils.include_in_random_sample(random_sample_by_percentage):
@@ -211,7 +214,7 @@ def process_bitstreams_by_search(dspace_client, output_file):
         logging.info("Item: %s", item.to_json_pretty())
         # refresh auth token
 
-        if count % 5000 == 0:
+        if count % DSPACE_CLIENT_TOKEN_REFRESH == 0:
             dspace_client.refresh_token()
 
         if "bundles" in item.embedded:
