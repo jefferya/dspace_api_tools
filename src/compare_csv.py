@@ -27,7 +27,17 @@ import pandas
 from utils import utilities as utils
 
 
-INVALID_CHARACTER_PATTERN = r"[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F]"
+INVALID_CHARACTER_PATTERN = (
+    r"["
+    r"\u0000-\u0008"
+    r"\u000B\u000C"
+    r"\u000E-\u001F"
+    r"\u007F-\u009F"
+    r"\uFFFE\uFFFF"
+    r"\U0001FFFE-\U0001FFFF"
+    r"\U0010FFFE-\U0010FFFF"
+    r"]"
+)
 
 
 def parse_args():
@@ -128,6 +138,13 @@ def remove_xml_invalid_characters(str1):
     return re.sub(INVALID_CHARACTER_PATTERN, "", str1)
 
 
+def remove_carrage_return(str1):
+    """
+    Remove invalid characters:
+    """
+    return re.sub(r"\r", "", str1)
+
+
 #
 def abstract_compare(str1, list2):
     """
@@ -158,6 +175,7 @@ def string_in_list_compare_ignore_whitespace(str1, list2):
         str1 = str(str1)
     else:
         str1 = remove_xml_invalid_characters(str1)
+        str1 = remove_carrage_return(str1)
     list2 = utils.convert_string_list_representation_to_list(list2)
     logging.debug("|%s| ---- %s", str1, list2)
 
@@ -182,7 +200,7 @@ def value_in_string_list_compare(str1, list2):
     list2 = utils.convert_string_list_representation_to_list(list2)
     logging.debug("%s ---- %s", str1, list2)
 
-    return True if not str1 and not list2 else str1 in list2
+    return True if not str1 and not list2 else str(str1).strip() in list2
 
 
 #
@@ -229,11 +247,14 @@ def collection_parent_compare(list1, list2):
         if path and isinstance(list1, str)
     )
 
+    if isinstance(list2, str) and list2.startswith("["):
+        list2 = utils.convert_string_list_representation_to_list(list2)
+    elif isinstance(list2, str):
+        list2 = [list2]
+
     logging.debug("%s ---- %s", list1_collection_ids, list2)
 
-    return list1_collection_ids == utils.convert_string_list_representation_to_list(
-        list2
-    )
+    return list1_collection_ids == list2
 
 
 #
@@ -350,7 +371,10 @@ def item_or_thesis_jupiter_list_and_string_to_single_dspace(row, key, value):
     list_1 = utils.convert_string_list_representation_to_list(
         row[value["columns"]["jupiter"][0]]
     )
+    if isinstance(list_1, list):
+        list_1 = [elem.strip() for elem in list_1]
     str_1 = row[value["columns"]["jupiter"][1]]
+    str_1 = str_1.strip() if isinstance(str_1, str) else str_1
     list_dspace = utils.convert_string_list_representation_to_list(
         row[value["columns"]["dspace"]]
     )
@@ -394,9 +418,13 @@ def item_or_thesis_jupiter_lists_to_single_dspace(row, key, value):
     list_1 = utils.convert_string_list_representation_to_list(
         row[value["columns"]["jupiter"][0]]
     )
+    if isinstance(list_1, list):
+        list_1 = [elem.strip() for elem in list_1]
     list_2 = utils.convert_string_list_representation_to_list(
         row[value["columns"]["jupiter"][1]]
     )
+    if isinstance(list_2, list):
+        list_2 = [elem.strip() for elem in list_2]
     list_dspace = utils.convert_string_list_representation_to_list(
         row[value["columns"]["dspace"]]
     )
@@ -468,6 +496,8 @@ def special_type_compare(row, key, value):
     list2 = utils.convert_string_list_representation_to_list(
         row[value["columns"]["dspace"]]
     )
+    # list2: if multiple values, they are separated with a space character
+    list2 = [item for sublist in list2 for item in sublist.split(" ")]
 
     logging.debug("special_type_compare: %s ---- %s", list1, list2)
 
@@ -588,7 +618,7 @@ bitstream_columns_to_compare = {
     "comparison_types": {
         "name": {
             "columns": {"jupiter": "filename", "dspace": "bitstream.name"},
-            "comparison_function": string_compare,
+            "comparison_function": string_compare_ignore_whitespace,
         },
         "checksum": {
             "columns": {
@@ -613,7 +643,7 @@ bitstream_columns_to_compare = {
         },
         "parent_item_name": {
             "columns": {"jupiter": "item.title", "dspace": "item.name"},
-            "comparison_function": string_compare,
+            "comparison_function": string_compare_ignore_whitespace,
         },
     },
 }
@@ -641,7 +671,7 @@ item_columns_to_compare = {
     "comparison_types": {
         "name": {
             "columns": {"jupiter": "title", "dspace": "name"},
-            "comparison_function": string_compare,
+            "comparison_function": string_compare_ignore_whitespace,
         },
         "description": {
             "columns": {
@@ -702,11 +732,11 @@ item_columns_to_compare = {
         },
         "dc.rights": {
             "columns": {"jupiter": "rights", "dspace": "metadata.dc.rights"},
-            "comparison_function": value_in_string_list_compare,
+            "comparison_function": string_in_list_compare_ignore_whitespace,
         },
-        "dc.rights.license": {
-            "columns": {"jupiter": "license", "dspace": "metadata.dc.rights.license"},
-            "comparison_function": value_in_string_list_compare,
+        "dc.rights.uri": {
+            "columns": {"jupiter": "license", "dspace": "metadata.dc.rights.uri"},
+            "comparison_function": string_in_list_compare_ignore_whitespace,
         },
         "abstract": {
             "columns": {

@@ -107,6 +107,8 @@ def test_value_in_string_list_compare():
     Given a single value string compare to string representation of a list
     """
     assert compare.value_in_string_list_compare("a", "['a']") is True
+    assert compare.value_in_string_list_compare("a ", "['a']") is True
+    assert compare.value_in_string_list_compare("", float("NaN")) is True
     assert compare.value_in_string_list_compare("", "[]") is True
 
 
@@ -140,8 +142,9 @@ def test_collection_parent_compare():
     Test the Jupiter member_of_path compared to the Scholaris collection id
     """
     assert compare.collection_parent_compare('["a/b"]', "['b']") is True
+    assert compare.collection_parent_compare('["a/bbb"]', "bbb") is True
     assert compare.collection_parent_compare('["a/b"]', "['c']") is False
-    assert compare.collection_parent_compare("[]", "[]") is True
+    assert compare.collection_parent_compare("[]", float("NaN")) is False
 
 
 def test_language_compare():
@@ -211,6 +214,24 @@ def test_special_type_compare():
     item_column_value = "http://purl.org/ontology/bibo/Book"
     thesis_column_value = ""
     dspace_column_value = "['http://purl.org/coar/resource_type/c_2f33']"
+    row = {
+        item_column_key: item_column_value,
+        thesis_column_key: thesis_column_value,
+        dspace_column_key: dspace_column_value,
+    }
+
+    assert compare.special_type_compare(row, key, value) == "PASS"
+
+    item_column_value = "http://purl.org/ontology/bibo/Article"
+    thesis_column_value = """[
+        'http://vivoweb.org/ontology/core#submitted',
+        'http://purl.org/ontology/bibo/status#draft'
+        ]"""
+    dspace_column_value = """[
+        'http://purl.org/coar/resource_type/c_6501',
+        'http://purl.org/coar/version/c_71e4c1898caa6e32',
+        'http://purl.org/coar/version/c_b1a7d7d4d402bcce'
+        ]"""
     row = {
         item_column_key: item_column_value,
         thesis_column_key: thesis_column_value,
@@ -292,7 +313,7 @@ def test_item_or_thesis_jupiter_lists_to_single_dspace():
         }
     }
 
-    item_column_value = "['A']"
+    item_column_value = "['A ']"
     thesis_column_value = ""
     dspace_column_value = "['A']"
     row = {
@@ -334,7 +355,7 @@ def test_item_or_thesis_jupiter_list_and_string_to_single_dspace():
         }
     }
 
-    item_column_value = "['A']"
+    item_column_value = "['A ']"
     thesis_column_value = ""
     dspace_column_value = "['A']"
     row = {
@@ -567,7 +588,7 @@ def test_input_process_item_valid(tmp_path):
     assert output_df["dc.subject"][0] == "PASS"
     assert output_df["dc.date.issued"][0] == "PASS"
     assert output_df["dc.rights"][0] == "PASS"
-    assert output_df["dc.rights.license"][0] == "PASS"
+    assert output_df["dc.rights.uri"][0] == "PASS"
     assert output_df["dc.type"][0] == "PASS"
     assert output_df["access_rights"][0] == "PASS"
 
@@ -600,6 +621,6 @@ def test_input_process_thesis_valid(tmp_path):
     assert output_df["dc.subject"][0] == "PASS"
     assert output_df["dc.date.issued"][0] == "PASS"
     assert output_df["dc.rights"][0] == "PASS"
-    assert output_df["dc.rights.license"][0] == "PASS"
+    assert output_df["dc.rights.uri"][0] == "PASS"
     assert output_df["dc.type"][0] == "STATIC VALUE ADDED (thesis?)"
     assert output_df["access_rights"][0] == "PASS"

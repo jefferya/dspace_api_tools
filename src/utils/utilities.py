@@ -87,6 +87,7 @@ CSV_FLATTENED_HEADERS = {
         "metadata.dc.relation.ispartofseries",
         "metadata.dc.rights",
         "metadata.dc.rights.license",
+        "metadata.dc.rights.uri",
         "metadata.dc.source",
         "metadata.dc.subject",
         "metadata.dc.title",
@@ -223,6 +224,7 @@ fields_deconstruct_to_list_of_values = [
     "dc.relation.ispartofseries",
     "dc.rights",
     "dc.rights.license",
+    "dc.rights.uri",
     "dc.source",
     "dc.subject",
     "dc.title",
@@ -468,7 +470,7 @@ def convert_string_list_representation_to_list(string):
         return (
             ast.literal_eval(string) if isinstance(string, str) and string != "" else []
         )
-    except ValueError as e:
+    except (ValueError, SyntaxError) as e:
         logging.error("Error decoding JSON string: [%s] error %s", string, e)
         return None
 
