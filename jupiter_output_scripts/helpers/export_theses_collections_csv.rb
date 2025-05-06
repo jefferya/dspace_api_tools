@@ -171,7 +171,7 @@ class CollectionCSVThesisExporter
   end
 
   def remove_xml_invalid_characters(value)
-    value.gsub(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F]/, '')
+    value.gsub(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F\uFFFE\uFFFF\u{1FFFE}-\u{1FFFF}\u{10FFFE}-\u{10FFFF}]/, '')
   end
 
   def thesis_data_row(thesis)

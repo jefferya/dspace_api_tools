@@ -24,7 +24,8 @@ from dspace_rest_client.models import Bundle
 from utils import utilities as utils
 from utils.dspace_rest_client_local import DSpaceClientLocal
 
-DSPACE_CLIENT_TOKEN_REFRESH=500
+DSPACE_CLIENT_TOKEN_REFRESH = 500
+
 
 def parse_args():
     """
@@ -200,8 +201,9 @@ def process_bitstreams(dspace_client, output_file, random_sample_by_percentage=1
 
         bundles = dspace_client.get_bundles(parent=item)
         for bundle in bundles:
-            bitstreams = dspace_client.get_bitstreams(bundle=bundle)
-            utils.output_bitstream(item, bundle, bitstreams, writer)
+            if bundle.name == "ORIGINAL":
+                bitstreams = dspace_client.get_bitstreams(bundle=bundle)
+                utils.output_bitstream(item, bundle, bitstreams, writer)
 
     logging.info("Count: [%d]", count)
 
@@ -211,6 +213,9 @@ def process_bitstreams_by_search(dspace_client, output_file):
     Process bitstreams: mainly for existence checks and bitstream checksums
     Use the search API in this version
     """
+    print("\n\n+++++++++++++++++++")
+    print("\n Fails if greater than 20 embedded bitstream bundles.\n")
+    print("+++++++++++++++++++\n\n")
     writer = utils.output_init(output_file, "bitstream")
     items = dspace_client.search_objects_iter(
         query="*:*", dso_type="item", embeds=["bundles"]

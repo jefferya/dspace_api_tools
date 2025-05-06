@@ -236,7 +236,7 @@ The steps to set up a validation run.
     export SCHOLARIS_DIR=~/Downloads
 
     # Communities audit results
-    venv/bin/python src/compare_csv.py \
+    ./venv/bin/python src/compare_csv.py \
         --input_jupiter ${JUPITER_DIR}/jupiter_community.csv \
         --input_dspace ${SCHOLARIS_DIR}/scholaris_communities.csv \
         --output /tmp/migration_audit_communities_$(date +%Y-%m-%d_%H:%M:%S).csv \
@@ -244,7 +244,7 @@ The steps to set up a validation run.
         --type communities
 
     # Collections audit results
-    venv/bin/python src/compare_csv.py \
+    ./venv/bin/python src/compare_csv.py \
         --input_jupiter ${JUPITER_DIR}/jupiter_collection.csv \
         --input_dspace ${SCHOLARIS_DIR}/scholaris_collections.csv \
         --output /tmp/migration_audit_collections_$(date +%Y-%m-%d_%H:%M:%S).csv \
@@ -252,7 +252,7 @@ The steps to set up a validation run.
         --type collections
 
     # Item audit results
-    venv/bin/python src/compare_csv.py \
+    ./venv/bin/python src/compare_csv.py \
         --input_jupiter ${JUPITER_DIR}/jupiter_combined_item_thesis.csv \
         --input_dspace ${SCHOLARIS_DIR}/scholaris_items.csv \
         --output /tmp/migration_audit_items_$(date +%Y-%m-%d_%H:%M:%S).csv \
@@ -260,7 +260,7 @@ The steps to set up a validation run.
         --type items
 
     # Bitstream audit results
-    venv/bin/python src/compare_csv.py \
+    ./venv/bin/python src/compare_csv.py \
         --input_jupiter ${JUPITER_DIR}/jupiter_combined_activestorage.csv \
         --input_dspace ${SCHOLARIS_DIR}/scholaris_bitstreams.csv \
         --output /tmp/migration_audit_bitstreams_$(date +%Y-%m-%d_%H:%M:%S).csv \
