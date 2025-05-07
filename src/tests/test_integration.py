@@ -146,6 +146,16 @@ def test_collection_parent_compare():
     assert compare.collection_parent_compare('["a/b"]', "['c']") is False
     assert compare.collection_parent_compare("[]", float("NaN")) is False
 
+def test_filename_with_uuid_compare():
+    """
+    Test the filename with uuid
+    """
+    assert compare.filename_with_uuid_compare("a.pdf", "a.pdf") == True
+    assert compare.filename_with_uuid_compare("a.pdf", "b.pdf") == False
+    assert compare.filename_with_uuid_compare("a.pdf", "a_12345.pdf") == True
+    assert compare.filename_with_uuid_compare("a.pdf", "a.pdf_extra") == False
+    assert compare.filename_with_uuid_compare("a.pdf", None) == False
+    assert compare.filename_with_uuid_compare(None, "a_uuid.pdf") == False
 
 def test_language_compare():
     """
