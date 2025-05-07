@@ -199,10 +199,10 @@ def process_bitstreams(dspace_client, output_file, random_sample_by_percentage=1
             logging.info("Not in random sample: %s (%s)", item.name, item.uuid)
             continue
 
-        bundles = dspace_client.get_bundles(parent=item)
+        bundles = dspace_client.get_bundles_iter(parent=item)
         for bundle in bundles:
             if bundle.name == "ORIGINAL":
-                bitstreams = dspace_client.get_bitstreams(bundle=bundle)
+                bitstreams = dspace_client.get_bitstreams_iter(bundle=bundle)
                 utils.output_bitstream(item, bundle, bitstreams, writer)
 
     logging.info("Count: [%d]", count)
@@ -238,7 +238,7 @@ def process_bitstreams_by_search(dspace_client, output_file):
                 logging.info("Bundle: %s", bundle)
                 if bundle.get("name", None) == "ORIGINAL":
                     bundle_obj = Bundle(bundle)
-                    bitstreams = dspace_client.get_bitstreams(bundle=bundle_obj)
+                    bitstreams = dspace_client.get_bitstreams_iter(bundle=bundle_obj)
                     utils.output_bitstream(item, bundle_obj, bitstreams, writer)
 
     logging.info("Count items (not actual bitstreams): [%d]", count)

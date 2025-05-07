@@ -270,7 +270,7 @@ The steps to set up a validation run.
         --output /tmp/migration_audit_bitstreams_$(date +%Y-%m-%d_%H:%M:%S).csv \
         --logging_level DEBUG \
         --type bitstreams \
-        2> /tmp/z_i
+        2> /tmp/z_b
     ```
 
 5. (optional) In the scenario where some items where intentionally not migrated then filter out the Jupiter/ERA IDs that have not been migrated to reduce the number of failures in the summary reports
@@ -285,7 +285,7 @@ The steps to set up a validation run.
     #   have a "jupiter_id" in the "provenance.ual.jupiterId.item"
     #   column of "ids_file"
     ./venv/bin/python src/filter_csv.py \
-        --input_dspace ${SCHOLARIS_DIR}/migration_audit_items.csv \
+        --input ${SCHOLARIS_DIR}/migration_audit_items.csv \
         --column_input jupiter_id \
         --ids_file ${SCHOLARIS_DIR}/scholaris/scholaris_items.csv \
         --column_ids metadata.ual.jupiterId.item \
@@ -297,7 +297,7 @@ The steps to set up a validation run.
     #   have a "jupiter_id" in the "provenance.ual.jupiterId.item"
     #   column of "ids_file"
     ./venv/bin/python src/filter_csv.py \
-        --input_dspace ${SCHOLARIS_DIR}/migration_audit_bitsreams.csv \
+        --input ${SCHOLARIS_DIR}/migration_audit_bitsreams.csv \
         --column_input jupiter_id \
         --ids_file ${SCHOLARIS_DIR}/scholaris/scholaris_bitstreams.csv \
         --column_ids provenance.ual.jupiterId.item \
