@@ -23,12 +23,17 @@ def parse_args():
         help="Origin CSV file with a column header specified by '--column'.",
     )
     parser.add_argument(
-        "--column",
+        "--column_input",
         required=True,
         help="CSV header name in the origin CSV where IDs are stored for filtering.",
     )
     parser.add_argument(
         "--ids_file", required=True, help="CSV file with a list of IDs."
+    )
+    parser.add_argument(
+        "--column_ids",
+        required=True,
+        help="CSV header name in the IDs CSV where IDs are stored for filtering.",
     )
     parser.add_argument(
         "--output", required=True, help="Location to store output file."
@@ -37,7 +42,7 @@ def parse_args():
     return parser.parse_args()
 
 
-def process(input_file, column, ids_file, output_file):
+def process(input_file, column_input, ids_file, column_ids, output_file):
     """
     Main processing method
     """
@@ -53,11 +58,11 @@ def process(input_file, column, ids_file, output_file):
             # Read IDs into a set for indexed/hashed lookup
             id_set = set()
             for row in csv_ids:
-                id_set.add(row[column])
+                id_set.add(row[column_ids])
 
             # If ID exists in the set, write the row to the output.
             for row in csv_input:
-                if row[column] in id_set:
+                if row[column_input] in id_set:
                     csv_output.writerow(row)
 
 
@@ -71,7 +76,9 @@ def main():
 
     pathlib.Path(os.path.dirname(args.output)).mkdir(parents=True, exist_ok=True)
     with open(args.output, "wt", encoding="utf-8", newline="") as output_file:
-        process(args.input, args.column, args.ids_file, output_file)
+        process(
+            args.input, args.column_input, args.ids_file, args.column_ids, output_file
+        )
 
 
 #

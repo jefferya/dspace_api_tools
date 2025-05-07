@@ -230,6 +230,9 @@ The steps to set up a validation run.
 
 4. Use `compare_csv.py` supplying the output from steps 1 & 2 as input, a join and comparison function outputs a CSV file with the validation results. FYI: the join is an outer join which includes null matches in either input file in the output; tweak comparison configuration as required.
 
+    * Note: `--logging_level DEBUG` will log the detailed field values and comparison used in the generated PASS/FAIL summary report
+    * Note: `--logging_level ERROR` reduces output 
+
     ```bash
 
     export JUPITER_DIR=~/Downloads/era_export
@@ -256,21 +259,54 @@ The steps to set up a validation run.
         --input_jupiter ${JUPITER_DIR}/jupiter_combined_item_thesis.csv \
         --input_dspace ${SCHOLARIS_DIR}/scholaris_items.csv \
         --output /tmp/migration_audit_items_$(date +%Y-%m-%d_%H:%M:%S).csv \
-        --logging_level ERROR \
-        --type items
+        --logging_level DEBUG \
+        --type items \
+        2> /tmp/z_i
 
     # Bitstream audit results
     ./venv/bin/python src/compare_csv.py \
         --input_jupiter ${JUPITER_DIR}/jupiter_combined_activestorage.csv \
         --input_dspace ${SCHOLARIS_DIR}/scholaris_bitstreams.csv \
         --output /tmp/migration_audit_bitstreams_$(date +%Y-%m-%d_%H:%M:%S).csv \
-        --logging_level ERROR \
-        --type bitstreams
+        --logging_level DEBUG \
+        --type bitstreams \
+        2> /tmp/z_i
     ```
 
-5. Review the results for PASS/FAIL notices on the validated columns.
+5. (optional) In the scenario where some items where intentionally not migrated then filter out the Jupiter/ERA IDs that have not been migrated to reduce the number of failures in the summary reports
 
-6. Audit bitstream access restrictions via the web UI
+    filter a CSV results file by a set of IDs and the column name to filter on in the source CSV file
+
+    ``` bash
+
+    # Filter item audit summary by list of IDs: known IDs in DSpace
+    # Assumption: check if an item has failed
+    # Adds to output only "input" rows that
+    #   have a "jupiter_id" in the "provenance.ual.jupiterId.item"
+    #   column of "ids_file"
+    ./venv/bin/python src/filter_csv.py \
+        --input_dspace ${SCHOLARIS_DIR}/migration_audit_items.csv \
+        --column_input jupiter_id \
+        --ids_file ${SCHOLARIS_DIR}/scholaris/scholaris_items.csv \
+        --column_ids metadata.ual.jupiterId.item \
+        --output /tmp/migration_audit_items_filtered.csv
+ 
+    # Filter bitstream audit summary by list of IDs: known IDs in DSpace
+    # If an item has failed we assume it is not needed
+    # Adds to output only "input" rows that
+    #   have a "jupiter_id" in the "provenance.ual.jupiterId.item"
+    #   column of "ids_file"
+    ./venv/bin/python src/filter_csv.py \
+        --input_dspace ${SCHOLARIS_DIR}/migration_audit_bitsreams.csv \
+        --column_input jupiter_id \
+        --ids_file ${SCHOLARIS_DIR}/scholaris/scholaris_bitstreams.csv \
+        --column_ids provenance.ual.jupiterId.item \
+        --output /tmp/migration_audit_bitstreams_filtered.csv
+    ```
+
+6. Review the results for PASS/FAIL notices on the validated columns.
+
+7. Audit bitstream access restrictions via the web UI
 
     * Optional:to reduce runtime, split the input list of IDs into multiple files and run multiple instance of the script
 
@@ -317,17 +353,6 @@ The steps to set up a validation run.
       * bitstream_url: if contains "request-a-copy" in the URL then there is an access restriction
       * note: if not empty then there was a failure to load the page or the URL contains no bitstreams
         * TimeoutException can mean that a login prompt was detected or that the site couldn't load
-
-7. Optional: filter a CSV results file by a set of IDs and the column name to filter on in the source CSV file
-
-    ``` bash
-
-    ./venv/bin/python src/filter_csv.py \
-        --input /tmp/x  \
-        --ids_file /tmp/x_in \
-        --column jupter_id \
-        --output /tmp/x_out
-    ```
 
 8. Optional: Collection item counts
 
