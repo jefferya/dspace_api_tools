@@ -1,3 +1,4 @@
+# pylint: disable=too-many-lines
 """
 Given two CSV files, compare the two files and return the differences between the two files.
 
@@ -282,9 +283,10 @@ def filename_with_uuid_compare(era_filename, scholaris_filename):
     # Check if the Scholaris filename starts with the ERA filename (before the UUID)
     if scholaris_filename.startswith(era_filename_without_type):
         # Ensure the Scholaris filename has a valid UUID appended after the base filename
-        suffix = scholaris_filename[
-            len(era_filename_without_type):
-        ]  # Extract the suffix
+        # Extract the suffix
+        # slices with "black" styling in PEP 8 and
+        # flake lint uses PEP 8 + PEP 257 thus tool flags spacing differently
+        suffix = scholaris_filename[len(era_filename_without_type) :]  # noqa: E203
         if suffix.startswith("_") and len(suffix.split(".")[0]) > 1:
             return True
 
