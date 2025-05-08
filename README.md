@@ -109,6 +109,8 @@ I'll import into a Google Sheet to leverage the power of the grid layout
 
 Note for bitstreams, all DSpace bitstreams are included in the report, including the DSpace generated bitstreams. One can limit and remove if the bundlename is not ORIGINAL.
 
+Item export and audit may contain multiple rows with the same jupiterId in the case where the item is associated with multiple collections. The parent association test may fail.
+
 #### Audit: Technical Details
 
 ##### How to how to extend the JSON flattening
@@ -270,7 +272,7 @@ The steps to set up a validation run.
         --output /tmp/migration_audit_bitstreams_$(date +%Y-%m-%d_%H:%M:%S).csv \
         --logging_level DEBUG \
         --type bitstreams \
-        2> /tmp/z_i
+        2> /tmp/z_b
     ```
 
 5. (optional) In the scenario where some items where intentionally not migrated then filter out the Jupiter/ERA IDs that have not been migrated to reduce the number of failures in the summary reports
@@ -285,22 +287,23 @@ The steps to set up a validation run.
     #   have a "jupiter_id" in the "provenance.ual.jupiterId.item"
     #   column of "ids_file"
     ./venv/bin/python src/filter_csv.py \
-        --input_dspace ${SCHOLARIS_DIR}/migration_audit_items.csv \
+        --input /tmp/migration_audit_items.csv \
         --column_input jupiter_id \
-        --ids_file ${SCHOLARIS_DIR}/scholaris/scholaris_items.csv \
-        --column_ids metadata.ual.jupiterId.item \
+        --ids_file ${JUPITER_DIR}/id_list_of_migrated_items_2025-05-07.csv \
+        --column_ids jupiter_id \
         --output /tmp/migration_audit_items_filtered.csv
  
     # Filter bitstream audit summary by list of IDs: known IDs in DSpace
     # If an item has failed we assume it is not needed
     # Adds to output only "input" rows that
-    #   have a "jupiter_id" in the "provenance.ual.jupiterId.item"
+    #   have a "jupiter_id" in the "metadata.ual.jupiterId"
     #   column of "ids_file"
+    # Recommend: filter against items or curated list of IDs
     ./venv/bin/python src/filter_csv.py \
-        --input_dspace ${SCHOLARIS_DIR}/migration_audit_bitsreams.csv \
+        --input ${SCHOLARIS_DIR}/migration_audit_bitsreams.csv \
         --column_input jupiter_id \
-        --ids_file ${SCHOLARIS_DIR}/scholaris/scholaris_bitstreams.csv \
-        --column_ids provenance.ual.jupiterId.item \
+        --ids_file ${SCHOLARIS_DIR}/scholaris/scholaris_items.csv \
+        --column_ids metadata.ual.jupiterId \
         --output /tmp/migration_audit_bitstreams_filtered.csv
     ```
 
