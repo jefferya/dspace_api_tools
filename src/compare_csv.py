@@ -256,6 +256,7 @@ def collection_parent_compare(list1, list2):
 
     return list1_collection_ids == list2
 
+
 #
 def filename_with_uuid_compare(era_filename, scholaris_filename):
     """
@@ -278,15 +279,17 @@ def filename_with_uuid_compare(era_filename, scholaris_filename):
         return True
 
     era_filename_without_type = era_filename.split(".")[0]
-    print(era_filename_without_type)
     # Check if the Scholaris filename starts with the ERA filename (before the UUID)
     if scholaris_filename.startswith(era_filename_without_type):
         # Ensure the Scholaris filename has a valid UUID appended after the base filename
-        suffix = scholaris_filename[len(era_filename_without_type):]  # Extract the suffix
+        suffix = scholaris_filename[
+            len(era_filename_without_type):
+        ]  # Extract the suffix
         if suffix.startswith("_") and len(suffix.split(".")[0]) > 1:
             return True
 
     return False
+
 
 #
 def special_language_compare(row, key, value):
