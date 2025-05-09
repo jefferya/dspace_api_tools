@@ -300,9 +300,9 @@ The steps to set up a validation run.
     #   column of "ids_file"
     # Recommend: filter against items or curated list of IDs
     ./venv/bin/python src/filter_csv.py \
-        --input ${SCHOLARIS_DIR}/migration_audit_bitsreams.csv \
+        --input /tmp/migration_audit_bitsreams.csv \
         --column_input jupiter_id \
-        --ids_file ${SCHOLARIS_DIR}/scholaris/scholaris_items.csv \
+        --ids_file ${SCHOLARIS_DIR}/scholaris_items.csv \
         --column_ids metadata.ual.jupiterId \
         --output /tmp/migration_audit_bitstreams_filtered.csv
     ```

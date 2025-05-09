@@ -257,6 +257,38 @@ def collection_parent_compare(list1, list2):
 
     return list1_collection_ids == list2
 
+#
+def collection_parent_compare_one_of_multiple(list1, list2):
+    """
+    Kludge to compare two lists of collections; An oversight in the export means that a 
+    complete comparison is not possible today 2025-05-08
+    Quick test relying on multiple rows in the export, one for each collection
+    remove this kludge when the export is fixed
+    """
+    logging.debug("%s ---- %s", list1, list2)
+
+    # list 1 is nan if item not in Jupiter
+    list1 = '[""]' if isinstance(list1, str) is False else list1
+
+    logging.debug("%s ---- %s", list1, list2)
+
+    list1_collection_ids = list(
+        path.split("/")[1]
+        for path in utils.convert_string_to_json(list1)
+        if path and isinstance(list1, str)
+    )
+
+    if isinstance(list2, str) and list2.startswith("["):
+        list2 = utils.convert_string_list_representation_to_list(list2)
+    elif isinstance(list2, str):
+        list2 = [list2]
+    else:
+        list2 = [str(list2)]
+
+    logging.debug("%s ---- %s", list1_collection_ids, list2)
+
+    return all(item in list1_collection_ids for item in list2)
+
 
 #
 def filename_with_uuid_compare(era_filename, scholaris_filename):
@@ -268,8 +300,7 @@ def filename_with_uuid_compare(era_filename, scholaris_filename):
     """
 
     logging.debug("%s ---- %s", era_filename, scholaris_filename)
-    print("%s ---- %s", era_filename, scholaris_filename)
-    if not era_filename or not scholaris_filename:
+    if not era_filename or not scholaris_filename or not isinstance(scholaris_filename, str) or not isinstance(era_filename, str):
         return False
 
     # Remove any whitespace and compare the base filename
@@ -721,7 +752,7 @@ item_columns_to_compare = {
                 "jupiter": "member_of_paths",
                 "dspace": "provenance.ual.jupiterId.collection",
             },
-            "comparison_function": collection_parent_compare,
+            "comparison_function": collection_parent_compare_one_of_multiple,
         },
         "dc.title": {
             "columns": {"jupiter": "title", "dspace": "metadata.dc.title"},
@@ -801,7 +832,7 @@ item_columns_to_compare = {
                 "jupiter": "supervisors",
                 "dspace": "metadata.dc.contributor.advisor",
             },
-            "comparison_function": string_lists_compare,
+            "comparison_function": string_lists_compare_trim_whitespace,
         },
         # "if_thesis_committee_members": {
         #    "columns": {
@@ -837,7 +868,7 @@ item_columns_to_compare = {
         # },
         "if_thesis_ual.department": {
             "columns": {"jupiter": "departments", "dspace": "metadata.ual.department"},
-            "comparison_function": string_lists_compare,
+            "comparison_function": string_lists_compare_trim_whitespace,
         },
     },
 }
