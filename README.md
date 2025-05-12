@@ -233,7 +233,7 @@ The steps to set up a validation run.
 4. Use `compare_csv.py` supplying the output from steps 1 & 2 as input, a join and comparison function outputs a CSV file with the validation results. FYI: the join is an outer join which includes null matches in either input file in the output; tweak comparison configuration as required.
 
     * Note: `--logging_level DEBUG` will log the detailed field values and comparison used in the generated PASS/FAIL summary report
-    * Note: `--logging_level ERROR` reduces output 
+    * Note: `--logging_level ERROR` reduces output
 
     ```bash
 
