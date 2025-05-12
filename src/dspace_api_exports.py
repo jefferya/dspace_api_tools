@@ -19,7 +19,7 @@ import pathlib
 import sys
 
 # from dspace_rest_client.client import DSpaceClient
-from dspace_rest_client.models import Bundle
+from dspace_rest_client.models import Bundle,Collection
 
 from utils import utilities as utils
 from utils.dspace_rest_client_local import DSpaceClientLocal
@@ -131,6 +131,49 @@ def process_items(dspace_client, output_file, random_sample_by_percentage=100):
 
 
 def process_items_by_search(dspace_client, output_file):
+    """
+    Process items quickly using Solr / Search API
+    """
+    print("\n\n+++++++++++++++++++")
+    print(
+        "\n Items fields only included in output if explictily added to CSV dict header and JSON flattening.\n"
+        "\n Only reports the first 20 collection an Item is assocated with.\n"
+    )
+    print("+++++++++++++++++++\n\n")
+    writer = utils.output_init(output_file, "item")
+
+    item_count_total = 1
+    items_iter = dspace_client.search_objects_iter(query="*:*", dso_type="item", embeds=["owningCollection", "accessStatus"])
+    for item in items_iter:
+        logging.info("Item %s (%s)", item.name, item.uuid)
+        logging.debug("%s", item.to_json_pretty())
+
+
+        if item_count_total % DSPACE_CLIENT_TOKEN_REFRESH == 0:
+            # not sure if both are needed
+            dspace_client.authenticate()
+            dspace_client.refresh_token()
+
+        logging.info("%s (%s)", item.name, item.uuid)
+        logging.debug("%s", item.to_json_pretty())
+
+        provenance = {
+            "provenance.ual.jupiterId.collection": utils.get_provenance_ual_jupiter_id(
+                Collection(item.embedded['owningCollection']), "ual.jupiterId.collection"
+            ),
+            "access_rights": item.embedded["accessStatus"]["status"],
+        }
+
+        logging.debug("------ provenance %s", provenance)
+        utils.output_writer(item, "item", writer, embbed=provenance)
+        item_count_total += 1
+
+        exit()
+
+    logging.info("Count: [%d]", item_count_total)
+
+
+def process_items_by_collection(dspace_client, output_file):
     """
     Process items quickly using Solr / Search API
     """
@@ -330,10 +373,12 @@ def process(dspace_client, output_file, dso_type, random_sample_percentage):
             process_items(dspace_client, output_file, random_sample_percentage)
         case "items_by_search":
             process_items_by_search(dspace_client, output_file)
+        case "items_by_collection":
+            process_items_by_collection(dspace_client, output_file)
         case "bitstreams":
             process_bitstreams(dspace_client, output_file, random_sample_percentage)
-        case "bitstreams_by_search":
-            process_bitstreams_by_search(dspace_client, output_file)
+        # case "bitstreams_by_search":
+            # process_bitstreams_by_search(dspace_client, output_file)
         case "users":
             process_users(dspace_client, output_file)
         case "collection_stats":
