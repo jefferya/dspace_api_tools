@@ -19,7 +19,7 @@ import pathlib
 import sys
 
 # from dspace_rest_client.client import DSpaceClient
-from dspace_rest_client.models import Bundle, Collection
+from dspace_rest_client.models import Bundle, Collection, Item
 
 from utils import utilities as utils
 from utils.dspace_rest_client_local import DSpaceClientLocal
@@ -245,13 +245,15 @@ def process_items_by_list(dspace_client, output_file, by_list_filename):
         item_list = []
         for line in fd:
             item_id = line.strip()
-            if item_id:
-                item = dspace_client.get_item(
+            if item_id is not None:
+                item_response = dspace_client.get_item(
                     item_id, embeds=["accessStatus", "owningCollection"]
                 )
-                item_list.append(item)
+                if item_response is not None:
+                    item = Item(item_response.json())
+                    item_list.append(item)
         item_iter = iter(item_list)
-    process_items_by_iter(dspace_client, output_file, item_iter)
+        process_items_by_iter(dspace_client, output_file, item_iter)
 
 
 def process_items_by_collection_id(dspace_client, output_file, collection_id):
@@ -277,11 +279,15 @@ def process_bitstreams_by_items(
     count = 0
     writer = utils.output_init(output_file, "bitstream")
     for count, item in enumerate(items, start=1):
+
         # refresh auth token
         if count % DSPACE_CLIENT_TOKEN_REFRESH == 0:
             # not sure if both are needed
             dspace_client.authenticate()
             dspace_client.refresh_token()
+
+        logging.info("%s (%s)", item.name, item.uuid)
+        logging.debug("%s", item.to_json_pretty())
 
         if not utils.include_in_random_sample(random_sample_by_percentage):
             logging.info("Not in random sample: %s (%s)", item.name, item.uuid)
@@ -314,10 +320,16 @@ def process_bitstreams_by_list(dspace_client, output_file, by_list_filename):
         item_list = []
         for line in fd:
             item_id = line.strip()
-            if item_id:
-                item_list.append(dspace_client.get_item(item_id))
+
+            logging.info("[%s]", item_id)
+
+            if item_id is not None and item_id != "":
+                item_response = dspace_client.get_item(item_id)
+                item = Item(item_response.json())
+                if item:
+                    item_list.append(item)
         item_iter = iter(item_list)
-    process_bitstreams_by_items(dspace_client, output_file, item_iter)
+        process_bitstreams_by_items(dspace_client, output_file, item_iter)
 
 
 def process_bitstreams_by_collection_id(dspace_client, output_file, collection_id):
@@ -494,6 +506,8 @@ def main():
     # Base class should set this as an instance variable in the constructor
     DSpaceClientLocal.ITER_PAGE_SIZE = 100
     dspace_client = DSpaceClientLocal(fake_user_agent=False)
+    dspace_client.authenticate()
+
     # don't set size over 100 otherwise a weird disconnect happens
     # between the requested page size, actual result size and # of pages
     # If 512 items and size is set to 500,

@@ -365,6 +365,58 @@ The steps to set up a validation run.
         --dso_type collection_stats
     ```
 
+### Audit: ETDs
+
+Given that ETDs (Theses, etc.) will be migrated at a later date, adjustments to the audit export script have been implemented to allow partial exports. The process will be similar to the above but:
+
+* only a subset of DSpace will be exported
+* extract the Theses from the Jupiter export
+* use the above to source files for the audit with the rest of the audit process proceeding as before
+
+The optional ways to export a subset of Item or Bitstream metadata
+
+* Item export given a collection ID
+
+    ``` bash
+    ./venv/bin/python3 src/dspace_api_exports.py \
+        --output /tmp/z.csv \
+        --logging_level DEBUG \
+        --dso_type items_by_collection_id 
+        --collection_id 90efc140-a19c-4b82-8305-6dd15ffd9556
+    ```
+
+* Item export given a file with a list of IDs, one per line with no header 
+
+    ``` bash
+    ./venv/bin/python3 src/dspace_api_exports.py \
+        --output /tmp/z.csv \
+        --logging_level DEBUG \
+        --dso_type items_by_list  \
+        --by_list_filename /tmp/zz.csv
+
+    ```
+
+* Bitream export given a collection ID
+
+    ``` bash
+    ./venv/bin/python3 src/dspace_api_exports.py \
+        --output /tmp/z.csv \
+        --logging_level ERROR \
+        --dso_type bitstreams_by_collection_id \
+        --collection_id 90efc140-a19c-4b82-8305-6dd15ffd9556
+    ```
+
+* Bitstream export given a file with a list of IDs, one per line with no header 
+
+    ``` bash
+    ./venv/bin/python3 src/dspace_api_exports.py \
+        --output /tmp/z.csv \
+        --logging_level DEBUG \
+        --dso_type bitstreams_by_list
+        --by_list_filename /tmp/zz.csv
+    ```
+
+
 ## dspace_api_exports.py
 
 Test exporting content from the DSpace API using <https://pypi.org/project/dspace-rest-client>.
