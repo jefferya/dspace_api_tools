@@ -257,10 +257,11 @@ def collection_parent_compare(list1, list2):
 
     return list1_collection_ids == list2
 
+
 #
 def collection_parent_compare_one_of_multiple(list1, list2):
     """
-    Kludge to compare two lists of collections; An oversight in the export means that a 
+    Kludge to compare two lists of collections; An oversight in the export means that a
     complete comparison is not possible today 2025-05-08
     Quick test relying on multiple rows in the export, one for each collection
     remove this kludge when the export is fixed
@@ -300,7 +301,12 @@ def filename_with_uuid_compare(era_filename, scholaris_filename):
     """
 
     logging.debug("%s ---- %s", era_filename, scholaris_filename)
-    if not era_filename or not scholaris_filename or not isinstance(scholaris_filename, str) or not isinstance(era_filename, str):
+    if (
+        not era_filename
+        or not scholaris_filename
+        or not isinstance(scholaris_filename, str)
+        or not isinstance(era_filename, str)
+    ):
         return False
 
     # Remove any whitespace and compare the base filename

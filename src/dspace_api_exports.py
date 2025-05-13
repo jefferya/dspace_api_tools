@@ -19,7 +19,7 @@ import pathlib
 import sys
 
 # from dspace_rest_client.client import DSpaceClient
-from dspace_rest_client.models import Bundle
+from dspace_rest_client.models import Bundle, Collection, Item
 
 from utils import utilities as utils
 from utils.dspace_rest_client_local import DSpaceClientLocal
@@ -50,6 +50,16 @@ def parse_args():
         type=int,
         choices=range(0, 101),
         help="Trigger a random sample to speedup runtime (1-100 percent).",
+    )
+    parser.add_argument(
+        "--by_list_filename",
+        required=False,
+        help="A filename containing a list of DSpace Item IDs to export as either items/bitstreams (no header).",
+    )
+    parser.add_argument(
+        "--collection_id",
+        required=False,
+        help="The DSpace ID of a collection to export either items/bitstreams.",
     )
     parser.add_argument(
         "--logging_level", required=False, help="Logging level.", default="INFO"
@@ -130,13 +140,14 @@ def process_items(dspace_client, output_file, random_sample_by_percentage=100):
     logging.info("Count: [%d]", count)
 
 
-def process_items_by_search(dspace_client, output_file):
+def process_items_by_search_collection(dspace_client, output_file):
     """
     Process items quickly using Solr / Search API
     """
     print("\n\n+++++++++++++++++++")
     print(
         "\n Items fields only included in output if explictily added to CSV dict header and JSON flattening.\n"
+        "\n Item occurs multiple times list if associated with multiple collections.\n"
     )
     print("+++++++++++++++++++\n\n")
     writer = utils.output_init(output_file, "item")
@@ -181,19 +192,102 @@ def process_items_by_search(dspace_client, output_file):
     logging.info("Count: [%d]", item_count_total)
 
 
-def process_bitstreams(dspace_client, output_file, random_sample_by_percentage=100):
+def process_items_by_iter(dspace_client, output_file, item_iter):
     """
+    Process items given an iterator
+    """
+    print("\n\n+++++++++++++++++++")
+    print(
+        "\n Items fields only included in output if explictily added to CSV dict header and JSON flattening.\n"
+    )
+    print("+++++++++++++++++++\n\n")
+    writer = utils.output_init(output_file, "item")
+    count = 0
+    for count, item in enumerate(item_iter, start=1):
+
+        if count % DSPACE_CLIENT_TOKEN_REFRESH == 0:
+            # not sure if both are needed
+            dspace_client.authenticate()
+            dspace_client.refresh_token()
+
+        logging.info("%s (%s)", item.name, item.uuid)
+        logging.debug("%s", item.to_json_pretty())
+
+        collection = Collection(item.embedded["owningCollection"])
+        provenance = {
+            "provenance.ual.jupiterId.collection": utils.get_provenance_ual_jupiter_id(
+                collection, "ual.jupiterId.collection"
+            ),
+            "access_rights": item.embedded["accessStatus"]["status"],
+        }
+        logging.debug("------ provenance %s", provenance)
+
+        utils.output_writer(item, "item", writer, embbed=provenance)
+
+    logging.info("Count: [%d]", count)
+
+
+def process_items_by_search(dspace_client, output_file):
+    """
+    Process items by a search: all items
+    """
+    items = dspace_client.search_objects_iter(
+        query="*:*", dso_type="item", embeds=["accessStatus", "owningCollection"]
+    )
+    process_items_by_iter(dspace_client, output_file, items)
+
+
+def process_items_by_list(dspace_client, output_file, by_list_filename):
+    """
+    Process items: given a file with a list of item IDs
+    """
+    with open(by_list_filename, "r", encoding="utf-8", newline="") as fd:
+        item_list = []
+        for line in fd:
+            item_id = line.strip()
+            if item_id is not None:
+                item_response = dspace_client.get_item(
+                    item_id, embeds=["accessStatus", "owningCollection"]
+                )
+                if item_response is not None:
+                    item = Item(item_response.json())
+                    item_list.append(item)
+        item_iter = iter(item_list)
+        process_items_by_iter(dspace_client, output_file, item_iter)
+
+
+def process_items_by_collection_id(dspace_client, output_file, collection_id):
+    """
+    Process items: given a file with a list of item IDs
+    """
+    items = dspace_client.search_objects_iter(
+        query="*:*",
+        dso_type="item",
+        scope=collection_id,
+        embeds=["accessStatus", "owningCollection"],
+    )
+    process_items_by_iter(dspace_client, output_file, items)
+
+
+def process_bitstreams_by_items(
+    dspace_client, output_file, items, random_sample_by_percentage=100
+):
+    """
+    Process bitstreams given a list of items
     Process bitstreams: mainly for existence checks and bitstream checksums
     """
-    writer = utils.output_init(output_file, "bitstream")
-    items = dspace_client.search_objects_iter(query="*:*", dso_type="item")
     count = 0
+    writer = utils.output_init(output_file, "bitstream")
     for count, item in enumerate(items, start=1):
+
         # refresh auth token
         if count % DSPACE_CLIENT_TOKEN_REFRESH == 0:
             # not sure if both are needed
             dspace_client.authenticate()
             dspace_client.refresh_token()
+
+        logging.info("%s (%s)", item.name, item.uuid)
+        logging.debug("%s", item.to_json_pretty())
 
         if not utils.include_in_random_sample(random_sample_by_percentage):
             logging.info("Not in random sample: %s (%s)", item.name, item.uuid)
@@ -206,6 +300,46 @@ def process_bitstreams(dspace_client, output_file, random_sample_by_percentage=1
                 utils.output_bitstream(item, bundle, bitstreams, writer)
 
     logging.info("Count: [%d]", count)
+
+
+def process_bitstreams(dspace_client, output_file, random_sample_by_percentage=100):
+    """
+    Process bitstreams: all items discoverable by the search API
+    """
+    items = dspace_client.search_objects_iter(query="*:*", dso_type="item")
+    process_bitstreams_by_items(
+        dspace_client, output_file, items, random_sample_by_percentage
+    )
+
+
+def process_bitstreams_by_list(dspace_client, output_file, by_list_filename):
+    """
+    Process bitstreams: given a file with a list of item IDs
+    """
+    with open(by_list_filename, "r", encoding="utf-8", newline="") as fd:
+        item_list = []
+        for line in fd:
+            item_id = line.strip()
+
+            logging.info("[%s]", item_id)
+
+            if item_id is not None and item_id != "":
+                item_response = dspace_client.get_item(item_id)
+                item = Item(item_response.json())
+                if item:
+                    item_list.append(item)
+        item_iter = iter(item_list)
+        process_bitstreams_by_items(dspace_client, output_file, item_iter)
+
+
+def process_bitstreams_by_collection_id(dspace_client, output_file, collection_id):
+    """
+    Process bitstreams: given a file with a list of item IDs
+    """
+    items = dspace_client.search_objects_iter(
+        query="*:*", dso_type="item", scope=collection_id
+    )
+    process_bitstreams_by_items(dspace_client, output_file, items)
 
 
 def process_bitstreams_by_search(dspace_client, output_file):
@@ -316,7 +450,7 @@ def process_collection_stats(dspace_client, output_file):
 
 
 #
-def process(dspace_client, output_file, dso_type, random_sample_percentage):
+def process(dspace_client, output_file, dso_type, args):
     """
     Main processing function
     """
@@ -327,13 +461,31 @@ def process(dspace_client, output_file, dso_type, random_sample_percentage):
         case "collections":
             process_collections(dspace_client, output_file)
         case "items":
-            process_items(dspace_client, output_file, random_sample_percentage)
+            process_items(dspace_client, output_file, args.random_sample_percentage)
+        case "items_by_search_collection":
+            process_items_by_search_collection(dspace_client, output_file)
         case "items_by_search":
             process_items_by_search(dspace_client, output_file)
+        case "items_by_list":
+            process_items_by_list(dspace_client, output_file, args.by_list_filename)
+        case "items_by_collection_id":
+            process_items_by_collection_id(
+                dspace_client, output_file, args.collection_id
+            )
         case "bitstreams":
-            process_bitstreams(dspace_client, output_file, random_sample_percentage)
+            process_bitstreams(
+                dspace_client, output_file, args.random_sample_percentage
+            )
         case "bitstreams_by_search":
             process_bitstreams_by_search(dspace_client, output_file)
+        case "bitstreams_by_list":
+            process_bitstreams_by_list(
+                dspace_client, output_file, args.by_list_filename
+            )
+        case "bitstreams_by_collection_id":
+            process_bitstreams_by_collection_id(
+                dspace_client, output_file, args.collection_id
+            )
         case "users":
             process_users(dspace_client, output_file)
         case "collection_stats":
@@ -354,6 +506,8 @@ def main():
     # Base class should set this as an instance variable in the constructor
     DSpaceClientLocal.ITER_PAGE_SIZE = 100
     dspace_client = DSpaceClientLocal(fake_user_agent=False)
+    dspace_client.authenticate()
+
     # don't set size over 100 otherwise a weird disconnect happens
     # between the requested page size, actual result size and # of pages
     # If 512 items and size is set to 500,
@@ -380,9 +534,7 @@ def main():
 
     pathlib.Path(os.path.dirname(args.output)).mkdir(parents=True, exist_ok=True)
     with open(args.output, "wt", encoding="utf-8", newline="") as output_file:
-        process(
-            dspace_client, output_file, args.dso_type, args.random_sample_by_percentage
-        )
+        process(dspace_client, output_file, args.dso_type, args)
 
 
 #

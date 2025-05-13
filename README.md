@@ -233,7 +233,7 @@ The steps to set up a validation run.
 4. Use `compare_csv.py` supplying the output from steps 1 & 2 as input, a join and comparison function outputs a CSV file with the validation results. FYI: the join is an outer join which includes null matches in either input file in the output; tweak comparison configuration as required.
 
     * Note: `--logging_level DEBUG` will log the detailed field values and comparison used in the generated PASS/FAIL summary report
-    * Note: `--logging_level ERROR` reduces output 
+    * Note: `--logging_level ERROR` reduces output
 
     ```bash
 
@@ -364,6 +364,58 @@ The steps to set up a validation run.
         --output /tmp/z.csv \
         --dso_type collection_stats
     ```
+
+### Audit: ETDs
+
+Given that ETDs (Theses, etc.) will be migrated at a later date, adjustments to the audit export script have been implemented to allow partial exports. The process will be similar to the above but:
+
+* only a subset of DSpace will be exported
+* extract the Theses from the Jupiter export
+* use the above to source files for the audit with the rest of the audit process proceeding as before
+
+The optional ways to export a subset of Item or Bitstream metadata
+
+* Item export given a collection ID
+
+    ``` bash
+    ./venv/bin/python3 src/dspace_api_exports.py \
+        --output /tmp/z.csv \
+        --logging_level DEBUG \
+        --dso_type items_by_collection_id 
+        --collection_id 90efc140-a19c-4b82-8305-6dd15ffd9556
+    ```
+
+* Item export given a file with a list of IDs, one per line with no header 
+
+    ``` bash
+    ./venv/bin/python3 src/dspace_api_exports.py \
+        --output /tmp/z.csv \
+        --logging_level DEBUG \
+        --dso_type items_by_list  \
+        --by_list_filename /tmp/zz.csv
+
+    ```
+
+* Bitream export given a collection ID
+
+    ``` bash
+    ./venv/bin/python3 src/dspace_api_exports.py \
+        --output /tmp/z.csv \
+        --logging_level ERROR \
+        --dso_type bitstreams_by_collection_id \
+        --collection_id 90efc140-a19c-4b82-8305-6dd15ffd9556
+    ```
+
+* Bitstream export given a file with a list of IDs, one per line with no header 
+
+    ``` bash
+    ./venv/bin/python3 src/dspace_api_exports.py \
+        --output /tmp/z.csv \
+        --logging_level DEBUG \
+        --dso_type bitstreams_by_list
+        --by_list_filename /tmp/zz.csv
+    ```
+
 
 ## dspace_api_exports.py
 
