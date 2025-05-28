@@ -370,7 +370,7 @@ The steps to set up a validation run.
 Given that ETDs (Theses, etc.) will be migrated at a later date, adjustments to the audit export script have been implemented to allow partial exports. The process will be similar to the above but:
 
 * only a subset of DSpace will be exported
-* extract the Theses from the Jupiter export
+* extract the ETDs from the Jupiter export
 * use the above to source files for the audit with the rest of the audit process proceeding as before
 
 The optional ways to export a subset of Item or Bitstream metadata
@@ -379,43 +379,42 @@ The optional ways to export a subset of Item or Bitstream metadata
 
     ``` bash
     ./venv/bin/python3 src/dspace_api_exports.py \
-        --output /tmp/z.csv \
+        --output /tmp/z_i.csv \
         --logging_level DEBUG \
         --dso_type items_by_collection_id 
-        --collection_id 90efc140-a19c-4b82-8305-6dd15ffd9556
+        --collection_id ba6b42e5-d44d-4e82-b5d3-b66dff1b461c
     ```
 
-* Item export given a file with a list of IDs, one per line with no header 
+* Item export given a file with a list of IDs, one per line with no header
 
     ``` bash
     ./venv/bin/python3 src/dspace_api_exports.py \
-        --output /tmp/z.csv \
+        --output /tmp/z_i.csv \
         --logging_level DEBUG \
         --dso_type items_by_list  \
         --by_list_filename /tmp/zz.csv
 
     ```
 
-* Bitream export given a collection ID
+* Bitstream export given a collection ID
 
     ``` bash
     ./venv/bin/python3 src/dspace_api_exports.py \
-        --output /tmp/z.csv \
+        --output /tmp/z_b.csv \
         --logging_level ERROR \
         --dso_type bitstreams_by_collection_id \
-        --collection_id 90efc140-a19c-4b82-8305-6dd15ffd9556
+        --collection_id ba6b42e5-d44d-4e82-b5d3-b66dff1b461c
     ```
 
 * Bitstream export given a file with a list of IDs, one per line with no header 
 
     ``` bash
     ./venv/bin/python3 src/dspace_api_exports.py \
-        --output /tmp/z.csv \
+        --output /tmp/z_b.csv \
         --logging_level DEBUG \
         --dso_type bitstreams_by_list
         --by_list_filename /tmp/zz.csv
     ```
-
 
 ## dspace_api_exports.py
 
