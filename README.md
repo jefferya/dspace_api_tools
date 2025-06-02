@@ -370,7 +370,7 @@ The steps to set up a validation run.
 Given that ETDs (Theses, etc.) will be migrated at a later date, adjustments to the audit export script have been implemented to allow partial exports. The process will be similar to the above but:
 
 * only a subset of DSpace will be exported
-* extract the Theses from the Jupiter export
+* extract the ETDs from the Jupiter export
 * use the above to source files for the audit with the rest of the audit process proceeding as before
 
 The optional ways to export a subset of Item or Bitstream metadata
@@ -379,43 +379,113 @@ The optional ways to export a subset of Item or Bitstream metadata
 
     ``` bash
     ./venv/bin/python3 src/dspace_api_exports.py \
-        --output /tmp/z.csv \
+        --output /tmp/z_i.csv \
         --logging_level DEBUG \
-        --dso_type items_by_collection_id 
-        --collection_id 90efc140-a19c-4b82-8305-6dd15ffd9556
+        --dso_type items_by_collection_id  \
+        --collection_id ba6b42e5-d44d-4e82-b5d3-b66dff1b461c
     ```
 
-* Item export given a file with a list of IDs, one per line with no header 
+* Item export given a file with a list of IDs, one per line with no header
 
     ``` bash
     ./venv/bin/python3 src/dspace_api_exports.py \
-        --output /tmp/z.csv \
+        --output /tmp/z_i.csv \
         --logging_level DEBUG \
         --dso_type items_by_list  \
         --by_list_filename /tmp/zz.csv
 
     ```
 
-* Bitream export given a collection ID
+* Bitstream export given a collection ID
 
     ``` bash
     ./venv/bin/python3 src/dspace_api_exports.py \
-        --output /tmp/z.csv \
+        --output /tmp/z_b.csv \
         --logging_level ERROR \
         --dso_type bitstreams_by_collection_id \
-        --collection_id 90efc140-a19c-4b82-8305-6dd15ffd9556
+        --collection_id ba6b42e5-d44d-4e82-b5d3-b66dff1b461c
     ```
 
 * Bitstream export given a file with a list of IDs, one per line with no header 
 
     ``` bash
     ./venv/bin/python3 src/dspace_api_exports.py \
-        --output /tmp/z.csv \
+        --output /tmp/z_b.csv \
         --logging_level DEBUG \
-        --dso_type bitstreams_by_list
+        --dso_type bitstreams_by_list \
         --by_list_filename /tmp/zz.csv
+
+
+
     ```
 
+As of May 29th, ETDs from Jupiter member_of_path `db9a4e71-f809-4385-a274-048f28eb6814/f42f3da6-00c3-4581-b785-63725c33c7ce` in Scholaris occur in two collections:
+
+* `f3d69d6d-203b-4472-a862-535e749ab216` (permanent, partial ingestion circa May 12th)
+* `ba6b42e5-d44d-4e82-b5d3-b66dff1b461c` (temporary holding area ingested May 29th)
+
+To build a Jupiter subset comprised of members of  `db9a4e71-f809-4385-a274-048f28eb6814/f42f3da6-00c3-4581-b785-63725c33c7ce` that have not already been ingested into Scholaris `f3d69d6d-203b-4472-a862-535e749ab216` -- the subset is what we expect to be in `ba6b42e5-d44d-4e82-b5d3-b66dff1b461c`
+
+``` bashi
+
+export JUPITER_FILTER_ROOT=~/Downloads/delete_me_2025-05-15/prd-scholaris/jupiter/
+
+# filter Jupiter 
+./venv/bin/python src/filter_csv.py \
+    --ids ${JUPITER_FILTER_ROOT}/jupiter_ids_expected_to_be_in_ba6b42e5-d44d-4e82-b5d3-b66dff1b461c.csv \
+    --column_ids id \
+    --input ${JUPITER_FILTER_ROOT}/jupiter_combined_item_thesis.csv  \
+    --column_input id \
+    --output ${JUPITER_FILTER_ROOT}/jupiter_combined_item_thesis_subset_theses_and_dissertations_ba6b42e5-d44d-4e82-b5d3-b66dff1b461c.csv
+
+# filter Jupiter bitstreams
+./venv/bin/python src/filter_csv.py \
+    --ids ${JUPITER_FILTER_ROOT}/jupiter_ids_expected_to_be_in_ba6b42e5-d44d-4e82-b5d3-b66dff1b461c.csv \
+    --column_ids id \
+    --input ${JUPITER_FILTER_ROOT}/jupiter_combined_activestorage.csv  \
+    --column_input item.id \
+    --output ${JUPITER_FILTER_ROOT}/jupiter_combined_activestorage_subset_theses_and_dissertations_ba6b42e5-d44d-4e82-b5d3-b66dff1b461c.csv
+
+export SCHOLARIS_FILTER_ROOT=~/Downloads/delete_me_2025-05-15/prd-scholaris/scholaris/
+
+# filter Scholaris items
+./venv/bin/python src/filter_csv.py \
+    --ids ${JUPITER_FILTER_ROOT}/jupiter_ids_expected_to_be_in_ba6b42e5-d44d-4e82-b5d3-b66dff1b461c.csv \
+    --column_ids id \
+    --input ${SCHOLARIS_FILTER_ROOT}/z_i_items_by_collection_id_wihtout_id_maybe_all.csv  \
+    --column_input metadata.ual.jupiterId \
+    --output ${SCHOLARIS_FILTER_ROOT}/scholaris_item_thesis_subset_theses_and_dissertations_ba6b42e5-d44d-4e82-b5d3-b66dff1b461c.csv
+
+
+# filter Scholaris bitstreams 
+./venv/bin/python src/filter_csv.py \
+    --ids ${JUPITER_FILTER_ROOT}/jupiter_ids_expected_to_be_in_ba6b42e5-d44d-4e82-b5d3-b66dff1b461c.csv \
+    --column_ids id \
+    --input ${SCHOLARIS_FILTER_ROOT}/scholaris_bitstreams_ingested_into_scholaris_ba6b42e5-d44d-4e82-b5d3-b66dff1b461c_may_29th.csv \
+    --column_input provenance.ual.jupiterId.item \
+    --output ${SCHOLARIS_FILTER_ROOT}/scholaris_bitstream_subset_theses_and_dissertations_ba6b42e5-d44d-4e82-b5d3-b66dff1b461c.csv
+
+
+# Item audit results
+./venv/bin/python src/compare_csv.py \
+    --input_jupiter ${JUPITER_DIR}/jupiter_combined_item_thesis_subset_theses_and_dissertations_ba6b42e5-d44d-4e82-b5d3-b66dff1b461c.csv \
+    --input_dspace ${SCHOLARIS_DIR}/scholaris_item_thesis_subset_theses_and_dissertations_ba6b42e5-d44d-4e82-b5d3-b66dff1b461c.csv \
+    --output /tmp/migration_audit_items_$(date +%Y-%m-%d_%H:%M:%S).csv \
+    --logging_level DEBUG \
+    --type items \
+    2> /tmp/z_i.log
+
+# Bitstream audit results
+./venv/bin/python src/compare_csv.py \
+    --input_jupiter ${JUPITER_DIR}/jupiter_combined_activestorage_subset_theses_and_dissertations_ba6b42e5-d44d-4e82-b5d3-b66dff1b461c.csv \
+    --input_dspace ${SCHOLARIS_DIR}/scholaris_bitstream_subset_theses_and_dissertations_ba6b42e5-d44d-4e82-b5d3-b66dff1b461c.csv \
+    --output /tmp/migration_audit_bitstreams_$(date +%Y-%m-%d_%H:%M:%S).csv \
+    --logging_level DEBUG \
+    --type bitstreams \
+    2> /tmp/z_b.log
+
+
+```
 
 ## dspace_api_exports.py
 

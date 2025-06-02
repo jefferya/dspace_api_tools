@@ -461,7 +461,7 @@ def process(dspace_client, output_file, dso_type, args):
         case "collections":
             process_collections(dspace_client, output_file)
         case "items":
-            process_items(dspace_client, output_file, args.random_sample_percentage)
+            process_items(dspace_client, output_file, args.random_sample_by_percentage)
         case "items_by_search_collection":
             process_items_by_search_collection(dspace_client, output_file)
         case "items_by_search":
@@ -474,7 +474,7 @@ def process(dspace_client, output_file, dso_type, args):
             )
         case "bitstreams":
             process_bitstreams(
-                dspace_client, output_file, args.random_sample_percentage
+                dspace_client, output_file, args.random_sample_by_percentage
             )
         case "bitstreams_by_search":
             process_bitstreams_by_search(dspace_client, output_file)
