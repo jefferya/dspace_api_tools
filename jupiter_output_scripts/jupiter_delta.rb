@@ -170,4 +170,4 @@ class ChangesReport
 
 end
 
-ChangesReport.new("/era_tmp/delete_me_by_2025-05-15/",Date.new(2025, 3, 15)).perform()
+ChangesReport.new("/era_tmp/delete_me_by_2025-05-15/",Date.new(2025, 4, 24)).perform()
