@@ -4,6 +4,8 @@
 #     Leverage the https://pypi.org/project/dspace-rest-client
 #     to test creating a DSpace API Resoorce Policy creation script.
 #     https://github.com/the-library-code/dspace-rest-python/blob/main/dspace_rest_client/client.py
+# usage:
+#  ./venv/bin/python src/dspace_api_resource_policy.py --item_id "8131338a-4c35-48ca-87f5-e00ca75342e9" --embargo_date 2000-01-02 --logging_level DEBUG
 # license: CC0 1.0 Universal (CC0 1.0) Public Domain Dedication
 # date: March 3, 2025
 ##############################################################################################
