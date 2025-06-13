@@ -75,7 +75,6 @@ def update_item_resource_policy(dspace_client, item_id, resource_policy, embargo
     # Verify that the steps described in this document are correct in all cases, for example,
     # will "edit" always be the correct workflow? What if there are multiple resource policies returned?
     # or a preexisting resource policy?
-    # https://tdl-ir.tdl.org/server/api/core/bitstreams/aa922a36-e9cd-4bc6-811d-f78a230cf86d/content
     resource_policy_id = resource_policy[0]["id"]
     # url = f"http://localhost:8080/server/api/authz/resourcepolicies/{resource_policy_id}"
     url = f"{dspace_client.API_ENDPOINT}/authz/resourcepolicies/{resource_policy_id}"
@@ -114,6 +113,9 @@ def process_item_embargo(dspace_client, item_id, embargo_date):
     https://github.com/DSpace/RestContract/blob/dspace-7_x/resourcepolicies.md
     """
 
+    # The flow is gathered from using the web UI and viewing the web requests when following
+    # the instructions for adding an embargo resource policy as described here:
+    # https://tdl-ir.tdl.org/server/api/core/bitstreams/aa922a36-e9cd-4bc6-811d-f78a230cf86d/content
     resource_policy = lookup_item_resource_policy(dspace_client, item_id)
     update_item_resource_policy(dspace_client, item_id, resource_policy, embargo_date)
 
