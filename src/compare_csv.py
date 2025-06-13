@@ -164,6 +164,7 @@ def abstract_compare(str1, list2):
 
     return True if not str1 and not list2 else str1 in list2
 
+
 def abstract_compare_ignore_whitespace(str1, list2):
     """
     Thesis abstract REST API result have <p></p> elements
@@ -174,7 +175,7 @@ def abstract_compare_ignore_whitespace(str1, list2):
         str1 = str(str1)
     else:
         str1 = remove_xml_invalid_characters(str1)
-        #str1 = remove_carrage_return(str1)
+        # str1 = remove_carrage_return(str1)
         str1 = str1.strip()
     list2 = "[]" if isinstance(list2, float) else list2
     list2 = list2.replace("<p>", "").replace("</p>", "")
