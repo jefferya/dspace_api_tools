@@ -5,7 +5,9 @@
 #     to test creating a DSpace API Resoorce Policy creation script.
 #     https://github.com/the-library-code/dspace-rest-python/blob/main/dspace_rest_client/client.py
 # usage:
-#  ./venv/bin/python src/dspace_api_resource_policy.py --item_id "8131338a-4c35-48ca-87f5-e00ca75342e9" --embargo_date 2000-01-02 --logging_level DEBUG
+#  ./venv/bin/python src/dspace_api_resource_policy.py \
+#      --item_id "8131338a-4c35-48ca-87f5-e00ca75342e9" \
+#      --embargo_date 2000-01-02 --logging_level DEBUG
 # license: CC0 1.0 Universal (CC0 1.0) Public Domain Dedication
 # date: March 3, 2025
 ##############################################################################################
@@ -72,11 +74,16 @@ def update_item_resource_policy(dspace_client, item_id, resource_policy, embargo
     http://localhost:8080/server/api/authz/resourcepolicies/270
     """
 
-    # Update
-    # Verify "0" is always the correct index
-    # Verify that the steps described in this document are correct in all cases, for example,
-    # will "edit" always be the correct workflow? What if there are multiple resource policies returned?
-    # or a preexisting resource policy?
+    # This code is based on the starting state and instructions described in this document: 
+    # https://tdl-ir.tdl.org/server/api/core/bitstreams/aa922a36-e9cd-4bc6-811d-f78a230cf86d/content
+    # The above document describes one starting state but I suspect there are other possible
+    # starting states. The code flow is gathered from using the web UI and viewing the web request
+    # when following the above documentation.
+    # Assumptions:
+    #     Verify "0" is always the correct index
+    #     Verify that the steps described in this documentation are correct in all cases, for example,
+    #     Will "edit" always be the correct workflow? What if there are multiple resource policies returned?
+    #         or a preexisting resource policy?
     resource_policy_id = resource_policy[0]["id"]
     # url = f"http://localhost:8080/server/api/authz/resourcepolicies/{resource_policy_id}"
     url = f"{dspace_client.API_ENDPOINT}/authz/resourcepolicies/{resource_policy_id}"
