@@ -572,7 +572,7 @@ Process thoughts:
 
 For Item/Thesis/Collection/Community, see script for details: `jupiter_output_scripts/jupiter_delta.rb`
 
-* `sudo -u apache bash -c "cd /var/www/sites/jupiter && RAILS_ENV=staging bundle exec rails runner /tmp/dspace_api_tools/jupiter_output_scripts/delta_report.rb"`
+* `sudo -u apache bash -c "cd /var/www/sites/jupiter && RAILS_ENV=staging bundle exec rails runner /tmp/dspace_api_tools/jupiter_output_scripts/jupiter_delta.rb"`
   * change `RAIL_ENV` as needed [development|staging|production]
 * 
  Rough outline:
