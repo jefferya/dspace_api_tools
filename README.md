@@ -574,7 +574,7 @@ For Item/Thesis/Collection/Community, see script for details: `jupiter_output_sc
 
 * `sudo -u apache bash -c "cd /var/www/sites/jupiter && RAILS_ENV=staging bundle exec rails runner /tmp/dspace_api_tools/jupiter_output_scripts/jupiter_delta.rb"`
   * change `RAIL_ENV` as needed [development|staging|production]
-* 
+
  Rough outline:
 
 * Set date in script and run `jupiter_output_scripts/jupiter_delta.rb`
@@ -594,7 +594,7 @@ Rough outline
 
 * Generate CSV report of Jupiter statistics, see `jupiter_output_scripts/jupiter_statistics_metadata_to_CSV`
 * Generate CSV report from DSpace, `dspace_api_exports.py`
-* The quick approach: 
+* The quick approach:
   * place both CSV reports into separate tabs in a Google Sheet
   * use XLOOKUP to align based on jupiter ID
   * add column to that compares the "view"|"download" counts between the two reports (`IF` to add a sortable value in the new column)
