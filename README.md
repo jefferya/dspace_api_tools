@@ -31,7 +31,7 @@ For those interested in the DSpace API usage, [./src](./src/) directory contains
 * Experimental resource policy creator: [dspace_api_resource_policy.py](./src/dspace_api_resource_policy.py)
 * Experimental bitsream access control tester: [bistream_access_control_test.py](./src/bitstream_access_control_test.py)
 
-For those interested in our local migration audit process, the [Audit](#audit) section below describes how the local migration audit process evolved locally during the migration from Jupiter(local developed tool) to DSpace/Scholaris.
+For those interested in our local migration audit process, the [Audit](#audit) section below describes how the local migration audit process evolved locally during the migration from Jupiter(local developed tool) to DSpace/Scholaris. The audit scripts were quickly written during the early DSpace learning phase and were intended for one-time use thus, they lack refinement and, in hindsight, would have benefited from an object-oriented design approach.
 
 ## Audit
 
