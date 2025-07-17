@@ -22,6 +22,17 @@ References for using the DSpace API
   * pytest
   * nox
 
+## Audience / Wayfinding
+
+For those interested in the DSpace API usage, [./src](./src/) directory contains some scripts used as part of the migration audit process. Examples include:
+
+* [dsapce_api_experts.py](#dspace_api_exportspy): bulk exporting content metadata (community, collection, item, and bitstream objects) from DSpace using the API and storing as CSV -- we used to audit but could be used for other purposes.
+* Experimental delete item script: [delete_via_api.py](./src/delete_via_api.py)
+* Experimental resource policy creator: [dspace_api_resource_policy.py](./src/dspace_api_resource_policy.py)
+* Experimental bitsream access control tester: [bistream_access_control_test.py](./src/bitstream_access_control_test.py)
+
+For those interested in our local migration audit process, the [Audit](#audit) section below describes how the local migration audit process evolved locally during the migration from Jupiter(local developed tool) to DSpace/Scholaris.
+
 ## Audit
 
 One piece of the migration from Jupiter to Scholaris, in particular the validation stage, is a content audit stage. The overview section describes the audit with a following section describing the technical steps to run the audit workflow.
@@ -194,7 +205,7 @@ The steps to set up a validation run.
 3. `./dspace_api_exports.py` to export (CSV) DSpace metadata
 
     * Option for items and bitstreams: `--random_sample_by_percentage` with default 100% and range between 1-100.
-    * Option for items and bitstreams: `--dso_type=item_by_search` and `--dso_type=bitstream_by_search` which leverage Solr as much as possible to reduce number of API calls (not as well tested)
+    * Option for items and bitstreams: `--dso_type=item_by_search` and `--dso_type=bitstream_by_search` (fails; see code) which leverage Solr as much as possible to reduce number of API calls (not as well tested)
 
     ```bash
     # Set environment variables
@@ -516,7 +527,7 @@ Run Python from the virtual environment (see Python Virtual Environment document
     --dso_type communities
 ```
 
-Where `--dso_type` is `[communities|collections|items|people|bitstreams]`
+Where `--dso_type` is `[communities|collections|items|items_by_search|items_by_list|items_by_collection_id|people|bitstreams|bitstreams_by_list|bitstreams_by_collection_id]`
 
 ## Jupiter Delta Report
 
